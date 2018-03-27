@@ -1,0 +1,6 @@
+The source code for these two readers was copied in from:
+
+  /home/tfa/cassini/wfr/spec
+  
+The original names of the readers in that area was: hwfr, lwfr
+

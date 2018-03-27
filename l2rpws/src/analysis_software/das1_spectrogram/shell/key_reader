@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# usage: key_reader begin-scet end-scet receiver-options
+
+#if [ $# -lt 2 ]; then
+#  exit -1
+#fi
+
+cd	/opt/project/cassini/data/key_parameter
+
+exec /home/tfa/cassini/pds/key_reader.exe "$1" "$2" "$3"
+exit 0

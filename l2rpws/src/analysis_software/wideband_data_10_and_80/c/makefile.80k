@@ -1,0 +1,16 @@
+TOP=/opt/project/cassini
+LIB=$(TOP)/lib/original
+INC=$(TOP)/include/original
+CFLAGS=-Ae -g -I$(INC) -I/opt/local/include
+
+OBJS =        wbr80k.o  window.o
+
+.c:           cc $(CFLAGS) -c $*.c
+
+lib:          $(OBJS)
+		cc -o wbr80k.exe wbr80k.o  window.o \
+                                        $(LIB)/libutil.a  \
+                                        -L./ -lm -L/opt/local/lib -ldas \
+					-lfftpack
+clean:
+		rm *.o

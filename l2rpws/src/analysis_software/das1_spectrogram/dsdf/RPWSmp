@@ -1,0 +1,20 @@
+description	= 'Cassini RPWS High Frequency Receiver Calibrated spectra'
+form		= x_y_z; time, frequency, and amplitude
+reader		= '/home/Web/raj/cassini/das/CasDasMp1.0'
+spacecraft	= 'Cassini'
+spacecraft_id	= 'CA'
+instrument	= 'Radio Plasma Wave Subsystem'
+instrument1	= 'High Frequency Receiver Bands A,B,C'
+instrument_id	= 'RPWS'
+instrument_id1  = 'HFR ABC'
+instrument_id2  = 'E'
+x_parameter	= 'time'
+x_unit		= 's'
+x_sample_width	= 128.0 ; typical seconds between spectra
+y_parameter	= 'frequency'
+y_unit		= 'KHz'
+y_coordinate    = [ 3.6 * ( (4.5^(1.0/32))^(0.5 + findgen(96)) ) ]
+z_parameter	= 'amplitude'
+z_unit		= '(V/M)^2/Hz'
+z_fill		= 1.0E-20 ; substitute this in place of missing data
+

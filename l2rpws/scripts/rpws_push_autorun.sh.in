@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+umask 0002
+
+source %(SETUP_FILE)s
+
+EMAIL=cwp@space.physics.uiowa.edu
+
+nRet=$?
+if [ $nRet != 0 ] ; then
+	echo "error sourcing %(SETUP_FILE)s"
+	exit $nRet
+fi
+
+PUSH_DIR=%(RPWS_DATA)s/bg_push
+LOG_DIR=${PUSH_DIR}/log
+LOG_FILE=${LOG_DIR}/autorun.log
+
+##############################################################################
+# Handle marking that we are running
+NOW=$(date -u "+%%Y-%%m-%%dT%%H:%%M:%%S")
+if [ -e ${PUSH_DIR}/.autorun ]; then
+
+	echo "Unexpected lock file: ${PUSH_DIR}/.autorun encountered by rpws_push_autorun on $(hostname)" | \
+	   nail -s "rpws_push_autorun blocked" ${EMAIL}
+	exit 13
+else
+	echo "Push processing cycle ${NOW} on $(hostname)" > ${PUSH_DIR}/.autorun
+	nRet=$?
+	if [ $nRet != 0 ] ; then
+		echo ERROR $(date -u "+%%Y-%%m-%%dT%%H:%%M:%%S") ": touching ${PUSH_DIR}/.autorun" > ${LOG_FILE}
+		rm ${PUSH_DIR}/.autorun
+		exit $nRet
+	fi
+fi
+
+##############################################################################
+# Now for synchronous processing
+echo "Push processing cycle started at ${NOW} on $(hostname)" > ${LOG_FILE}
+
+echo INFO $(date -u "+%%Y-%%m-%%dT%%H:%%M:%%S") ": exec, %(INST_NAT_BIN)s/rpws_push_wcron.sh" >> ${LOG_FILE}
+%(INST_NAT_BIN)s/rpws_push_wcron.sh &> Cassini_Push.log
+nRet=$?
+if [ $nRet != 0 ] ; then
+	echo "Error running %(INST_NAT_BIN)s/rpws_push_wcron.sh, log file in ${LOG_DIR}/Cassini_Push.status" | \
+	   nail -s "rpws_push_autorun, rpws_push_wcron.sh failure" ${EMAIL}
+	exit $nRet
+fi
+
+
+echo INFO $(date -u "+%%Y-%%m-%%dT%%H:%%M:%%S") ": exec, %(INST_NAT_BIN)s/rpws_push_wpatch.sh" >> ${LOG_FILE}
+%(INST_NAT_BIN)s/rpws_push_wpatch.sh &> Cassini_Patch.log
+nRet=$?
+if [ $nRet != 0 ] ; then
+	echo "Error running %(INST_NAT_BIN)s/rpws_push_wpatch.sh, log file in ${LOG_DIR}/Cassini_Patch.status" | \
+	   nail -s "rpws_push_autorun, rpws_push_wpatch.sh failure" ${EMAIL}
+	exit $nRet
+fi
+
+
+echo INFO $(date -u "+%%Y-%%m-%%dT%%H:%%M:%%S") ": exec, %(INST_NAT_BIN)s/rpws_lr_rtinf.ksh" >> ${LOG_FILE}
+%(INST_NAT_BIN)s/rpws_lr_rtinf.ksh &> ${LOG_DIR}/Cassini_LR_RtInf.status
+nRet=$?
+if [ $nRet != 0 ] ; then
+	echo "Error running %(INST_NAT_BIN)s/rpws_lr_rtinf.ksh, log file in ${LOG_DIR}/Cassini_LR_RtInf.status" | \
+	   nail -s "rpws_push_autorun, rpws_lr_rtinf.ksh failure" ${EMAIL}
+	exit $nRet
+fi
+
+
+echo INFO $(date -u "+%%Y-%%m-%%dT%%H:%%M:%%S") ": exec, %(INST_NAT_BIN)s/rpws_lr_rtfc.ksh" >> ${LOG_FILE}
+%(INST_NAT_BIN)s/rpws_lr_rtfc.ksh &> ${LOG_DIR}/Cassini_LR_RtFc.status
+nRet=$?
+if [ $nRet != 0 ] ; then
+	echo "Error running %(INST_NAT_BIN)s/rpws_lr_rtfc.ksh, log file in ${LOG_DIR}/Cassini_LR_RtFc.status" | \
+	   nail -s "rpws_push_autorun, rpws_lr_rtfc.ksh failure" ${EMAIL}
+	exit $nRet
+fi
+
+echo INFO $(date -u "+%%Y-%%m-%%dT%%H:%%M:%%S") ": Push processing cycle complete." >> ${LOG_FILE}
+rm ${PUSH_DIR}/.autorun
+exit 0
+

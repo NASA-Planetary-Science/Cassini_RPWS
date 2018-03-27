@@ -1,0 +1,95 @@
+<HTML>
+<HEAD>
+<TITLE>CASSINI RPWS Integrated Power</TITLE>
+<H1>CASSINI RPWS Integrated Power <br>(Using Key Parameter Data)</H1>
+</HEAD>
+
+<HR>
+<BODY>
+<FORM METHOD="POST" ACTION="http://www-pw.physics.uiowa.edu/cgi-tfa/int_pow_kp.cgi">
+
+<b>Time Range: </b>
+<input size=19 name="entry1" value="2006-12-17 00:00:00">
+<b> to </b>
+<input size=19 name="entry2" value="2006-12-21 00:00:00">
+<br>
+
+<b>Delta-T to average over: </b>
+<input size=5 name="entry3" value="   10"> minutes
+<br>
+
+<b>Delta-T to slide average by: </b>
+<input size=5 name="entry4" value="   10"> minutes
+<br>
+
+<b>Lower Frequency of integration interval: </b>
+<input size=8 name="entry5" value="    4000"> Hz
+<br>
+
+<b>Upper Frequency of integration interval: </b>
+<input size=8 name="entry6" value="    8000"> Hz
+<br>
+
+<b>Radial Distance Adjustment: </b>
+<br>
+<input type="radio" name="r_adjust" value="NO" checked> NONE
+<br>
+<input type="radio" name="r_adjust" value="RE"> Earth Radii (RE)
+<br>
+<input type="radio" name="r_adjust" value="RJ"> Jupiter Radii (RJ)
+<br>
+<input type="radio" name="r_adjust" value="RS"> Saturn Radii (RS)
+<br>
+Normalization Radii:
+<input size=8 name="radii" value="     100"> 
+
+<br>
+<b>Output: </b>
+<br>
+<input type="radio" name="device_name" value="Z" checked> GIF plot as
+<select name="gif_mime_header">
+<option>application/x-das-gif
+<option selected>image/gif
+<option>application/octet-stream
+</select>
+<br>
+<input type="radio" name="device_name" value="PS"> PS plot as
+<select name="ps_mime_header">
+<option>application/x-das-eps
+<option selected>application/postscript
+<option>application/octet-stream
+</select>
+<br>
+<input type="radio" name="device_name" value="TEXT"> Text file as
+<select name="text_mime_header">
+<option>text/plain
+<option>application/octet-stream
+</select>
+<br>
+
+<b>Data Set Selection: </b>
+<br>
+<input type="radio" name="E_or_B" value="Electric" checked> Electric
+<br>
+<input type="radio" name="E_or_B" value="Magnetic"> Magnetic
+<br>
+
+<br>
+<b>spike removal </b>
+<input type="checkbox" name="remove" value="1" >
+<b> &nbsp &nbsp  noise spike level: </b>
+<input size=10 name="level" value="1.e-2">
+<br>
+
+
+<P>
+<INPUT TYPE="submit">
+<br>
+For more info, see
+<a href="int_pow_kp_doc.html">
+Information about the Integrated Power Calculation</a>.<br>
+</FORM>
+
+<hr>
+</BODY>
+</HTML>

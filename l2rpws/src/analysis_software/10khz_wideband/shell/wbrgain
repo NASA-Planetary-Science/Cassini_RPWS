@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# usage: wbrgain begin-scet end-scet [dataset]
+
+#if [ $# -ne 2 ]; then
+#  exit -1
+#fi
+
+exec /home/tfa/cassini/wbr/spec/wbrgain.exe "$1" "$2" $3
+exit 0

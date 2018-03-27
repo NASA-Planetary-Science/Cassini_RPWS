@@ -1,0 +1,17 @@
+description	= 'Cassini RPWS wideband calibrated spectra'
+form		= x_y_z; time, frequency, and amplitude
+reader		= '/home/tfa/cassini/wbr/spec/new80k_V5'
+spacecraft	= 'Cassini'
+spacecraft_id	= 'CA'
+instrument	= 'Radio Plasma Wave Subsystem'
+instrument1	= 'Wideband'
+instrument_id	= 'RPWS'
+instrument_id1  = 'WBR'
+x_parameter	= 'time'
+x_unit		= 's'
+x_sample_width	= 8.00 ; typical seconds between spectra
+y_parameter	= 'frequency'
+y_unit		= 'kHz'
+z_parameter	= 'amplitude'
+z_unit		= '(V/M)^2/Hz'
+z_fill		= 1.0e-32 ; substitute this in place of missing data

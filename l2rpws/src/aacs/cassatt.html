@@ -1,0 +1,68 @@
+<HTML>
+<HEAD>
+<TITLE>CASSINI Spacecraft Attitude tool</TITLE>
+<H1>CASSINI Spacecraft Attitude tool</H1>
+
+<HR>
+
+<FORM METHOD="POST" ACTION="http://www-pw.physics.uiowa.edu/das-test/cas_cgi_attitude">
+
+<br>
+<b>Time Range: </b>
+<input size=19 name="entry1" value="2004/183 00:00:00">
+<b> to </b>
+<input size=19 name="entry2" value="2004/184 00:00:00">
+<br>
+
+<b>Time Interval: </b>
+<input size=8 name="entry3" value="    120">
+<b> seconds</b>
+<br>
+
+<b>Attitude Type: </b> <select name="entry4">
+<option selected value="quat">   Quaternions
+<option value="eule">   Euler Angles
+<option value="matr">   Transformation Matrix
+<option value="ugse">   GSE Spacecraft Axes (Earth)
+<option value="uvse">   VSE Spacecraft Axes (Venus)
+<option value="ujse">   JSE Spacecraft Axes (Jupiter)
+<option value="usse">   SSE Spacecraft Axes (Saturn)
+<option value="ussq">   SSQ Spacecraft Axes (Saturn Equatorial)
+<option value="mecl">   Solar Ecliptic Spacecraft Axes (Sun)
+</select>
+<br>
+
+<P>
+<INPUT TYPE="submit">
+</FORM>
+
+<HR>
+</BODY>
+</HTML>
+
+<p>
+<pre>
+The VSE, GSE, JSE, and SSE coordinate systems are all defined as:
+
+    Planetary Solar Ecliptic, Planet centered X=Sun, V2=Orbital normal.
+    X      - Along the Planet->Sun line (S), positive towards the Sun.
+    Y      - V2 x X
+    Z      - Parallel to the Planetary orbital plane upward normal.
+
+The Solar Ecliptic Spacecraft Axes Matrix is similar to these Planetary
+Solar Ecliptic systems, with the X-Y plane in the Ecliptic.
+The X-axis is defined by the intersection of the Ecliptic Plane
+and the Earth's Dynamic Equator at the Jan. 1, 2000, epoch. That is, it is
+the X-axis of the J2000 coordinate system. The Z-axis is the Ecliptic normal.
+
+The SSQ coordinate system is Saturn Solar Equatorial, defined as follows:
+
+    Saturn Solar Equatorial, Saturn centered Z=Omega, V2=Saturn-Sun vector.
+    X      - In the Saturn->Sun plane, positive towards the Sun.
+    Y      - Z x X
+    Z      - Northward spin axis of Saturn.
+
+</pre>
+For more information, see <a href="http://www-pw.physics.uiowa.edu/~tfa/casatt/attitude.html">
+Cassini Attitude</a>.
+.<p>

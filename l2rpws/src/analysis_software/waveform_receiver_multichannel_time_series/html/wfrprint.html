@@ -1,0 +1,31 @@
+<HTML>
+<HEAD>
+<TITLE>CASSINI RPWS WFR Time Series Printing tool</TITLE>
+<H1>CASSINI RPWS WFR Time Series Printing Tool</H1>
+
+<HR>
+<BODY>
+<FORM METHOD="POST" ACTION="http://cassini.physics.uiowa.edu/cgi-tfa/wfrall.cgi">
+
+<b>Time Range: </b>
+<input size=19 name="entry1" value="2001//016 20:15:00">
+<b> to </b>
+<input size=19 name="entry2" value="2001//016 21:00:00">
+<br>
+
+<b>Units: </b> <select name="entry3">
+<option selected value="raw"> Raw Counts
+<option value="vlt"> Field Strength
+</select>
+<br>
+
+<INPUT TYPE="submit">
+</FORM>
+
+<br> Note: Field Strength Units are Volts/meter for Channels 0,1 and nanoTesla for channels 2,3,4.
+These calibrations are valid at 1 KHz for the HighBand mode, and at 10 Hz for the LowBand mode.
+<br>
+
+<hr>
+</BODY>
+</HTML>

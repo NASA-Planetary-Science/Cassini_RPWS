@@ -1,0 +1,5 @@
+ int get_status    (unsigned char *mp, int control1, int control2);
+ int get_status_32 (unsigned char *mp, int control[4], int);
+ unsigned long set_status (	unsigned char *status, 
+ 					int control, 
+ 					int pattern);

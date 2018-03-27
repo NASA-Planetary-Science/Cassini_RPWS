@@ -1,0 +1,20 @@
+TOP=/opt/project/cassini
+LIB=$(TOP)/lib/original
+INC=$(TOP)/include/original
+CFLAGS=-Ae -g -I$(INC) -I/opt/local/include
+
+OBJS =        wbr80hfb.o window.o
+
+.c:           cc $(CFLAGS) -c $*.c
+
+lib:          $(OBJS)
+		cc -g -o wbr80hfb.exe wbr80hfb.o window.o \
+                                        $(LIB)/libutil.a  \
+                                        -L/opt/local/lib \
+                                        -R/opt/local/lib \
+                                        -R/opt/SUNWspro/lib \
+					-lfftpack \
+					-ldas -lm -lsunmath
+		
+clean:
+		rm *.o

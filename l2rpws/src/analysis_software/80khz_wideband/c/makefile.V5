@@ -1,0 +1,17 @@
+TOP=/opt/project/cassini
+LIB=$(TOP)/lib
+INC=$(TOP)/include
+CFLAGS=-Ae -g -I$(INC) -I/opt/local/include
+
+OBJS =        new80k_V5.o window.o
+
+.c:           cc $(CFLAGS) -c $*.c
+
+lib:          $(OBJS)
+	      f77 -g -o new80k_V5.exe new80k_V5.o window.o \
+                                        $(LIB)/libutil.a  \
+                                        -L./ -lm -L/opt/local/lib -ldas \
+					-lfftpack
+
+clean:
+		rm *.o

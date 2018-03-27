@@ -1,0 +1,24 @@
+TOP=/opt/project/cassini
+LIB=$(TOP)/lib/original
+INC=$(TOP)/include/original
+CFLAGS=-Ae -g -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -I$(INC) -I/opt/local/include
+
+OBJS =        web_avpow_pds.o
+
+.c:           cc -Ae -g  -I/opt/project/cassini/include -I/opt/local/include -c $*.c
+
+lib:          $(OBJS)
+		f77 -o web_avpow_pds.exe web_avpow_pds.o \
+					/home/jbg/cassini/web/util.o \
+                                        $(LIB)/libutil.a  /local/pgplot/libpgplot.a \
+					/local/naif/toolkit/lib/spicelib.a \
+					/opt/local/lib/libfftpack.a \
+				        -lX11 \
+                                        -L/opt/SUNWspro/lib \
+                                        -R/opt/SUNWspro/lib \
+                                        -R/opt/local/lib                \
+					-R/opt/csw/lib -L/opt/csw/lib -lpng \
+                                        -L/opt/local/lib -ldas -lm -lsunmath
+
+
+clean:

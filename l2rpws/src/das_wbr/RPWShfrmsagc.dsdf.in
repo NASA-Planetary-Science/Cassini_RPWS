@@ -1,0 +1,16 @@
+description	= 'Cassini HFR millisecond mode AGC data'
+form		= x_multi_y ; time tag and multiple y values
+reader		= '%(INST_ETC)s/invoke.sh rpws_l2hfr_gainrdr'
+ny		= 1 ; number of y items
+spacecraft	= 'Cassini'
+spacecraft_id	= 'CA'
+instrument	= 'Radio Plasma Wave Subsystem'
+instrument1	= 'Wideband'
+instrument_id	= 'RPWS'
+instrument_id1  = 'HFR'
+x_parameter	= 'time'
+x_unit		= 's'
+x_sample_width	= 1.0 ; interpolate across 1 second
+y_parameter	= 'agc' ; need a way to distinguish different y parameters
+y_unit		= '(V/M)^2/Hz'
+y_fill		= 1.0e-32 ; substitute this in place of missing data

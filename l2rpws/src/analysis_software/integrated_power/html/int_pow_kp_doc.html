@@ -1,0 +1,44 @@
+<HTML>
+<HEAD>
+<TITLE>CASSINI RPWS Integrated Power Information</TITLE>
+<H1>Information about the RPWS Integrated Power Calculation
+<br> (using Key Parameter data)</H1>
+<HR>
+<p>
+<br>
+The integrated power calculation is done by using the RPWS Key Parameter (KP) data set.<br>
+The KP data set consists of 1-day files with an somewhat low resolution<br>
+representation of the RPWS electric field data: nominally 1 minute in time,<br>
+and approximately 10 frequencies per decade, extending logarithmically from <br>
+1 Hz to 16.1 MHz. There are 73 frequency bins in this data set, and for each<br>
+frequency bin the value representing median Electric Field Spectral Density for<br>
+the given time interval and the given frequency interval is given. This median is<br>
+selected from all available electric sensors: EX, EU, EV, and EW.<br>
+
+<br>
+The integrated power calculation can be averaged over a specified delta-t,<br>
+given in minutes. The smallest value for this averaging interval, 1 minute,<br>
+results in the resolution of the browse data set. The calculation can be done<br>
+for each interval specified by the "delta-t to slide average by"; this specifies<br>
+the output time resolution. The time tags for the output give the start time of<br>
+each averaging interval.<br>
+
+<br>
+A radial distance adjustment can be made to the calculation. A planet is chosen<br>
+and a normalization radius value R, given in units of that planet's radius.<br>
+Then the integrated power is multiplied by the factor d<sup>2</sup>/R<sup>2</sup>,<br>
+where d is the distance of Cassini from the chosen planet in planet radii.<br>
+For informational purposes, here are various measures in kilometers:<br>
+<pre><strong>
+                          RVenus          6051.8
+                          REarth          6378.1
+                          RJupiter       71492.0
+                          RSaturn        60268.0
+                          AU         149600000.0
+</strong></pre>
+<br>
+
+</p>
+<HR>
+</BODY>
+</HTML>

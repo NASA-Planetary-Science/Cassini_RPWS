@@ -1,0 +1,45 @@
+<HTML>
+<HEAD>
+<TITLE>CASSINI RPWS HFR Frequency Selection tool</TITLE>
+<H1>CASSINI RPWS HFR Frequency Selection Tool</H1>
+</HEAD>
+
+<HR>
+<BODY>
+<FORM METHOD="POST" ACTION="http://www-pw.physics.uiowa.edu/cgi-tfa/hfrselect.cgi">
+
+<br>
+<b>Time Range: </b>
+<input size=19 name="entry1" value="2000-10-04 11:15:00">
+<b> to </b>
+<input size=19 name="entry2" value="2000-10-04 12:30:00">
+<br>
+
+<b>Frequency to select: </b>
+<input size=8 name="entry3" value="  20000"> Hz
+<br>
+
+<b>output: </b>
+<br>
+<input type="hidden" name="device_name" value="TEXT"> Text file as
+<select name="text_mime_header">
+<option>text/plain
+<option>application/octet-stream
+</select><br>
+
+<P>
+<INPUT TYPE="submit">
+<br>
+</FORM>
+<br>
+<hr>
+Notes:<br>
+Amplitude units are Spectral Density, i.e., V<sup>2</sup>m<sup>-2</sup>Hz<sup>-1</sup>.<br>
+Only EX and EU antennas are selected.<br>
+Effective Antenna Lengths used are 9.26 meters for EX and 5.00 meters for EU.<br>
+No antenna base capacitance correction is made.<br>
+No correction is made for antenna resonance frequency response.<br>
+<br>
+<hr>
+</BODY>
+</HTML>

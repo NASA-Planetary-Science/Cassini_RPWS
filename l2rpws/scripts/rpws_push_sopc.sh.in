@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+# Start off the processing pipe, and record it's status
+
+source %(SETUP_FILE)s
+
+export PATH=%(INST_NAT_BIN)s:/local/gnu/bin:/usr/bin:/opt/csw/bin
+
+umask 0002
+
+PUSH_DIR=%(RPWS_DATA)s/bg_push
+
+if [ ! -d $PUSH_DIR/log ]; then
+	if ! mkdir -p $PUSH_DIR/log ; then
+		echo "ERROR: Couldn't make $PUSH_DIR/log"
+		exit 3
+	fi
+fi
+		
+if ! cd $PUSH_DIR ; then
+	echo "ERROR: Couldn't change to $PUSH_DIR" 
+	exit 3
+fi
+
+sCurFile='Cassini_Push'
+
+echo "INFO: Setup info will be routed to $PUSH_DIR/log/$sCurFile.status" 1>&2
+exec 2> $PUSH_DIR/log/$sCurFile.status 
+
+echo "sopc_1276.bat PUSH *****************" 1>&2
+date 1>&2
+
+
+# Fire up the processing pipe, NOTE that we let this set of stuff loose (&)
+bash -c "
+ %(INST_NAT_BIN)s/rpws_chdo_listener -debug -port 1277 | \
+ %(INST_NAT_BIN)s/rpws_chdo -epup 128 | \
+ %(INST_NAT_BIN)s/rpws_dsp_hkrom -vc -recent $PUSH_DIR/recent_hsk.dat -stdout | \
+ %(INST_NAT_BIN)s/rpws_file -size 360 -sciop -strip -addstdout -nodupe | \
+ %(INST_NAT_BIN)s/rpws_mpii -pool 0 | \
+ %(INST_NAT_BIN)s/rpws_decomp | \
+ %(INST_NAT_BIN)s/rpws_mpus | \
+ %(INST_NAT_BIN)s/rpws_lfdr_fake | \
+ %(INST_NAT_BIN)s/rpws_usdc | \
+ %(INST_NAT_BIN)s/rpws_file -size 360 -sciop -split -stpk1 +hfrcal -strip -filerc " &
+
+echo Process $! 1>&2
+echo Shell $$ 1>&2
+
+exit 0

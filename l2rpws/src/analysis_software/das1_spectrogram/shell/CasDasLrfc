@@ -1,0 +1,24 @@
+#!/bin/ksh
+# set up the enviroment variables
+CAS_NAIF_METAKERNEL=/opt/project/cassini/spice/kernels/cas_kernels.txt
+  export CAS_NAIF_METAKERNEL
+
+# Reader History
+#
+# 2016-03-10 switch to CWP maintained Solaris 10 reader
+# /opt/project/cassini/SunOS.sparc/bin/rpws_lr_pdsrdr
+
+
+. /opt/project/cassini/SunOS.sparc/setup_env.sh
+reader=/opt/project/cassini/SunOS.sparc/bin/rpws_lr_pdsrdr
+
+# First two arguments are "2003-175T00:00:00.000" "2003-176T00:00:00.000"
+echo 1>&2 $0
+tStart=$1;  tStop=$2
+shift;  shift;
+sArgs="-version -nofill "$*
+#sArgs=$sArgs" -version -nofill -n bad_data -n dpf_zero"
+echo 1>&2 $reader -tStart "$tStart" -tStop "$tStop" $sArgs
+$reader -tStart "$tStart" -tStop "$tStop" $sArgs
+
+exit 0

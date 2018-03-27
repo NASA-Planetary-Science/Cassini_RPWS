@@ -1,0 +1,4 @@
+This program only depends on Willy's non-portable libraries in order to
+read chdo's.  The connection is very tenuous and getatt.c could be updated
+to work on Linux with less hassle than most programs that depend on libutil.a.
+  -cwp 2016-09-10

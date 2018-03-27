@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+# The following scripts assumes that the only process with the string 
+# "bash" in it's name is the pipe-line controller process
+
+umask 0002
+
+source %(SETUP_FILE)s
+
+export PATH=%(INST_NAT_BIN)s:/local/gnu/bin:/usr/bin:/opt/csw/bin
+
+PUSH_DIR=%(RPWS_DATA)s/bg_push
+
+if ! cd $PUSH_DIR ; then
+	echo "Couldn't change to $PUSH_DIR" 
+	exit 3
+fi
+
+if [ ! -e $PUSH_DIR/log/Cassini_Push.status ] ; then
+	# Okay, it looks like push processing is off, double check
+	sProc=$(ps -ef | grep rpws_chdo_listener | grep -v grep)
+	
+	if [ "$sProc" != "" ] ; then
+		echo "ERROR: Push processing is in a BAD STATE!"
+		echo "ERROR: File $PUSH_DIR/log/Cassini_Push.status is missing but rpws_chdo_listener"
+		echo "ERROR: is running!  You should shut down *all* rpws processes, turn off all cron jobs "
+		echo "ERROR: and restart processing to get back into a known state."
+		exit 13
+	else
+		echo "INFO: Push processing is off."
+		exit 0
+	fi
+	
+fi
+
+sPID=$(grep -a Process $PUSH_DIR/log/Cassini_Push.status)
+
+nPID=$(echo $sPID | cut -d \  -f 2)
+
+echo "    USER    GROUP   PID  PPID    START COMMAND"
+
+# 1st print the controlling shell
+ps -e -o "user group pid ppid stime comm" | grep " $nPID " | grep bash 
+
+
+# now the individual processes, sorted
+nTmpFile=$(mktemp /var/tmp/wshow.XXXXXX)
+if [ -z "$nTmpFile" ]; then
+	echo "ERROR: Couldn't create temporary file in /var/tmp"
+	exit 3
+fi
+ps -e -o "user group pid ppid stime comm" | grep -v bash > $nTmpFile
+grep " $nPID " $nTmpFile | sort 
+rm $nTmpFile
+
+

@@ -1,0 +1,249 @@
+#
+# rpws.trs Trans Table File
+#
+#       These transactions have been defined for RPWS testing.  They
+#       support the early development and integration of the BIU hardware
+#       and software interface.  The actual lengths and content of these
+#       transactions are for testing only and can be modified when
+#       this information is known.              (SCC JPL Section 351)
+#
+#
+#
+# TRANS <name> <rt1> <rt2> <sub1> <sub2> <busop> <tick> <len> <activity> <k> <m>
+# name:     1 - 8 alphanumeric transaction name
+# rt1:  0 - 31 Source 1553 bus rt address (0 or 31 = modecode)
+# rt2:  0 - 31 Destination 1553 bus rt address if RT->RT Trans
+# sub1:  0 - 31 1553 subaddress (31 = broadcast)
+# sub2:  0 - 31 1553 subaddress if RT->RT Trans (31 = broadcast)
+# op     0 - 1 Bus Operation (0 = RT Recv,  1 = RT Send
+# tick:  0,1,2,4,7,or 8 RTI Tick To Issue Trans On (0 = injected)
+# len:      0 - 545 Transaction Data Length (in 16-bit words)
+# activity: 0 neither periodic or enabled
+#           0 not  periodic  but is enabled
+#           0 is periodic but not enabled
+#           0 both  periodic and enabled
+# k:  number of time to fire during repeat cycle
+# m:  repeat cycle in RTI units
+#
+# DATA1 <word0> <word1> ... <word15>
+# DATA2 <word16> ... <word31>
+# DATAn can be used to specify hex value for
+# data words in previous BC->RT Transaction
+#
+
+# telsrc - Collect  Telemetry from the Instrument
+#       MODE-ENTRY    FREQUENCY       
+#         0 - 1          EVERY 8TH TRI
+#         1 - 2         EVERY 4TH TRI
+#         2 - 3         EVERY 2ND RTI
+#         3 - 4         EVERY RTI
+#         4 - 5         2 PER RTI
+#         5 - 6         5 PER RTI
+#         6 - 7         6 PER RTI
+#         7 - 8          NO DATA
+#
+
+TRANS telsrc        25  0  11  0   1   1 545  3  1  8
+TRANS telsrc2       25  0  11  0   1   1 545  2  1  1
+TRANS telsrc3       25  0  11  0   1   1 545  2  1  1
+TRANS telsrc4       25  0  11  0   1   1 545  2  1  1
+TRANS telsrc5       25  0  11  0   1   1 545  2  1  1
+TRANS telsrc6       25  0  11  0   1   1 545  2  1  1
+
+AUGMENT_TRANS telsrc SCHEDOPT_ROWENTRY1 4 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc SCHEDOPT_ROWENTRY2 4 8 0 0 0 0 0 0
+AUGMENT_TRANS telsrc SCHEDOPT_ROWENTRY3 2 4 6 8 0 0 0 0
+AUGMENT_TRANS telsrc SCHEDOPT_ROWENTRY4 1 2 3 4 5 6 7 8
+AUGMENT_TRANS telsrc SCHEDOPT_ROWENTRY5 1 2 3 4 5 6 7 8
+AUGMENT_TRANS telsrc SCHEDOPT_ROWENTRY6 1 2 3 4 5 6 7 8
+AUGMENT_TRANS telsrc SCHEDOPT_ROWENTRY7 1 2 3 4 5 6 7 8
+AUGMENT_TRANS telsrc SCHEDOPT_ROWENTRY8 0 0 0 0 0 0 0 0
+
+AUGMENT_TRANS telsrc2 SCHEDOPT_ROWENTRY1 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc2 SCHEDOPT_ROWENTRY2 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc2 SCHEDOPT_ROWENTRY3 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc2 SCHEDOPT_ROWENTRY4 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc2 SCHEDOPT_ROWENTRY5 1 2 3 4 5 6 7 8
+AUGMENT_TRANS telsrc2 SCHEDOPT_ROWENTRY6 1 2 3 4 5 6 7 8
+AUGMENT_TRANS telsrc2 SCHEDOPT_ROWENTRY7 1 2 3 4 5 6 7 8
+AUGMENT_TRANS telsrc2 SCHEDOPT_ROWENTRY8 0 0 0 0 0 0 0 0
+
+AUGMENT_TRANS telsrc3 SCHEDOPT_ROWENTRY1 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc3 SCHEDOPT_ROWENTRY2 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc3 SCHEDOPT_ROWENTRY3 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc3 SCHEDOPT_ROWENTRY4 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc3 SCHEDOPT_ROWENTRY5 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc3 SCHEDOPT_ROWENTRY6 1 2 3 4 5 6 7 8
+AUGMENT_TRANS telsrc3 SCHEDOPT_ROWENTRY7 1 2 3 4 5 6 7 8
+AUGMENT_TRANS telsrc3 SCHEDOPT_ROWENTRY8 0 0 0 0 0 0 0 0
+
+AUGMENT_TRANS telsrc4 SCHEDOPT_ROWENTRY1 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc4 SCHEDOPT_ROWENTRY2 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc4 SCHEDOPT_ROWENTRY3 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc4 SCHEDOPT_ROWENTRY4 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc4 SCHEDOPT_ROWENTRY5 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc4 SCHEDOPT_ROWENTRY6 1 2 3 4 5 6 7 8
+AUGMENT_TRANS telsrc4 SCHEDOPT_ROWENTRY7 1 2 3 4 5 6 7 8
+AUGMENT_TRANS telsrc4 SCHEDOPT_ROWENTRY8 0 0 0 0 0 0 0 0
+
+AUGMENT_TRANS telsrc5 SCHEDOPT_ROWENTRY1 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc5 SCHEDOPT_ROWENTRY2 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc5 SCHEDOPT_ROWENTRY3 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc5 SCHEDOPT_ROWENTRY4 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc5 SCHEDOPT_ROWENTRY5 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc5 SCHEDOPT_ROWENTRY6 1 2 3 4 5 6 7 8
+AUGMENT_TRANS telsrc5 SCHEDOPT_ROWENTRY7 1 2 3 4 5 6 7 8
+AUGMENT_TRANS telsrc5 SCHEDOPT_ROWENTRY8 0 0 0 0 0 0 0 0
+
+AUGMENT_TRANS telsrc6 SCHEDOPT_ROWENTRY1 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc6 SCHEDOPT_ROWENTRY2 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc6 SCHEDOPT_ROWENTRY3 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc6 SCHEDOPT_ROWENTRY4 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc6 SCHEDOPT_ROWENTRY5 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc6 SCHEDOPT_ROWENTRY6 0 0 0 0 0 0 0 0
+AUGMENT_TRANS telsrc6 SCHEDOPT_ROWENTRY7 1 2 3 4 5 6 7 8
+AUGMENT_TRANS telsrc6 SCHEDOPT_ROWENTRY8 0 0 0 0 0 0 0 0
+
+# biuread - Read 32 words of data from the BIU
+TRANS biuread    25  0   1  0   1   0  32
+
+# biuload - Load 32 words of data in the BIU
+TRANS biuload    25  0   1  0   0   0  32
+# Insert Data Values DATA1 and DATA2
+# Note, these can be overridden by a TEST_DATAn line in a test def file (.tst)
+DATA1  000 181 1e0 1e1 000 181 e000 e182 000 1000 1000 1000 000 1000 1000 1000
+DATA2  000 1000 1000 1000 000 1000 1000 1000 004 186   80 1e6 000 187 1e0 1e7
+
+# biucmd - Issue a 3 word BIU Command
+# Insert Data Values in DATA1
+TRANS biucmd     25  0   3  0   0   0  3
+DATA1  0  0  0
+
+# biureset - Issue the 1 word BIU Command containing the codes to pacify the BIU
+#            By default, the BIU will be reset if this is not sent every 1/2 sec
+TRANS biureset   25  0   3  0   0   4  1  3  1  4
+DATA1  0000
+
+# wpenable - Issue the 3 word BIU Command to enable the BIU mem wp
+TRANS wpenable   25  0   3  0   0   0  3
+DATA1  0100 1eff 0000
+
+# wpdisable - Issue the 3 word BIU Command to disable the BIU mem wp
+TRANS wpdisable   25  0   3  0   0   0   3
+DATA1  0100 1eff 0100
+
+#wpclear
+TRANS wpclear 25 0 3 0 0 0 3
+DATA1 0400 1Bff 0000
+
+# wdtenable - Issue the 3 word BIU Command to enable the BIU WDT
+TRANS wdtenable   25  0   3  0   0   0   3
+DATA1  0200 1dff 0000
+
+# wdtdisable - Issue the 3 word BIU Command to disable the BIU WDT
+TRANS wdtdisable   25  0   3  0   0   0  3
+DATA1  0200 1dff 0200
+
+# wdt clear
+TRANS wdtclear 25 0 3 0 0 0 3
+DATA1 0800 17FF 0000
+
+# lrpreset - Issue the 3 word BIU Command containing the codes to reset the LRP
+TRANS lrpreset   25  0   3  0   0   0  3
+DATA1  0001 1ffe 0001
+
+# lrpset - Issue the 3 word BIU Command containing the codes to reset the LRP
+TRANS lrpset   25  0   3  0   0   0  3
+DATA1  0001 1ffe 0000
+
+# disc1on - Issue the 3 word BIU Command to set discrete bit 1
+TRANS disc1on 25  0   3  0   0   0  3
+DATA1  0002 1ffd 0002
+
+# disc1off - Issue the 3 word BIU Command to reset discrete bit 1
+TRANS disc1off 25  0   3  0   0   0  3
+DATA1  0002 1ffd 0000
+
+# disc2on - Issue the 3 word BIU Command to set discrete bit 2
+TRANS disc2on 25  0   3  0   0   0  3
+DATA1  0004 1ffb 0004
+
+# disc2off - Issue the 3 word BIU Command to reset discrete bit 2
+TRANS disc2off 25  0   3  0   0   0  3
+DATA1  0004 1ffb 0000
+
+# disc3on - Issue the 3 word BIU Command to set discrete bit 3
+TRANS disc3on 25  0   3  0   0   0  3
+DATA1  0008 1ff7 0008
+
+# disc3off - Issue the 3 word BIU Command to reset discrete bit 3
+TRANS disc3off 25  0   3  0   0   0  3
+DATA1  0008 1ff7 0000
+
+# disc4on - Issue the 3 word BIU Command to set discrete bit 4
+TRANS disc4on 25  0   3  0   0   0  3
+DATA1  0010 1fef 0010
+
+# disc4off - Issue the 3 word BIU Command to reset discrete bit 4
+TRANS disc4off 25  0   3  0   0   0  3
+DATA1  0010 1fef 0000
+
+# disc5on - Issue the 3 word BIU Command to set discrete bit 5
+TRANS disc5on 25  0   3  0   0   0  3
+DATA1  0020 1fdf 0020
+
+# disc5off - Issue the 3 word BIU Command to reset discrete bit 5
+TRANS disc5off 25  0   3  0   0   0  3
+DATA1  0020 1fdf 0000
+
+# disc6on - Issue the 3 word BIU Command to set discrete bit 6
+TRANS disc6on 25  0   3  0   0   0  3
+DATA1  0040 1fbf 0040
+
+# disc6off - Issue the 3 word BIU Command to reset discrete bit 6
+TRANS disc6off 25  0   3  0   0   0  3
+DATA1  0040 1fbf 0000
+
+# housekp - Collect 64 Bytes of Housekeeping from the Instrument once per 8 sec
+TRANS housekp    25  0  12  0   1   0 96 3 1 256
+
+# sctime - Broadcast Spacecraft Time once per sec on tick 7
+#          Do NOT alter this ...
+TRANS sctime     31  0  29  0   0   5  8  
+# 3  1  8
+DATA1  0 0 0 0 0 0 0 0
+
+TRANS alf 25 0 7 0 0 0 110
+AUGMENT_TRANS alf SCHEDOPT_DATAFACTORS 22 22 22 22 22 22 22 22
+
+TRANS LP_TRIG_SW 25  0   7  0   0   0 1
+DATA1 A101
+
+TRANS LP_MUX_0ON 25  0   7  0   0   0 1
+DATA1 A123
+
+TRANS LP_DAC0 25  0   7  0   0   0 2
+DATA1 A262 1234
+
+TRANS LP_MDT 25  0   7  0   0   0 6
+DATA1 A123 A262 1234 8001 9201 e000
+
+TRANS WBR_ON 25  0  7   0   0   0   1
+DATA1 C134
+TRANS WBR_OFF 25  0  7   0   0   0   1
+DATA1 C115
+
+TRANS DUST_ON 25  0  7   0   0   0   1
+DATA1 F125
+TRANS DUST_OFF 25  0  7   0   0   0   1
+DATA1 F104
+
+TRANS WFR_ON 25  0  7   0   0   0   1
+DATA1 B031
+TRANS WFR_OFF 25  0  7   0   0   0   1
+DATA1 B010
+
+TRANS LFDR_ON 25  0  7   0   0   0   1
+DATA1 D020
+TRANS LFDR_OFF 25  0  7   0   0   0   1
+DATA1 D001
