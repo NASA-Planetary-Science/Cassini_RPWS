@@ -1,0 +1,3 @@
+In addition to spice position (and someday orientation) information functions
+this ancillary area provides Cext.h which many other programs depend on.
+So build/install this area first.
