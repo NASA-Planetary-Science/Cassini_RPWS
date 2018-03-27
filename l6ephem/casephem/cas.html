@@ -1,0 +1,643 @@
+<HTML>
+<HEAD>
+
+<TITLE>CASSINI ephemeris tool</TITLE>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="dasTime.js"></SCRIPT>
+
+<SCRIPT LANGUAGE = "JavaScript">
+<!-- hide from old browsers
+
+function setSunCoordinates (selectCoordinates)
+{
+   selectCoordinates.length = 0
+
+   selectCoordinates.options [0] = new Option ("Ecliptic",   "ecli")
+   selectCoordinates.options [1] = new Option ("Equatorial", "equa")
+
+   selectCoordinates.options [0].selected = true
+}
+
+function setPlanetCoordinates (selectCoordinates)
+{
+   selectCoordinates.length = 0
+
+   selectCoordinates.options [0] = new Option ("Geographic", "geog")
+   selectCoordinates.options [1] = new Option ("Ecliptic",   "ecli")
+   selectCoordinates.options [2] = new Option ("Equatorial", "equa")
+
+   selectCoordinates.options [1].selected = true
+}
+
+function setSaturnCoordinates (selectCoordinates)
+{
+   selectCoordinates.length = 0
+
+   selectCoordinates.options [0] = new Option ("Geographic", "geog")
+   selectCoordinates.options [1] = new Option ("Ecliptic",   "ecli")
+   selectCoordinates.options [2] = new Option ("Equatorial", "equa")
+   selectCoordinates.options [3] = new Option ("KSM",        "khsm")
+
+   selectCoordinates.options [1].selected = true
+}
+
+function setSatelliteCoordinates (selectCoordinates)
+{
+   selectCoordinates.length = 0
+
+   selectCoordinates.options [0] = new Option ("Geographic",    "geog")
+   selectCoordinates.options [1] = new Option ("Ecliptic",      "ecli")
+   selectCoordinates.options [2] = new Option ("Equatorial",    "equa")
+   selectCoordinates.options [3] = new Option ("Co-rotational", "crot")
+
+   selectCoordinates.options [1].selected = true
+}
+
+function setSunObservers (selectObserver)
+{
+   selectObserver.length = 0
+
+   selectObserver.options [0] = new Option ("Venus",     "venu")
+   selectObserver.options [1] = new Option ("Earth",     "eart")
+   selectObserver.options [2] = new Option ("Jupiter",   "jupi")
+   selectObserver.options [3] = new Option ("Saturn barycentric",    "sat1")
+   selectObserver.options [4] = new Option ("Saturn geocentric",     "sat2")
+   selectObserver.options [5] = new Option ("Voyager 1", "voy1")
+   selectObserver.options [6] = new Option ("Voyager 2", "voy2")
+   selectObserver.options [7] = new Option ("Galileo",   "gali")
+   selectObserver.options [8] = new Option ("Ulysses",   "ulys")
+   selectObserver.options [9] = new Option ("Cassini",   "cass")
+
+   selectObserver.options [9].selected = true
+}
+
+function setVenusObservers (selectObserver)
+{
+   selectObserver.length = 0
+
+   selectObserver.options [0] = new Option ("Galileo", "gali")
+   selectObserver.options [1] = new Option ("Cassini", "cass")
+
+   selectObserver.options [1].selected = true
+}
+
+function setEarthObservers (selectObserver)
+{
+   selectObserver.length = 0
+
+   selectObserver.options [0] = new Option ("Voyager 1", "voy1")
+   selectObserver.options [1] = new Option ("Voyager 2", "voy2")
+   selectObserver.options [2] = new Option ("Galileo",   "gali")
+   selectObserver.options [3] = new Option ("Ulysses",   "ulys")
+   selectObserver.options [4] = new Option ("Cassini",   "cass")
+
+   selectObserver.options [4].selected = true
+}
+
+function setJupiterObservers (selectObserver)
+{
+   selectObserver.length = 0
+
+   selectObserver.options [0] = new Option ("Io",        "  io")
+   selectObserver.options [1] = new Option ("Europa",    "euro")
+   selectObserver.options [2] = new Option ("Ganymede",  "gany")
+   selectObserver.options [3] = new Option ("Callisto",  "call")
+   selectObserver.options [4] = new Option ("Voyager 1", "voy1")
+   selectObserver.options [5] = new Option ("Voyager 2", "voy2")
+   selectObserver.options [6] = new Option ("Galileo",   "gali")
+   selectObserver.options [7] = new Option ("Ulysses",   "ulys")
+   selectObserver.options [8] = new Option ("Cassini",   "cass")
+
+   selectObserver.options [6].selected = true
+}
+
+function setSaturnObservers (selectObserver)
+{
+   selectObserver.length = 0
+
+   selectObserver.options  [0] = new Option ("Mimas",     "mima")
+   selectObserver.options  [1] = new Option ("Enceladus", "ence")
+   selectObserver.options  [2] = new Option ("Tethys",    "teth")
+   selectObserver.options  [3] = new Option ("Dione",     "dion")
+   selectObserver.options  [4] = new Option ("Rhea",      "rhea")
+   selectObserver.options  [5] = new Option ("Titan",     "tita")
+   selectObserver.options  [6] = new Option ("Hyperion",  "hype")
+   selectObserver.options  [7] = new Option ("Iapetus",   "iape")
+   selectObserver.options  [8] = new Option ("Phoebe",    "phoe")
+   selectObserver.options  [9] = new Option ("Methone",   "meth")
+   selectObserver.options [10] = new Option ("Anthe",     "anth")
+   selectObserver.options [11] = new Option ("Pallene",   "pall")
+   selectObserver.options [12] = new Option ("Telesto",   "tele")
+   selectObserver.options [13] = new Option ("Helene",    "hele")
+   selectObserver.options [14] = new Option ("Voyager 1", "voy1")
+   selectObserver.options [15] = new Option ("Voyager 2", "voy2")
+   selectObserver.options [16] = new Option ("Ulysses",   "ulys")
+   selectObserver.options [17] = new Option ("Cassini",   "cass")
+
+   selectObserver.options [17].selected = true
+}
+
+function setJupiterSatellitesObservers (selectObserver)
+{
+   selectObserver.length = 0
+
+   selectObserver.options [0] = new Option ("Voyager 1", "voy1")
+   selectObserver.options [1] = new Option ("Voyager 2", "voy2")
+   selectObserver.options [2] = new Option ("Galileo",   "gali")
+   selectObserver.options [3] = new Option ("Cassini",   "cass")
+   selectObserver.options [4] = new Option ("Jupiter",   "jupi")
+
+   selectObserver.options [2].selected = true
+}
+
+function setSaturnSatellitesObservers (selectObserver)
+{
+   selectObserver.length = 0
+
+   selectObserver.options [0] = new Option ("Voyager 1", "voy1")
+   selectObserver.options [1] = new Option ("Voyager 2", "voy2")
+   selectObserver.options [2] = new Option ("Cassini",   "cass")
+
+   selectObserver.options [2].selected = true
+}
+
+function setObserverSelect (selectTarget)
+{
+   var TIndex = selectTarget.selectedIndex
+   var CIndex = selectTarget.selectedIndex
+   var selectObserver = document.myForm.observer
+   var selectCoordinates = document.myForm.coordinates
+   var setOriginName = document.myForm.OriginName
+   var setOriginRadius = document.myForm.OriginRadius
+
+   if ("Sun".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setSunObservers (selectObserver)
+      setOriginName.value = "Earth's orbit"
+      setOriginRadius.value = "149597871"
+   }
+   else if ("Venus".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setVenusObservers (selectObserver)
+      setOriginName.value = "    Venus    "
+      setOriginRadius.value = "  6051.8 "
+   }
+   else if ("Earth".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setEarthObservers (selectObserver)
+      setOriginName.value = "    Earth    "
+      setOriginRadius.value = " 6378.14 "
+   }
+   else if ("Jupiter".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setJupiterObservers (selectObserver)
+      setOriginName.value = "   Jupiter   "
+      setOriginRadius.value = "  71492  "
+   }
+   else if ("Saturn barycentric".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setSaturnObservers (selectObserver)
+      setOriginName.value = "    Saturn   "
+      setOriginRadius.value = "  60268 "
+   }
+   else if ("Saturn geocentric".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setSaturnObservers (selectObserver)
+      setOriginName.value = "    Saturn   "
+      setOriginRadius.value = "  60268 "
+   }
+   else if ("Io".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setJupiterSatellitesObservers (selectObserver)
+      setOriginName.value = "      Io     "
+      setOriginRadius.value = "  1824.4 "
+   }
+   else if ("Europa".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setJupiterSatellitesObservers (selectObserver)
+      setOriginName.value = "    Europa   "
+      setOriginRadius.value = " 1562.68 "
+   }
+   else if ("Ganymede".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setJupiterSatellitesObservers (selectObserver)
+      setOriginName.value = "   Ganymede  "
+      setOriginRadius.value = "  2632.4 "
+   }
+   else if ("Callisto".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setJupiterSatellitesObservers (selectObserver)
+      setOriginName.value = "   Callisto  "
+      setOriginRadius.value = "  2409.3 "
+   }
+   else if ("Mimas".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setSaturnSatellitesObservers (selectObserver)
+      setOriginName.value = "    Mimas    "
+      setOriginRadius.value = "  202.1  "
+   }
+   else if ("Enceladus".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setSaturnSatellitesObservers (selectObserver)
+      setOriginName.value = "  Enceladus  "
+      setOriginRadius.value = "  254.0  "
+   }
+   else if ("Tethys".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setSaturnSatellitesObservers (selectObserver)
+      setOriginName.value = "    Tethys   "
+      setOriginRadius.value = "  535.8  "
+   }
+   else if ("Dione".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setSaturnSatellitesObservers (selectObserver)
+      setOriginName.value = "    Dione    "
+      setOriginRadius.value = "  562.4  "
+   }
+   else if ("Rhea".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setSaturnSatellitesObservers (selectObserver)
+      setOriginName.value = "     Rhea    "
+      setOriginRadius.value = "  764.8  "
+   }
+   else if ("Titan".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setSaturnSatellitesObservers (selectObserver)
+      setOriginName.value = "    Titan    "
+      setOriginRadius.value = "  2575.0 "
+   }
+   else if ("Hyperion".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setSaturnSatellitesObservers (selectObserver)
+      setOriginName.value = "   Hyperion  "
+      setOriginRadius.value = "  147.0  "
+   }
+   else if ("Iapetus".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setSaturnSatellitesObservers (selectObserver)
+      setOriginName.value = "   Iapetus   "
+      setOriginRadius.value = "  747.4  "
+   }
+   else if ("Phoebe".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setSaturnSatellitesObservers (selectObserver)
+      setOriginName.value = "    Phoebe   "
+      setOriginRadius.value = "  112.0  "
+   }
+   else if ("Methone".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setSaturnSatellitesObservers (selectObserver)
+      setOriginName.value = "   Methone   "
+      setOriginRadius.value = "   10.0  "
+   }
+   else if ("Anthe".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setSaturnSatellitesObservers (selectObserver)
+      setOriginName.value = "    Anthe    "
+      setOriginRadius.value = "   1.0   "
+   }
+   else if ("Pallene".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setSaturnSatellitesObservers (selectObserver)
+      setOriginName.value = "   Pallene   "
+      setOriginRadius.value = "   10.0  "
+   }
+   else if ("Telesto".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setSaturnSatellitesObservers (selectObserver)
+      setOriginName.value = "   Telesto   "
+      setOriginRadius.value = "   12.0  "
+   }
+   else if ("Helene".indexOf (selectTarget.options [TIndex].text) != -1)
+   {
+      setSaturnSatellitesObservers (selectObserver)
+      setOriginName.value = "    Helene   "
+      setOriginRadius.value = "   16.0  "
+   }
+
+
+   if ("Sun".indexOf (selectTarget.options [CIndex].text) != -1)
+   {
+      setSunCoordinates (selectCoordinates)
+   }
+   else if (("Venus".indexOf (selectTarget.options [TIndex].text)               != -1) ||
+            ("Earth".indexOf (selectTarget.options [TIndex].text)               != -1) ||
+            ("Jupiter".indexOf (selectTarget.options [TIndex].text)             != -1))
+   {
+      setPlanetCoordinates (selectCoordinates)
+   }
+   else if (("Saturn barycentric".indexOf (selectTarget.options [TIndex].text)  != -1) ||
+            ("Saturn geocentric".indexOf (selectTarget.options [TIndex].text)   != -1))
+   {
+      setSaturnCoordinates (selectCoordinates)
+   }
+   else
+   {
+      setSatelliteCoordinates (selectCoordinates)
+   }
+}
+
+function validateTime ()
+{
+   var sTmp
+   var TempNumber
+   var ErrorName
+   var OutOfRange
+   var sBegTmp, sEndTmp
+   var regexp = /'+/g
+
+   var voy1BegTime  = "1977-248-14-07-00"
+   var voy1EndTime  = "2020-366-23-58-52"
+   var voy2BegTime  = "1977-232-15-40-09"
+   var voy2EndTime  = "2021-004-23-58-52"
+   var gllBegTime   = "1989-292-01-28-38"
+   var gllEndTime   = "2003-273-11-58-55"
+   var ulyBegTime   = "1990-279-20-26-01"
+   var ulyEndTime   = "2050-001-11-58-49"
+   var casBegTime   = "1997-288-09-26-10"
+   var casEndTime   = "2017-258-10-32-49"
+   var solarBegTime = "1958-001-00-00-00"
+   var solarEndTime = "2094-001-00-00-00"
+
+   var dasTm0      = new dasTime ()
+   var dasTm1      = new dasTime ()
+   var scStTime    = new dasTime ()
+   var scSpTime    = new dasTime ()
+   var objStTime   = document.myForm.StTime
+   var objSpTime   = document.myForm.SpTime
+   var objTimeInv  = document.myForm.TimeInterval
+   var objOrRadius = document.myForm.OriginRadius
+
+   var selectObserver = document.myForm.observer
+   var Index = document.myForm.observer.selectedIndex
+
+   sTmp = new String (objTimeInv.value)
+   TempNumber = parseFloat (sTmp)
+
+   if (isNaN (TempNumber))
+   {
+      alert (sTmp + ' is not a valid time interval.')
+      return false
+   }
+
+   sTmp = new String (objOrRadius.value)
+   TempNumber = parseFloat (sTmp)
+
+   if (isNaN (TempNumber))
+   {
+      alert (sTmp + ' is not a valid radius value.')
+      return false
+   }
+
+   OutOfRange = false
+
+   sTmp = new String (objStTime.value)
+   sTmp = sTmp.replace (regexp, "")
+
+   if (dasTm0.parsetime (sTmp) == false)
+   {
+      dasTm0.PopupParseTmErr ()
+      return false
+   }
+
+   sTmp = new String (objSpTime.value)
+   sTmp = sTmp.replace (regexp, "")
+
+   if (dasTm1.parsetime (sTmp) == false)
+   {
+      dasTm1.PopupParseTmErr ()
+      return false
+   }
+
+   if ("Voyager 1".indexOf (selectObserver.options [Index].text) != -1)
+   {
+      sBegTmp = new String (voy1BegTime)
+      sEndTmp = new String (voy1EndTime)
+   }
+   else if ("Voyager 2".indexOf (selectObserver.options [Index].text) != -1)
+   {
+      sBegTmp = new String (voy2BegTime)
+      sEndTmp = new String (voy2EndTime)
+   }
+   else if ("Galileo".indexOf (selectObserver.options [Index].text) != -1)
+   {
+      sBegTmp = new String (gllBegTime)
+      sEndTmp = new String (gllEndTime)
+   }
+   else if ("Ulysses".indexOf (selectObserver.options [Index].text) != -1)
+   {
+      sBegTmp = new String (ulyBegTime)
+      sEndTmp = new String (ulyEndTime)
+   }
+   else if ("Cassini".indexOf (selectObserver.options [Index].text) != -1)
+   {
+      sBegTmp = new String (casBegTime)
+      sEndTmp = new String (casEndTime)
+   }
+   else
+   {
+      sBegTmp = new String (solarBegTime)
+      sEndTmp = new String (solarEndTime)
+   }
+
+   if (scStTime.parsetime (sBegTmp) == false)
+   {
+      scStTime.PopupParseTmErr ()
+      return false
+   }
+
+   if (scSpTime.parsetime (sEndTmp) == false)
+   {
+      scSpTime.PopupParseTmErr ()
+      return false
+   }
+
+   if ((dasTm0.ttime() < scStTime.ttime()) ||
+       (dasTm0.ttime() > scSpTime.ttime()) ||
+       (dasTm1.ttime() < scStTime.ttime()) ||
+       (dasTm1.ttime() > scSpTime.ttime()))
+   {
+      OutOfRange = true
+   }
+
+   if (OutOfRange == true)
+   {
+      if ("Voyager 1".indexOf (selectObserver.options [Index].text) != -1)
+      {
+         ErrorName = objStTime.value + " - " + objSpTime.value
+         ErrorName += " is out of the Voyager 1 time range."
+         ErrorName += "\nChoose a time within this range:"
+         ErrorName += "\n     " + voy1BegTime + " - " + voy1EndTime
+
+         alert (ErrorName)
+      }
+      else if ("Voyager 2".indexOf (selectObserver.options [Index].text) != -1)
+      {
+         ErrorName = objStTime.value + " - " + objSpTime.value
+         ErrorName += " is out of the Voyager 2 time range."
+         ErrorName += "\nChoose a time within this range:"
+         ErrorName += "\n     " + voy2BegTime + " - " + voy2EndTime
+
+         alert (ErrorName)
+      }
+      else if ("Galileo".indexOf (selectObserver.options [Index].text) != -1)
+      {
+         ErrorName = objStTime.value + " - " + objSpTime.value
+         ErrorName += " is out of the Galileo time range."
+         ErrorName += "\nChoose a time within this range:"
+         ErrorName += "\n     " + gllBegTime + " - " + gllEndTime
+
+         alert (ErrorName)
+      }
+      else if ("Ulysses".indexOf (selectObserver.options [Index].text) != -1)
+      {
+         ErrorName = objStTime.value + " - " + objSpTime.value
+         ErrorName += " is out of the Ulysses time range."
+         ErrorName += "\nChoose a time within this range:"
+         ErrorName += "\n     " + ulyBegTime + " - " + ulyEndTime
+
+         alert (ErrorName)
+      }
+      else if ("Cassini".indexOf (selectObserver.options [Index].text) != -1)
+      {
+         ErrorName = objStTime.value + " - " + objSpTime.value
+         ErrorName += " is out of the Cassini time range."
+         ErrorName += "\nChoose a time within this range:"
+         ErrorName += "\n     " + casBegTime + " - " + casEndTime
+
+         alert (ErrorName)
+      }
+      else
+      {
+         ErrorName = objStTime.value + " - " + objSpTime.value
+         ErrorName += " is out of the Solar System time range."
+         ErrorName += "\nChoose a time within this range:"
+         ErrorName += "\n     " + solarBegTime + " - " + solarEndTime
+
+         alert (ErrorName)
+      }
+
+      return false
+   }
+
+   return true
+}
+
+// end script hiding -->
+</SCRIPT>
+
+</HEAD>
+
+<BODY>
+
+<CENTER><H1>Cassini, Ulysses, Galileo, and Voyager ephemeris tool</H1></CENTER>
+
+<HR>
+
+<FORM NAME = "myForm" onSubmit = "return validateTime ()" METHOD = "POST"
+ACTION = "http://cassini.physics.uiowa.edu/das/casephem">
+<DIV ALIGN=CENTER>
+
+<br>
+<b>Time Range: </b>
+<input type="text" size=18 name="StTime" value="2004//183 02:00:00">
+<b> to </b>
+<input size=18 name="SpTime" value="2004//183 03:00:00">
+<br>
+
+<br>
+<b>Time Interval: </b>
+<input size=8 name="TimeInterval" value="     300">
+<b> seconds</b>
+<br>
+
+<br>
+<b>Origin: </b> <select name="origin" onChange = "setObserverSelect (this)">
+<option value=" sun"> Sun
+<option value="venu"> Venus
+<option value="eart"> Earth
+<option value="jupi"> Jupiter
+<option value="  io"> Io
+<option value="euro"> Europa
+<option value="gany"> Ganymede
+<option value="call"> Callisto
+<option selected value="sat1"> Saturn barycentric
+<option value="sat2"> Saturn geocentric
+<option value="mima"> Mimas
+<option value="ence"> Enceladus
+<option value="teth"> Tethys
+<option value="dion"> Dione
+<option value="rhea"> Rhea
+<option value="tita"> Titan
+<option value="hype"> Hyperion
+<option value="iape"> Iapetus
+<option value="phoe"> Phoebe
+<option value="meth"> Methone
+<option value="anth"> Anthe
+<option value="pall"> Pallene
+<option value="tele"> Telesto
+<option value="hele"> Helene
+</select>
+<br>
+
+<br>
+<b>Observer: </b> <select name="observer">
+<option value="mima"> Mimas
+<option value="ence"> Enceladus
+<option value="teth"> Tethys
+<option value="dion"> Dione
+<option value="rhea"> Rhea
+<option value="tita"> Titan
+<option value="hype"> Hyperion
+<option value="iape"> Iapetus
+<option value="phoe"> Phoebe
+<option value="meth"> Methone
+<option value="anth"> Anthe
+<option value="pall"> Pallene
+<option value="tele"> Telesto
+<option value="hele"> Helene
+<option value="voy1"> Voyager 1
+<option value="voy2"> Voyager 2
+<option selected value="cass"> Cassini
+</select>
+<br>
+
+<br>
+<b>Coordinate System: </b> <select name="coordinates">
+<option value="geog">   Geographic
+<option selected value="ecli">   Ecliptic
+<option value="equa">   Equatorial
+<option value="khsm">   KSM
+</select>
+<br>
+
+<br>
+<b>The radius of </b>
+<input type="text" size=13 name="OriginName" value="    Saturn   ">
+<b> is </b>
+<input type="text" size=9 name="OriginRadius" value="  60268  ">
+<b> km.  (Change the value if you wish)</b>
+<br>
+
+<p>Here are <a href = "http://www-pw.physics.uiowa.edu/~jbg/coords2.txt">
+descriptions</a> of the coordinate systems.</p>
+
+<p>Here is a brief <a href = "http://www-pw.physics.uiowa.edu/~jbg/SaturnLongitude.txt">
+explanation</a> of the Saturn longitude used by this tool.</p>
+
+<p>If you would like to use our new SLS4 longitude system, you can find it
+<a href = "http://www-pw.physics.uiowa.edu/sls4"> here</a>.  NEW</p>
+
+<p>Here are the <a href = "http://www-pw.physics.uiowa.edu/~jbg/kernels.txt">
+names</a> of the SPICE kernels used by this program.</p>
+
+<p>Send questions or comments to <a href="&#109;ailto&#58;joseph-groene&#64;uiowa&#46;ed&#117;">
+joseph-groene&#64;uiowa&#46;ed&#117</a>.</p>
+
+<P>
+<INPUT TYPE="submit">
+</FORM>
+
+<HR>
+</BODY>
+</HTML>

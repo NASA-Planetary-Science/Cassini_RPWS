@@ -1,0 +1,38 @@
+
+   When the user chooses "Saturn barycentric" or "Saturn geocentric"
+as the origin and "Geographic" as the coordinate system, the output
+will include three longitude values.  The three values are labeled as
+"WL (IAU)", "WL (SLS2)",  and "WL (SLS3)".  The first value [WL (IAU)]
+is based on a longitude system described here:
+
+      Seidelmann et al.:2002, "Report on the IAU/IAG Working Group
+      on Cartographic Coordinates and Rotational Elements of the
+      Planets and Satellites: 2000", CELESTIAL MECHANICS AND
+      DYNAMICAL ASTRONOMY 82: 83-110, 2002.
+
+   The second value [WL (SLS2)] is based on a longitude system
+described here:
+
+      Kurth et al.:2007, "A Saturnian Longitude System Based on a
+      Variable Kilometric Radiation Period", GEOPHYS. RES.
+      LETT. 34, L02201, doi:10.1029/2006GL028336, Jan. 2007.
+
+   The third value [WL (SLS3)] is based on a longitude system
+described here:
+
+      Kurth et al.:2007, "An Update to a Saturnian Longitude
+      System Based on Kilometric Radio Emissions", J. GEOPHYS.
+      RES., submitted, Oct. 10, 2007.
+
+   Note that all three values are considered west longitude (WL).
+
+   The SLS2 longitude system is only valid for this time period:
+
+      1 January 2004 to 28 August 2006.
+
+   The SLS3 longitude system is only valid for this time period:
+
+      1 January 2004 through 10 August 2007.
+
+   If the user chooses a time outside these time periods, a fill
+value of -1 will be used in the output.

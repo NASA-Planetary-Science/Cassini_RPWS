@@ -1,0 +1,8 @@
+ \begindata
+ KERNELS_TO_LOAD = ( '/home/jbg/data1/spice/misc/naif0012.tls',
+                     '/home/jbg/data1/spice/misc/pck00010.tpc',
+                     '/home/jbg/data1/spice/misc/mar033_2000-2025.bsp',
+                     '/home/jbg/data1/spice/misc/jup310.bsp',
+                     '/home/jbg/data1/spice/misc/sat375.bsp',
+                     '/home/jbg/data1/spice/misc/siding_spring_8-19-14.bsp',
+                     '/home/jbg/data1/spice/misc/de434s.bsp' )

@@ -1,0 +1,7 @@
+ \begindata
+ KERNELS_TO_LOAD = ( '/home/jbg/data1/spice/misc/naif0012.tls',
+                     '/home/jbg/data1/spice/misc/pck00010.tpc',
+                     '/home/jbg/data1/spice/juno/frames/JSQ.tf',
+                     '/home/jbg/data1/spice/misc/jup310.bsp',
+                     '/home/jbg/data1/spice/misc/sat375.bsp',
+                     '/home/jbg/data1/spice/ulysses/ephemeris/ulysses_1990_2009_2050.bsp' )
