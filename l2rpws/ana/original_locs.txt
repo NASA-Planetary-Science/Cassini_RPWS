@@ -1,0 +1,17 @@
+The original source and header locations for each subdirectory of this
+directory are given below:
+
+ana  <-- /home/raj/project/Cassini/src/ana/ana9.00/ana
+
+         this version was chosen because the executable here had the same
+			md5sum as the production version of ana located at:
+			
+			   /opt/project/cassini/bin
+			
+			That was in use as of 2008-04-22.
+
+
+lib     <-- Stuff from /home/raj/project/Cassini/include and 
+                       /home/raj/project/Cassini/src/lib
+
+

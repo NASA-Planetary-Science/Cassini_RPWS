@@ -1,0 +1,35 @@
+#!/bin/ksh
+
+CasLib=`pwd`/../lib
+
+cd Cext
+make clean
+make
+mv lib*.a $CasLib
+cd .. 
+
+cd CTools
+make clean
+make
+mv lib*.a $CasLib
+cd ..
+
+cd XmRPWS
+make clean
+make
+mv lib*.a $CasLib
+cd ..
+
+cd rpwsdsp
+make clean
+make
+mv lib*.a $CasLib
+cd ..
+
+cd telemetry
+make clean
+make
+mv lib*.a $CasLib
+cd ..
+
+
