@@ -1,0 +1,40 @@
+#!/bin/ksh
+#
+# cas_orbit.ksh 
+#   March 16, 2005
+#   return orbit number according to Joe Green's List
+#   
+#   Sept. 2016
+#   Updated since fxtime was moved to das1_fxtime and installed
+#   with libdas2
+#
+# Programs: das1_fxtime(), gawk()
+# Scripts: none
+#
+#
+# This script is used by:
+#  
+#      rpws_lr_das_lrfc.pl and rpws_kp_dat2png.pl
+#
+# The giferator runners for LRFC and KP data.
+
+PATH=%(LRFC_SCRIPT_PATH)s
+CAS_ORBIT=%(INST_ETC)s/OrbitNames.list
+
+tBeg=${1:?"start time not defined"};  tBeg=$(das1_fxtime "$tBeg" -f "%%Y-%%jT%%H:%%M")
+
+if [[ ! -r $CAS_ORBIT ]]; then
+  printf "Cassini Orbit file %%s not found\n" $CAS_ORBIT  
+fi
+
+cat $CAS_ORBIT | 
+gawk ' 
+{
+  if(($2 <= tBeg) && ($3 > tBeg)){
+    print $1
+    exit(0)
+  }
+}
+' tBeg=$tBeg
+
+exit 0
