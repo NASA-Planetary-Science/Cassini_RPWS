@@ -1,0 +1,33 @@
+
+    (Planetary Solar Ecliptic, Planet centered X=Sun, V2=Orbital normal)
+    X      - Along the Planet->Sun line (S), positive towards the Sun.
+    Y      - V2 x X
+    Z      - Parallel to the Planetary orbital plane upward normal.
+
+    (Planetary Solar Equatorial, Planet centered Z=Omega, V2=Planet-Sun vector)
+    X      - In the Planet->Sun plane, positive towards the Sun.
+    Y      - Z x X
+    Z      - Northward spin axis of the Planet.
+
+       KSM - This coordinate system will be similar to the GSM
+    (Geocentric Solar Magnetospheric) coordinate system used at
+    Earth.  Because Saturn's rotation axis and magnetic dipole
+    axis are < 1 degree different, we will not differentiate them
+    when defining this coordinate system.
+
+          X = S (where S is the unit vector from Saturn to the Sun)
+          Y = K x X (where K is the unit vector of the rotation axis)
+          Z = X x Y
+
+       The geographic coordinate system is defined so that its
+    x-axis is in the planet's equatorial plane, but is fixed with
+    the rotation of the planet, so that it passes through the prime
+    meridian.  Its z-axis is parallel to the rotation axis of the
+    planet, and its y-axis completes a right-handed orthogonal set.
+
+       The co-rotational coordinate is defined as having its origin
+    at the center of the planetary satellite.  The +z axis is aligned
+    parallel to the parent planet's rotational axis and the +x axis
+    is parallel to the nominal co-rotational plasma flow induced by
+    the parent planet's rotation.  The +y axis is in the direction
+    of the parent planet.
