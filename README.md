@@ -106,12 +106,12 @@ Build the Iowa Cassini data handling software in this order:
     $ cd l2rpws  
     $ gmake  
     $ gmake test  
-    $gmake install  
+    $ gmake install  
 4. **Build the calibrated-level handling libs and programs**  (Solaris or Linux)  
     $ cd l3rpws/lowrate  
     $ gmake  
     $ gmake test  
-    $gmake install  
+    $ gmake install  
 
     $ cd l3rpws/highrate  
     $ gmake  
