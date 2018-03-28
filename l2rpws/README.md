@@ -1,7 +1,11 @@
 Most of the code in this area is made to work together to get data from SFDUs
-from the SOPC to *.r and *.u files in a data area.  Most of it was written by
-Willy Robison.  Robert Johnson, Terry Averkamp also contributed.  The original
-location for much of this software was:
+from the SOPC to *.r and *.u files in a data area.  Orginally written by:
+
+   Willy R.
+	Robert J.
+	Terry A.
+	  
+The location for much of this software was:
 
   /opt/project/cassini/src
   
