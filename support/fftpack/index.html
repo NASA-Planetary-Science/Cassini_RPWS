@@ -1,0 +1,182 @@
+<head>
+<title>FFTPACK</title>
+<meta name="waisindex" value="nse">
+</head>
+<h1>FFTPACK</h1>
+
+Click <A HREF="http://www.netlib.org/master_counts2.html#fftpack">here</A> to see the number of accesses to this library.
+
+<p>
+FFTPACK is a package of Fortran subprograms for the fast Fourier
+transform of periodic and other symmetric sequences.  It includes
+complex, real, sine, cosine, and quarter-wave transforms.
+
+<dl>
+<dt>Reference
+<dd>P.N. Swarztrauber, Vectorizing the FFTs, in Parallel Computations
+(G. Rodrigue, ed.), Academic Press, 1982, pp. 51--83.
+<dt>Developer
+<dd>Paul N. Swarztrauber, National Center for Atmospheric Research,
+Boulder, CO
+</dl>
+<p>
+<hr>
+
+<pre>
+file	<a href="/fftpack/links.html">fftpack/links.html</a>  <a href="/cgi-bin/netlibget.pl/fftpack/links.html">fftpack/links.html plus dependencies</a>
+for	related resources
+
+file	<a href="/fftpack/doc">fftpack/doc</a>
+for	user guide for fftpack
+
+file	<a href="/fftpack/fft.c">fftpack/fft.c</a>  <a href="/cgi-bin/netlibget.pl/fftpack/fft.c">fftpack/fft.c plus dependencies</a>
+for	C translation of much of fftpack
+prec	single
+by	Monty &lt;xiphmont@mit.edu&gt;
+gams	J1a
+lang	C
+
+file	<a href="/fftpack/cfftb.f">fftpack/cfftb.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/cfftb.f">fftpack/cfftb.f plus dependencies</a>
+gams	J1a2
+for	FFT, backward transform (synthesis) of a complex Fourier coefficient array
+
+file	<a href="/fftpack/cfftf.f">fftpack/cfftf.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/cfftf.f">fftpack/cfftf.f plus dependencies</a>
+gams	J1a2
+for	FFT, forward transform of a complex periodic sequence
+
+file	<a href="/fftpack/cosqf.f">fftpack/cosqf.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/cosqf.f">fftpack/cosqf.f plus dependencies</a>
+gams	J1a3
+for	FFT, forward cosine transform with odd wave numbers
+
+file	<a href="/fftpack/cost.f">fftpack/cost.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/cost.f">fftpack/cost.f plus dependencies</a>
+gams	J1a3
+for	FFT, discrete cosine transform of a real even sequence
+
+file	<a href="/fftpack/ezfftb.f">fftpack/ezfftb.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/ezfftb.f">fftpack/ezfftb.f plus dependencies</a>
+gams	J1a1
+for	FFT, backward transform (synthesis) of a real Fourier coefficient array, simplified and slower version of (fftpack/rfftb)
+
+file	<a href="/fftpack/ezfftf.f">fftpack/ezfftf.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/ezfftf.f">fftpack/ezfftf.f plus dependencies</a>
+gams	J1a1
+for	FFT, forward transform of a real periodic sequence, simplified and slower version of (fftpack/rfftf)
+
+file	<a href="/fftpack/rfftb.f">fftpack/rfftb.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/rfftb.f">fftpack/rfftb.f plus dependencies</a>
+gams	J1a1
+for	FFT, backward transform (synthesis) of a real Fourier coefficient array
+
+file	<a href="/fftpack/rfftf.f">fftpack/rfftf.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/rfftf.f">fftpack/rfftf.f plus dependencies</a>
+gams	J1a1
+for	FFT, forward transform of a real periodic sequence
+
+file	<a href="/fftpack/sinqb.f">fftpack/sinqb.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/sinqb.f">fftpack/sinqb.f plus dependencies</a>
+gams	J1a3
+for	FFT, backward sine transform (synthesis) with odd wave numbers
+
+file	<a href="/fftpack/sinqf.f">fftpack/sinqf.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/sinqf.f">fftpack/sinqf.f plus dependencies</a>
+gams	J1a3
+for	FFT, forward sine transform with odd wave numbers
+
+file	<a href="/fftpack/sint.f">fftpack/sint.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/sint.f">fftpack/sint.f plus dependencies</a>
+gams	J1a3
+for	FFT, discrete sine transform of a real odd sequence
+
+file	<a href="/fftpack/cffti.f">fftpack/cffti.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/cffti.f">fftpack/cffti.f plus dependencies</a>
+gams	-0-
+for	initialization routine for (fftpack/cfftf) and (fftpack/cfftb)
+
+file	<a href="/fftpack/cosqb.f">fftpack/cosqb.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/cosqb.f">fftpack/cosqb.f plus dependencies</a>
+gams	J1a3
+for	FFT, backward cosine transform (synthesis) with odd wave numbers
+
+file	<a href="/fftpack/cosqi.f">fftpack/cosqi.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/cosqi.f">fftpack/cosqi.f plus dependencies</a>
+gams	-0-
+for	initialization routine for (fftpack/cosqf) and (fftpack/cosqb)
+
+file	<a href="/fftpack/ezffti.f">fftpack/ezffti.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/ezffti.f">fftpack/ezffti.f plus dependencies</a>
+for	initialization routine for (fftpack/ezfftf) and (fftpack/ezfftb)
+
+file	<a href="/fftpack/costi.f">fftpack/costi.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/costi.f">fftpack/costi.f plus dependencies</a>
+gams	-0-
+for	initialization routine for (fftpack/cost)
+
+file	<a href="/fftpack/rffti.f">fftpack/rffti.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/rffti.f">fftpack/rffti.f plus dependencies</a>
+gams	J1a1
+for	initialization routine for (fftpack/rfftf) and (ftpack/rfftb)
+
+file	<a href="/fftpack/sinqi.f">fftpack/sinqi.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/sinqi.f">fftpack/sinqi.f plus dependencies</a>
+gams	-0-
+for	initialization routtine for (fftpack/sinqf) and (fftpack/sinqb)
+
+file	<a href="/fftpack/sinti.f">fftpack/sinti.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/sinti.f">fftpack/sinti.f plus dependencies</a>
+gams	-0-
+for	initialization routine for (fftpack/sint)
+
+file	<a href="/fftpack/cfftb1.f">fftpack/cfftb1.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/cfftb1.f">fftpack/cfftb1.f plus dependencies</a>
+
+file	<a href="/fftpack/cfftf1.f">fftpack/cfftf1.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/cfftf1.f">fftpack/cfftf1.f plus dependencies</a>
+
+file	<a href="/fftpack/cffti1.f">fftpack/cffti1.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/cffti1.f">fftpack/cffti1.f plus dependencies</a>
+
+file	<a href="/fftpack/changes">fftpack/changes</a>
+
+file	<a href="/fftpack/cosqb1.f">fftpack/cosqb1.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/cosqb1.f">fftpack/cosqb1.f plus dependencies</a>
+
+file	<a href="/fftpack/cosqf1.f">fftpack/cosqf1.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/cosqf1.f">fftpack/cosqf1.f plus dependencies</a>
+
+file	<a href="/fftpack/ezfft1.f">fftpack/ezfft1.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/ezfft1.f">fftpack/ezfft1.f plus dependencies</a>
+
+file	<a href="/fftpack/fftpack.mail">fftpack/fftpack.mail</a>
+
+file	<a href="/fftpack/passb.f">fftpack/passb.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/passb.f">fftpack/passb.f plus dependencies</a>
+
+file	<a href="/fftpack/passb2.f">fftpack/passb2.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/passb2.f">fftpack/passb2.f plus dependencies</a>
+
+file	<a href="/fftpack/passb3.f">fftpack/passb3.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/passb3.f">fftpack/passb3.f plus dependencies</a>
+
+file	<a href="/fftpack/passb4.f">fftpack/passb4.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/passb4.f">fftpack/passb4.f plus dependencies</a>
+
+file	<a href="/fftpack/passb5.f">fftpack/passb5.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/passb5.f">fftpack/passb5.f plus dependencies</a>
+
+file	<a href="/fftpack/passf.f">fftpack/passf.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/passf.f">fftpack/passf.f plus dependencies</a>
+
+file	<a href="/fftpack/passf2.f">fftpack/passf2.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/passf2.f">fftpack/passf2.f plus dependencies</a>
+
+file	<a href="/fftpack/passf3.f">fftpack/passf3.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/passf3.f">fftpack/passf3.f plus dependencies</a>
+
+file	<a href="/fftpack/passf4.f">fftpack/passf4.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/passf4.f">fftpack/passf4.f plus dependencies</a>
+
+file	<a href="/fftpack/passf5.f">fftpack/passf5.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/passf5.f">fftpack/passf5.f plus dependencies</a>
+
+file	<a href="/fftpack/radb2.f">fftpack/radb2.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/radb2.f">fftpack/radb2.f plus dependencies</a>
+
+file	<a href="/fftpack/radb3.f">fftpack/radb3.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/radb3.f">fftpack/radb3.f plus dependencies</a>
+
+file	<a href="/fftpack/radb4.f">fftpack/radb4.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/radb4.f">fftpack/radb4.f plus dependencies</a>
+
+file	<a href="/fftpack/radb5.f">fftpack/radb5.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/radb5.f">fftpack/radb5.f plus dependencies</a>
+
+file	<a href="/fftpack/radbg.f">fftpack/radbg.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/radbg.f">fftpack/radbg.f plus dependencies</a>
+
+file	<a href="/fftpack/radf2.f">fftpack/radf2.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/radf2.f">fftpack/radf2.f plus dependencies</a>
+
+file	<a href="/fftpack/radf3.f">fftpack/radf3.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/radf3.f">fftpack/radf3.f plus dependencies</a>
+
+file	<a href="/fftpack/radf4.f">fftpack/radf4.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/radf4.f">fftpack/radf4.f plus dependencies</a>
+
+file	<a href="/fftpack/radf5.f">fftpack/radf5.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/radf5.f">fftpack/radf5.f plus dependencies</a>
+
+file	<a href="/fftpack/radfg.f">fftpack/radfg.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/radfg.f">fftpack/radfg.f plus dependencies</a>
+
+file	<a href="/fftpack/rfftb1.f">fftpack/rfftb1.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/rfftb1.f">fftpack/rfftb1.f plus dependencies</a>
+
+file	<a href="/fftpack/rfftf1.f">fftpack/rfftf1.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/rfftf1.f">fftpack/rfftf1.f plus dependencies</a>
+
+file	<a href="/fftpack/rffti1.f">fftpack/rffti1.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/rffti1.f">fftpack/rffti1.f plus dependencies</a>
+
+file	<a href="/fftpack/sint1.f">fftpack/sint1.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/sint1.f">fftpack/sint1.f plus dependencies</a>
+
+file	<a href="/fftpack/test.f">fftpack/test.f</a>  <a href="/cgi-bin/netlibget.pl/fftpack/test.f">fftpack/test.f plus dependencies</a>
+
+</pre>
+</body>
+</html>

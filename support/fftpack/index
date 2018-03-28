@@ -1,0 +1,154 @@
+file	fftpack/links.html
+for	related resources
+
+file	fftpack/doc
+for	user guide for fftpack
+
+file	fftpack/fft.c
+for	C translation of much of fftpack
+prec	single
+by	Monty <xiphmont@mit.edu>
+gams	J1a
+lang	C
+
+file	fftpack/cfftb.f
+gams	J1a2
+for	FFT, backward transform (synthesis) of a complex Fourier coefficient array
+
+file	fftpack/cfftf.f
+gams	J1a2
+for	FFT, forward transform of a complex periodic sequence
+
+file	fftpack/cosqf.f
+gams	J1a3
+for	FFT, forward cosine transform with odd wave numbers
+
+file	fftpack/cost.f
+gams	J1a3
+for	FFT, discrete cosine transform of a real even sequence
+
+file	fftpack/ezfftb.f
+gams	J1a1
+for	FFT, backward transform (synthesis) of a real Fourier coefficient array, simplified and slower version of (fftpack/rfftb)
+
+file	fftpack/ezfftf.f
+gams	J1a1
+for	FFT, forward transform of a real periodic sequence, simplified and slower version of (fftpack/rfftf)
+
+file	fftpack/rfftb.f
+gams	J1a1
+for	FFT, backward transform (synthesis) of a real Fourier coefficient array
+
+file	fftpack/rfftf.f
+gams	J1a1
+for	FFT, forward transform of a real periodic sequence
+
+file	fftpack/sinqb.f
+gams	J1a3
+for	FFT, backward sine transform (synthesis) with odd wave numbers
+
+file	fftpack/sinqf.f
+gams	J1a3
+for	FFT, forward sine transform with odd wave numbers
+
+file	fftpack/sint.f
+gams	J1a3
+for	FFT, discrete sine transform of a real odd sequence
+
+file	fftpack/cffti.f
+gams	-0-
+for	initialization routine for (fftpack/cfftf) and (fftpack/cfftb)
+
+file	fftpack/cosqb.f
+gams	J1a3
+for	FFT, backward cosine transform (synthesis) with odd wave numbers
+
+file	fftpack/cosqi.f
+gams	-0-
+for	initialization routine for (fftpack/cosqf) and (fftpack/cosqb)
+
+file	fftpack/ezffti.f
+for	initialization routine for (fftpack/ezfftf) and (fftpack/ezfftb)
+
+file	fftpack/costi.f
+gams	-0-
+for	initialization routine for (fftpack/cost)
+
+file	fftpack/rffti.f
+gams	J1a1
+for	initialization routine for (fftpack/rfftf) and (ftpack/rfftb)
+
+file	fftpack/sinqi.f
+gams	-0-
+for	initialization routtine for (fftpack/sinqf) and (fftpack/sinqb)
+
+file	fftpack/sinti.f
+gams	-0-
+for	initialization routine for (fftpack/sint)
+
+file	fftpack/cfftb1.f
+
+file	fftpack/cfftf1.f
+
+file	fftpack/cffti1.f
+
+file	fftpack/changes
+
+file	fftpack/cosqb1.f
+
+file	fftpack/cosqf1.f
+
+file	fftpack/ezfft1.f
+
+file	fftpack/fftpack.mail
+
+file	fftpack/passb.f
+
+file	fftpack/passb2.f
+
+file	fftpack/passb3.f
+
+file	fftpack/passb4.f
+
+file	fftpack/passb5.f
+
+file	fftpack/passf.f
+
+file	fftpack/passf2.f
+
+file	fftpack/passf3.f
+
+file	fftpack/passf4.f
+
+file	fftpack/passf5.f
+
+file	fftpack/radb2.f
+
+file	fftpack/radb3.f
+
+file	fftpack/radb4.f
+
+file	fftpack/radb5.f
+
+file	fftpack/radbg.f
+
+file	fftpack/radf2.f
+
+file	fftpack/radf3.f
+
+file	fftpack/radf4.f
+
+file	fftpack/radf5.f
+
+file	fftpack/radfg.f
+
+file	fftpack/rfftb1.f
+
+file	fftpack/rfftf1.f
+
+file	fftpack/rffti1.f
+
+file	fftpack/sint1.f
+
+file	fftpack/test.f
+

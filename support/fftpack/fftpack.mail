@@ -1,0 +1,14 @@
+* from research!ucbvax!hao!@su-score.arpa,@csnet-relay.arpa:scd-sa!pauls  wed apr 24 18:49:21 1985
+* received: from su-score.arpa by ucb-vax.arpa  wed, 24 apr 85 18:49:21 pst
+* received: from csnet-relay by su-score.arpa wed 24 apr 85 18:48:16-pst
+* received: from boulder by csnet-relay.csnet 24 apr 85 21:28 est
+* received: by boulder.ucboulder (4.30/4.7) wed, 24 apr 85 01:16:47 mst
+* received: by hao.ncar (4.12/4.7) tue, 23 apr 85 22:47:11 mst
+* date:  23 apr 85 22:40:48 mst
+* from: scd-sa!pauls <hao!ucbvax!@csnet-relay.arpa:@boulder.csnet:scd-sa!pauls (paul swarztrauber 303-497-1220)>
+* subject: test fftpack
+* to: na.grosse@su-score.arpa
+* cc: 
+* 
+* eric - here's the test program - as usual the output should be
+* all small numbers -  good luck!      paul

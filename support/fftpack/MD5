@@ -1,0 +1,74 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+
+# netlib-bl master Fri Apr 17 03:31:39 EDT 1998
+# http://cm.bell-labs.com/netlib/crc/netlib-bl.html
+2ohLnEnHZAG1Lz99Jt9DIg	.depend
+P5LOMl+aCWQQp8R3PkoAfg	.master
+wmwVgO+Zoxyjr+VLlbMQyg	Makefile
+1t2ifInVcLUmNTpu1wGzIw	cfftb.f
+urYSktLpQ+i1DCbu1GKxYg	cfftb1.f
+2/iAIJOEnnDdWtO9AHXjdA	cfftf.f
+y7wz5VeuWvPvZJLGpGEvMA	cfftf1.f
+8rebmJXYjuzkKt3vhJ3f6g	cffti.f
+jv19V+shvX4TO2lRmpJenw	cffti1.f
+6sGi5eXlmuu5swrvb1QhPQ	changes
+OrkA0PQyrVD6VexXW4uh9w	cosqb.f
+/PaUni5NiLDhRnlHAA520A	cosqb1.f
+KYbb4F+4J9f9Hd/dpsGAUg	cosqf.f
+n6aMdOROAmQxS7l1Lx0+sQ	cosqf1.f
++qnGS5XlSd0Spgs+8G06Ew	cosqi.f
+XHnYTZrThk12vup1WE1ZLw	cost.f
+TravKbjb7lqKn9aKLJzOQg	costi.f
+P+Jlpa++zcVRDPN3xFQSDA	doc
+1IOO1bqXEegch7nOiVA4tQ	ezfft1.f
+/gFAZlGgHkgB9vYPWbnxEw	ezfftb.f
+VtFfXqDmd+OVMk+qjDGStg	ezfftf.f
+F2N8ME8QY3O5sscgb7Bquw	ezffti.f
+j2kFRLW7qY9TUrI0cvvDyw	fft.c
+G8FgLJ6j5Hh32NLB8Y82+g	fftpack.mail
+uPO8jS5SYV0mLwjEpWh7Yw	index
+xlY96RLZ6DtQJQRjLUvB2w	links.html
+b/6CIR1wkpcxpf+V/pMvmQ	passb.f
+MtOAfs5f71pGVrecNUGf6w	passb2.f
+hzWlktyyEj4cC213nKx7IQ	passb3.f
+NbhDB6NLsPadEaG3PqwpBQ	passb4.f
+5FDs2dJxjb99MDPSpu3Y0Q	passb5.f
+iEG7TKvAQFNPXA++UO+u7w	passf.f
+psnJy1FWtXBqMrzzw3+8lA	passf2.f
+JvJggKQr7LCJ6YzcsRmYDA	passf3.f
+xQuAxmt97aLqgrnJwoBSiQ	passf4.f
+Zsm7A9JZw+1KzZIxW/Xnzg	passf5.f
+2ptsgaw6ntXJ59OnldK+/A	permission
+RsZYPnGuUCIT2j6qXpWgiQ	radb2.f
+YaRTrve8rflgKHnAUQO1Zg	radb3.f
+/QiKObkEhL+3D0pii7l0UA	radb4.f
+M6mH5le3ztFpdSXHQ17QqA	radb5.f
+qCAfWzoBD0m4AsDeFc6R2w	radbg.f
+QokuXMXFtEVjV33C5+rdfA	radf2.f
+76Rxt8Ij8lGmQz66AQPtCA	radf3.f
+8j2MlxCxKwdWagWlaDZQIQ	radf4.f
+Cp2yTLHtFcdjjQqcWlGpLw	radf5.f
+U4/GvxmnTbNisYgcjL7blw	radfg.f
+CKIYfBteSLJ2S0pC31DIFQ	rfftb.f
+LLpdmBzeAL+3xmnW449kfw	rfftb1.f
+ofppAtNemNVB0PzaRKFwAQ	rfftf.f
+AY4V/M5ZppxE6/h00i1Fgg	rfftf1.f
+ua/KRFKKipDeVxcR2ZvrYw	rffti.f
+PVs3u09yr/mVp0xiFlWyuA	rffti1.f
+Pfdj4Uly3eITsPZTZuQEdQ	sinqb.f
+MkuHZPdHdJYgItdj+Bxc9A	sinqf.f
+VkbPAxHT1XeIhxS+mEePaQ	sinqi.f
+lI6F0u5HpD44+3aOAzxJVQ	sint.f
+xAaaDhWZi3ILfxAfSVjaWw	sint1.f
+3b2f9PP8Z8OrqooRKi29Xg	sinti.f
+Gt3YQbl4SnlwhzfpmC4fSg	test.f
+
+-----BEGIN PGP SIGNATURE-----
+Version: 2.6.2
+
+iQCVAwUBNTcFXb5pvxO9gjtZAQF3XQP+KCQU4q0KYQlPnEomuOnPoJXbp3J6tgTa
+Y0RDseehaAj3kmejsh389/EvMue62T/7TWmuz1Qh0I2wU3MMNXyHKwCq1My8yHFC
+4zb0D0yS81eQ4ks2SjU743Zb2m4lQ2mF53VSh3seRxWZrMQiE0n0Fhn2/X2jHFOd
+3to0gi5smHo=
+=ds8t
+-----END PGP SIGNATURE-----
