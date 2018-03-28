@@ -4,7 +4,7 @@ Cassini RPWS data processing code, both working applications and reference archi
 This repository comprises the core of the Cassini Radio and Plasma Wave Science (RPWS) team routine production software.
 The software was initially developed on Sun/SPARC SunOS 2.5 and was updated to Oracle/SPARC Solaris 10 through
 the life of the project.
-Some applications were also ported to be platform independent and will run on X86/Linux platforms.
+Some applications were also ported to be platform independent and will run on X86_64/Linux platforms.
 Rough installation instructions follow:
 
 ## Environment
