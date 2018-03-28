@@ -1,0 +1,2 @@
+This directory contain Willy Robison's command line flags library.  It's used
+extensively for Cassini GSE programs.  See install.txt for more info.

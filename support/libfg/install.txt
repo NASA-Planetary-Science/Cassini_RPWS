@@ -1,0 +1,28 @@
+1. Setup the install location
+-----------------------------
+
+The library will be installed under the directory specified by the environment
+variable named PREFIX.  By defauld PREFIX=$HOME, set it to a different location
+if you like.  For example to install into the cassini solaris programs area:
+
+  $ export PREFIX=/opt/project/cassini/SunOS.sparc
+  
+The library will go into:  $PREFIX/lib/libfg.a
+The header will go into:   $PREFIX/include/fg.h
+
+
+2. Build the Software
+---------------------
+
+  $ gmake
+  
+
+3. Install the Software
+-----------------------
+
+  $ gmake install
+  
+  
+ 
+
+   
