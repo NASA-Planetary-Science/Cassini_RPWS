@@ -77,7 +77,7 @@ The following environment variables must be set:
 The RPWS Core software depends on these custom libraries and tools which should first be installed using the
 same environment variables stated above.
 
-  - **PDS tools** - Tools for PDS label parsing and volume checking.  
+  - **PDS tools** - Tools for PDS label parsing and volume checking.  (optional)  
     https://pds.jpl.nasa.gov/tools/pds-tools-package.shtml 
  
   - **Giferator** - Larry's das1 gifferator.  
