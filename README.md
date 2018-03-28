@@ -1,7 +1,7 @@
 # Cassini_RPWS_core Installation
 Cassini RPWS data processing code, both working applications and reference archives
 
-This software has been tested on Solaris 10.  Much of the code depends on Big-Endian (Most Significant Byte First) byte order and 32-bit pointer lengths to operate correctly.  To install the software:
+This software has been tested on Solaris 10.  Much of the code under the l2rpws directory depends on Big-Endian (Most Significant Byte First) byte order and 32-bit pointer lengths to operate correctly, with the exception of l2rpws/src/castlm which is portable.  To install the software:
 
 
 Setup your environment
