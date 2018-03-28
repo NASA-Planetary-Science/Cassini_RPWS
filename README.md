@@ -77,16 +77,16 @@ The following environment variables must be set:
 The RPWS Core software depends on these custom libraries and tools which should first be installed using the
 same environment variables stated above.
 
-  - **PDS tools** - Tools for PDS label parsing and volume checking:
+  - **PDS tools** - Tools for PDS label parsing and volume checking.  
     https://pds.jpl.nasa.gov/tools/pds-tools-package.shtml 
  
-  - **Giferator** - Larry's das1 gifferator:
+  - **Giferator** - Larry's das1 gifferator.  
     git clone https://github.com/das-developers/das1-giferator.git
 
-  - **liddas2** - The Das2 server side C-library
+  - **libdas2** - The Das2 server side C-library.  
 	 git clone https://github.com/das-developers/libdas2.git
 
-  - **pspice** - Python spice wrappers used by the PDS volume creation software:
+  - **pspice** - Python spice wrappers used by the PDS volume creation software.  
     git clone https://github.com/das-developers/pspice.git
 
 ## Build
