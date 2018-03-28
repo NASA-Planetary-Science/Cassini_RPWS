@@ -1,0 +1,215 @@
+#/usr/bin/env python
+
+import sys
+import lowrate, cssrpws, mag
+import das, qstream
+from struct import Struct
+from collections import namedtuple as _namedtuple
+from argparse import ArgumentParser,FileType
+
+
+_output_type = _namedtuple('OutputType',
+	'write_header write_packet_descriptor write_packets')
+
+def dastime(sTime):
+	return das.ttime(das.parsetime(sTime))
+
+def configureArgumentParser():
+	qstream_type = _output_type(
+		write_header=write_qstream_header,
+		write_packet_descriptor=write_qstream_packet_descriptor,
+		write_packets=write_binary_packets)
+
+	parser = ArgumentParser()
+	parser.description='''\
+		pds reader for Cassini RPWS low rate data
+		The times specified can be in any format allowed by daslib's parsetime
+
+		    Examples: 2011-02-26T12:01:32.123
+		             '2011-02-26 12:01:32.123'
+		              2011-057T01:23:56.726
+		             '2011-057 01:23:56.726'
+'''
+
+	parser.add_argument('--pds-root',dest='pds_root',
+		help='The root directory of the pds volume',
+		default='/opt/project/cassini/pds')
+	parser.add_argument('--mag-root',dest='mag_root',
+		help='The directory containing mag data',
+		default='/opt/project/cassini/mag/SC')
+	parser.add_argument('dStart', type=dastime, metavar='start_time',
+		help='The beginning of the requested interval')
+	parser.add_argument('dEnd', type=dastime, metavar='end_time',
+		help='The end of the requested interval')
+	parser.add_argument('-o', '--outfile', dest='fOut', type=FileType('w'),
+		help='The file the data will be written to (defaults to stdout',
+		default=sys.stdout)
+	output_type=parser.add_mutually_exclusive_group()
+	output_type.add_argument('--qstream',action='store_const',
+		dest='output_type',const=qstream_type)
+	output_type.add_argument('--das2stream',action='store_const',
+		dest='output_type',const=None) # finish this later
+
+	parser.set_defaults(output_type=qstream_type)
+
+	return parser
+
+def main(argv):
+
+	parser = configureArgumentParser()
+
+	args = parser.parse_args(argv)
+	dStart = args.dStart
+	dEnd = args.dEnd
+	sPdsRoot = args.pds_root
+	sMagRoot = args.mag_root
+	fOut = args.fOut
+	lReceivers = ['LFR','MFR','MFDR','HFR']
+
+	args.output_type.write_header(dStart,dEnd,fOut)
+
+	lMagRecords = mag.magData(sMagRoot,dStart,dEnd)
+
+	for ldFreq, table in lowrate.getdata(sPdsRoot,dStart,dEnd,lReceivers):
+		pptable = cssrpws.magParallelPerpendicular(lMagRecords, table)
+		iPacketTag=args.output_type.write_packet_descriptor(ldFreq,fOut)
+		args.output_type.write_packets(pptable,iPacketTag,fOut)
+	if fOut != sys.stdout:
+		fOut.close()
+
+	qstream.header(sys.stdout)
+	qstream.packetDescriptor(sys.stdout, len(freq))
+
+	sLineFormat = ''.join(['%23s']+[' %10.3f']*len(freq)+['\n'])
+
+	print repr(sLineFormat)
+
+	return 0
+
+def write_qstream_header(dStart,dEnd,fOut):
+	'''\
+	Write an xml document representing the qstream header.
+	The xml document is preceded by '[00]' and the length of the xml document
+	encoded in 6 byte ascii field.
+	Following the header is another xml document defining the join dimension
+	of the dataset preceded by '[01]' and a 6 byte length field.
+	'''
+	sHeader='''<stream dataset_id="parallel"/>\n'''
+	fOut.write("[00]{:06d}".format(len(sHeader)))
+	fOut.write(sHeader)
+	sJoin='''
+<packet>
+	<qdataset id="parallel" rank="3">
+		<values join="para"/>
+		<properties>
+			<property name="JOIN_0" type="String" value="DEPEND_1"/>
+		</properties>
+	</qdataset>
+	<qdataset id="perpendicular" rank="3">
+		<values join="perp"/>
+		<properties>
+			<property name="JOIN_0" type="String" value="DEPEND_1"/>
+		</properties>
+	</qdataset>
+</packet>
+'''
+	fOut.write("[01]{:06d}".format(len(sJoin)))
+	fOut.write(sJoin)
+
+_qstream_data_num = lowrate._id_gen(max=50)
+def write_qstream_packet_descriptor(ldFrequencies,fOut):
+	'''\
+	Write an xml document defining a particular packet format.
+	This method also calls writes the dataset containing the
+	frequency channels for this packet type.
+	'''
+
+	iDataNum = _qstream_data_num.next()
+	iTagNum = iDataNum*2
+
+	sFreqDesc='''
+<packet>
+	<qdataset id="freq_{dataNum:d}" rank="1">
+		<properties>
+			<property name="UNITS" type="units" value="hertz"/>
+		</properties>
+		<values encoding="float" length="{itemCount:d}"/>
+	</qdataset>
+</packet>
+'''.format(dataNum=iDataNum,itemCount=len(ldFrequencies))
+	fOut.write('[{:02d}]{:06d}'.format(iTagNum,len(sFreqDesc)))
+	fOut.write(sFreqDesc)
+	sStructFmt = '>{:d}f'.format(len(ldFrequencies))
+	try:
+		sData = struct.pack(sStructFmt,*ldFrequencies)
+	except struct.error as e:
+		print ldFrequencies
+		raise e
+
+	fOut.write(':{:02d}:'.format(iTagNum));
+	fOut.write(sData)
+
+	sPacket='''
+<packet>
+	<qdataset id="time_{dataNum:d}" rank="1">
+		<properties>
+			<property name="UNITS" type="units" value="t2000"/>
+			<property name="MONOTONIC" type="Boolean" value="true"/>
+		</properties>
+		<values encoding="double" />
+	</qdataset>
+	<qdataset id="para" joinId="parallel" rank="2">
+		<properties>
+			<property name="DEPEND_0" type="qdataset" value="time_{dataNum:d}"/>
+			<property name="DEPEND_1" type="qdataset" value="freq_{dataNum:d}"/>
+			<property name="QUBE" type="Boolean" value="true"/>
+			<property name="VALID_MIN" type="double" value="0.0"/>
+			<property name="FILL_VALUE" type="double" value="0.0"/>
+		</properties>
+		<values encoding="float" length="{itemCount:d}"/>
+	</qdataset>
+	<qdataset id="perp" joinId="perpendicular" rank="2">
+		<properties>
+			<property name="DEPEND_0" type="qdataset" value="time_{dataNum:d}"/>
+			<property name="DEPEND_1" type="qdataset" value="freq_{dataNum:d}"/>
+	`		<property name="QUBE" type="Boolean" value="true"/>
+			<property name="VALID_MIN" type="double" value="0.0"/>
+			<property name="FILL_VALUE" type="double" value="0.0"/>
+		</properties>
+		<values encoding="float" length="{itemCount:d}"/>
+	</qdataset>
+</packet>
+'''.format(dataNum=iDataNum,itemCount=len(ldFrequencies))
+	fOut.write('[{:02d}]{:06d}'.format(iTagNum,len(sPacket)))
+	fOut.write(sPacket)
+
+	return iPacketId
+
+
+def write_binary_packets(table,iPacketId,fOut):
+	'''\
+	Write a binary packet.
+	The format of the packet will be 4 characters ':XY:' followed by a
+	8 byte big-endian float and a series of 4 byte big-endian floats.
+	XY is a 2 digit number identifying the packet format previously defined
+	on the stream. The 8 byte float is a time value in seconds since
+	2000-01-01T00:00:00.000.  The 4 byte floats are the spectral density
+	measurements for each frequency channel previously defined on the stream.
+	These binary packets are compatible with both qstreams and das2 streams.
+	'''
+	itemCount = len(table[0].lData)
+	if itemCount not in _struct_cache:
+		_struct_cache[itemCount] = struct.Struct('>d{:d}f'.format(itemCount))
+	dataStruct = _struct_cache[itemCount]
+	sTag=':{:02d}:'.format(iPacketId)
+	for rpwsPacket in table:
+		dTime = rpwsPacket.time - T2000_EPOCH
+		lData = rpwsPacket.parallel + rpwsPacket.perpendicular
+		sPacket = dataStruct.pack(dTime,*lData)
+		fOut.write(sTag)
+		fOut.write(sPacket)
+	
+_das2_packet_id=lowrate._id_gen()
+
+if __name__ == "__main__":
+	sys.exit(main(sys.argv[1:]))

@@ -1,0 +1,169 @@
+#!/usr/bin/env python
+
+# $URL: https://saturn.physics.uiowa.edu/svn/cassini/production/devel/l4mag/scripts/mag_vector_rdr $
+# $Revision: 517 $
+
+import sys,os,os.path
+import optparse
+import das2
+from bisect import bisect_left, bisect_right
+
+NAME_FORMAT = "MAG__SC___%4d%03d_%c.TAB"
+
+TIME_FORMAT = "%04d-%03dT%02d:%02d:%06.3f"
+
+DATA_DIRECTORY = "/opt/project/cassini/mag/SC"
+
+def das2Header(sStart, sEnd):
+	header = '''
+<stream>
+  <properties DatumRange:xCacheRange="%s to %s UTC"
+              Datum:xCacheResolution="60 s"
+              Datum:xTagWidth="%d s"
+              String:xLabel="%%{RANGE} SCET"
+              String:title="Cassini Local B Field in Spacecraft Coordinates!c(60 Second Averages)"
+  />
+</stream>
+'''%(sStart,sEnd,120)
+	sys.stdout.write('[00]%06d%s'%(len(header),header))
+
+def das2Packet(options=None):
+	packet = '''
+<packet>
+  <x type="time22" units="t2000"/>
+  <y type="ascii11" name="x" units="nT">
+    <properties yLabel="X!bSC!n" />
+  </y>
+  <y type="ascii11" name="y" units="nT">
+    <properties yLabel="Y!bSC!n" />  
+  </y>
+  <y type="ascii11" name="z" units="nT">
+    <properties yLabel="Z!bSC!n" />  
+  </y>
+  <y type="ascii11" name="total" units="nT">
+    <properties yLabel="|B|!bSC!n" />  
+  </y>
+</packet>
+'''
+	sys.stdout.write('[01]%06d%s'%(len(packet),packet))
+
+def qStreamHeader(sStart, sEnd):
+	header = '''<stream dataset_id="ds_0"/>'''
+	sys.stdout.write('[00]%06d%s'%(len(header),header))
+
+def qStreamPacket(options):
+	joinDescriptor = '''
+<packet>
+	<qdataset id="ds_0" rank="3">
+		<values join="ds_1"/>
+		<properties>
+			<property name="JOIN_0" type="String" value="DEPEND_1"/>
+		</properties>
+	</qdataset>
+</packet>
+'''
+	if not options.bSimple:
+		sys.stdout.write('[02]%06d%s'%(len(joinDescriptor),joinDescriptor))
+
+	labelPacket = '''
+<packet>
+	<qdataset id="ds_4" rank="1">
+		<properties>
+			<property name="UNITS" type="enumerationUnit" value="default[1:x::2:y::3:z::4:total]"/>
+		</properties>
+		<values values="1.0,2.0,3.0,4.0"/>
+	</qdataset>
+</packet>
+'''
+	sys.stdout.write('[03]%06d%s'%(len(labelPacket),labelPacket))
+
+	packet = '''
+<packet>
+	<qdataset id="time_0" rank="1">
+		<properties>
+			<property name="UNITS" type="units" value="t2000"/>
+			<property name="MONOTONIC" type="Boolean" value="true"/>
+		</properties>
+		<values encoding="time22" length=""/>
+	</qdataset>
+	<qdataset id="%s" %s rank="2">
+		<properties>
+			<property name="DEPEND_0" type="qdataset" value="time_0"/>
+			<property name="DEPEND_1" type="qdataset" value="ds_4"/>
+			<property name="QUBE" type="Boolean" value="true"/>
+		</properties>
+		<values encoding="ascii11" length="4"/>
+	</qdataset>
+</packet>
+'''
+	if options.bSimple:
+		packet = packet%('ds_0', '')
+	else:
+		packet = packet%('ds_1', 'joinId="ds_0"')
+	sys.stdout.write('[01]%06d%s'%(len(packet),packet))
+
+def reformatLine(line):
+	fields = line.split()
+	time = fields[0]
+	bx = float(fields[1])
+	by = float(fields[2])
+	bz = float(fields[3])
+	bt = float(fields[4])
+	return ':01:%s %10.3f %10.3f %10.3f %10.3f\n'%(time, bx, by, bz, bt)
+
+def main(argv):
+
+	descriptors = { 'das2' : [das2Header, das2Packet],
+		'qstream' : [qStreamHeader, qStreamPacket] }
+
+	psr = optparse.OptionParser('%prog [options] start_time end_time')
+
+	psr.add_option('-f', '--output-format', dest='sOutputFormat',
+		metavar='[das2|qstream]', help='Output format for the magnetometer'+\
+		' data. das2 for das2streams and qstream for a qdataset stream',
+		action='store', default='das2', type='choice',
+		choices=['das2','qstream'])
+
+	psr.add_option('-s', '--simple', dest='bSimple',
+		help='Output simplified qstream (ignored for das2 format)',
+		action='store_true', default=False)
+
+	(opts,args) = psr.parse_args(argv[1:])
+
+	sStart = args[0]
+	sEnd = args[1]
+
+	lStart = das2.parsetime(sStart)
+	lEnd = das2.parsetime(sEnd)
+
+	sStart = TIME_FORMAT%(lStart[0],lStart[3],lStart[4],lStart[5],lStart[6])
+	sEnd = TIME_FORMAT%(lEnd[0],lEnd[3],lEnd[4],lEnd[5],lEnd[6])
+
+	sStartFile = NAME_FORMAT%(lStart[0],lStart[3],'0')
+	sEndFile = NAME_FORMAT%(lEnd[0],lEnd[3],'_')
+
+	lDataFiles = os.listdir(DATA_DIRECTORY)
+	lDataFiles = [item for item in lDataFiles if item.endswith('.TAB')]
+	
+	lDataFiles.sort()
+
+	lSelectedFiles = lDataFiles[
+		bisect_left(lDataFiles,sStartFile):bisect_right(lDataFiles,sEndFile)]
+
+	sOutputFormat = opts.sOutputFormat
+	
+	descriptors[sOutputFormat][0](sStart, sEnd)
+	descriptors[sOutputFormat][1](opts)
+
+	for f in lSelectedFiles:
+		in_file = open(os.path.join(DATA_DIRECTORY,f))
+		for line in in_file:
+			if line >= sStart and line <= sEnd:
+				line = reformatLine(line)
+				sys.stdout.write(line)
+
+	return 0
+
+if __name__ == '__main__':
+	sys.exit(main(sys.argv))
+

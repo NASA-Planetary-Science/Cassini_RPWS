@@ -1,0 +1,73 @@
+#!/bin/ksh
+
+# Edward West
+#
+# Retrieves Cassini Magnetometer data from the MAPSview website.
+#
+# 2012-11-08, cwp:  Modified to use data directory defined in env var.
+#
+# solaris find is MISSING the oh-so-important and oh-so-useful
+# maxdepth test.
+
+source %(PREFIX)s/setup_env.sh
+umask 0002
+
+find=/opt/local/gnu/bin/find
+
+die() {
+  typeset message=${1:-"Undefined error"}
+  printf "%%s\n" $message
+  exit -1
+}
+
+if [ "$MAG_DATA" = "" ]; then
+	die "MAG_DATA environment variable not defined"
+fi
+
+wget=/local/bin/wget
+remote_db='http://mapsview.engin.umich.edu/data/MAG/'
+
+username='eew@space.physics.uiowa.edu'
+passwd='gl0cy1DE'
+wget_opt='-nv -r -N -np'
+
+if [ ! -d ${MAG_DATA} ] ; then
+  if ! mkdir ${MAG_DATA}; then
+    die "Couldn't create directory ${MAG_DATA}"
+  fi
+fi
+
+
+cd $MAG_DATA;
+
+if [[ ! -d .mirror ]]; then
+  rm -f .mirror
+  mkdir .mirror
+fi
+
+cd .mirror || die "Couldn't cd to $(pwd)/.mirror"
+
+$wget $wget_opt -R '*%%0D,*%%0d' --http-user=$username --http-passwd=$passwd $remote_db
+
+printf 'Removing unnecessary files (index.html, etc)\n';
+
+$find . \! -type d \! -name '*.TAB' \! -name '*.HDR' \! -name '.' \
+	-print -exec rm {} \;
+
+printf 'Changing file permissions\n';
+find . \! -perm -220 -print -exec chmod a+r,g+w \{\} \;
+
+cd ${MAG_DATA} || die "Couldn't cd to ${MAG_DATA}"
+
+# Support the poorly chosen old-style flat directory structure.
+printf 'Hard linking SC data into base mag directory.\n'
+local_path='.mirror/mapsview.engin.umich.edu/data/MAG'
+
+if [ ! -h ${MAG_DATA}/SC ] ; then
+	ln -s ${local_path}/SC SC || die "Couldn't create symlink to ${local_path}/SC"
+fi
+
+#Make sure I'm using the ln I want to use.
+test -e /local/gnu/bin/ln && alias ln=/local/gnu/bin/ln
+
+ln -f ${MAG_DATA}/SC/* ${MAG_DATA}

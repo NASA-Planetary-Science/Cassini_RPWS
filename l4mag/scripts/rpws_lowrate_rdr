@@ -1,0 +1,431 @@
+#!/usr/bin/env python
+
+import sys, os
+import struct
+import cssmag.cssdas as das
+import cssmag.cssrpws as rpws
+import re
+from bisect import bisect_left as _bisect_left, bisect_right as _bisect_right
+import argparse 
+from collections import namedtuple as _namedtuple
+
+SECONDS_IN_DAY = 86400
+EPOCH = das.ttime(das.parsetime('1958-01-01T00:00:00Z'))
+T2000_EPOCH = das.ttime(das.parsetime('2000-01-01T00:00:00Z'))
+
+_output_type = _namedtuple('OutputType',
+	'write_header write_packet_descriptor write_packets')
+
+_recOrder = {'CAL':0, 'LFR':1, 'MFR':2, 'MFDR':3, 'HFR':4, 'MSC':5}
+_reFilename = re.compile('^T(?P<date>[0-9]{7})_'
+	+ '(?P<rec>CAL|LFR|MFR|MFDR|HFR|MSC)'
+	+ '(?P<num>[0-9]+)\\.(LBL|DAT)$')
+
+LowRateMode = _namedtuple('LowRateMode', 'frequencies spectralDensities timeOffsets')
+
+def filecompare(sFileA, sFileB):
+	matchA = _reFilename.match(sFileA)
+	matchB = _reFilename.match(sFileB)
+	if not matchA or not matchB:
+		return cmp(sFileA, sFileB)
+	dateA = matchA.group('date')
+	dateB = matchB.group('date')
+	if dateA != dateB:
+		return cmp(dateA,dateB)
+	recA = matchA.group('rec')
+	recB = matchB.group('rec')
+	if recA != recB:
+		return _recOrder[recA] - _recOrder[recB]
+	numA = int(matchA.group('num'))
+	numB = int(matchB.group('num'))
+	return numA - numB
+
+def readFile(sPath):
+	f = open(sPath)
+
+	lrFullFmt = struct.Struct('>8s2I')
+
+	header = lrFullFmt.unpack(f.read(16))
+
+	if header[0] != 'CORPWS01':
+		f.close()
+		raise ValueError('%s is not a cassini data file'%sPath)
+
+
+	iRecordSize = header[1]
+	iRecordCount = header[2]
+
+	recordFormat = struct.Struct('>6xHIc2xc%df'%((iRecordSize-16)/4))
+
+	#Read rest of LRFULL table
+	f.read(iRecordSize - 16)
+	
+	#Read time offset table
+	sRecord = f.read(iRecordSize)
+	timeOffsets = recordFormat.unpack(sRecord)
+	timeOffsets = timeOffsets[4:]
+	
+
+	#Read frequency table
+	sRecord = f.read(iRecordSize)
+	frequencies = recordFormat.unpack(sRecord)
+	frequencies = frequencies[4:]
+
+	#Read spectra data
+	specDenTable = []
+	for iRecordNum in range(3,iRecordCount):
+		sRecord = f.read(iRecordSize)
+		specDenRow = recordFormat.unpack(sRecord)
+		fTime = specDenRow[0]*SECONDS_IN_DAY + specDenRow[1] / 1000.0 + EPOCH
+		flags = ord(specDenRow[2])
+		antenna = ord(specDenRow[3])
+		if antenna not in [0,1,2,3]:
+			continue
+		metaData = rpws.MetaData(flags,flags,flags,antenna)
+		specDenTable.append(rpws.RpwsRecord(fTime,metaData,specDenRow[4:]))
+
+	f.close()
+
+	return LowRateMode(frequencies, specDenTable, timeOffsets)
+
+def dbg_out(vars, keys=None):
+	if keys == None:
+		keys = vars.keys()
+		keys.sort()
+	keys = filter(lambda x: not x.startswith('__'), keys)
+	for k in keys:
+		sys.stderr.write('{}: {}\n'.format(k,vars[k]))
+
+
+def listFiles(sPdsRoot, dStart, dEnd, lSections=["LFR","MFR","MFDR","HFR"]):
+	'''Returns a list of files for a particular interval and set of detectors'''
+
+	sPathFmt = 'T{0.year}{1}XX/T{0.year}{0.yday:03d}'
+	sPatternFmt = 'T{0.year}{0.yday:03d}_({1})[0-9]+.DAT'
+	
+	sArchivePath = sPdsRoot
+	sLowRatePath = 'DATA/RPWS_LOW_RATE_FULL'
+
+	dasTimeStart = das.emitt(dStart)
+	dasTimeEnd = das.emitt(dEnd)
+
+	dasTime = dasTimeStart._replace(hour=0,min=0,sec=0.0)
+
+	reInstSection = re.compile('|'.join(lSections))
+
+	lResult = []
+
+	sSectionsRe = '|'.join(lSections)
+
+	while dasTime < dasTimeEnd:
+		sDayDir = sPathFmt.format(dasTime, dasTime.yday/100)
+		sDayDir = os.path.join(sArchivePath,sLowRatePath,sDayDir)
+
+		if os.path.isdir(sDayDir):
+			reFilename = re.compile(sPatternFmt.format(dasTime, sSectionsRe))
+			for sFile in sorted(os.listdir(sDayDir),cmp=filecompare):
+				if reFilename.search(sFile):
+					yield os.path.join(sDayDir,sFile)
+	
+		dasTime = das.tnorm(dasTime._replace(mday=dasTime.mday+1))
+
+
+def getdata(sPdsRoot,dStart, dEnd, lSections):
+	for sPath in listFiles(sPdsRoot,dStart, dEnd, lSections):
+		yield readFile(sPath)
+		
+def dastime(s):
+	'''Convenience function to use as an ArgumentParser type'''
+	return das.ttime(das.parsetime(s))
+
+def configureArgumentParser():
+
+	qstream_type = _output_type(
+		write_header=write_qstream_header,
+		write_packet_descriptor=write_qstream_packet_descriptor,
+		write_packets=write_binary_packets)
+
+	das2_type = _output_type(
+		write_header=write_das2_header,
+		write_packet_descriptor=write_das2_packet_descriptor,
+		write_packets=write_binary_packets)
+
+	parser = argparse.ArgumentParser()
+	parser.description='''\
+		pds reader for Cassini RPWS low rate data
+		The times specified can be in any format allowed by daslib's parsetime
+
+		    Examples: 2011-02-26T12:01:32.123
+		             '2011-02-26 12:01:32.123'
+		              2011-057T01:23:56.726
+		             '2011-057 01:23:56.726'
+'''
+
+	parser.add_argument('--pds-root',dest='pds_root',
+		help='The root directory of the pds volume',
+		default='/opt/project/cassini/pds')
+	parser.add_argument('dStart', type=dastime, metavar='start_time',
+		help='The beginning of the requested interval')
+	parser.add_argument('dEnd', type=dastime, metavar='end_time',
+		help='The end of the requested interval')
+	parser.add_argument('-o', '--outfile', dest='fOut',
+		type=argparse.FileType('w'), default=sys.stdout,
+		help='The file the data will be written to (defaults to stdout')
+	
+	output_type=parser.add_mutually_exclusive_group()
+	output_type.add_argument('--qstream',action='store_const',
+		dest='output_type',const=qstream_type)
+	output_type.add_argument('--das2stream',action='store_const',
+		dest='output_type',const=das2_type) 
+
+	parser.set_defaults(output_type=qstream_type)
+
+	return parser
+
+antennaLabels = {0:'Ex',4:'Bx',8:'Hf',1:'Eu',5:'By',11:'Lp',
+	2:'Ev',6:'Bz',3:'Ew'}
+
+def fileSummary(sPath):
+	ldFrequencies, lRecords = readFile(sPath)
+	ldFrequencies = sorted(ldFrequencies)
+	lRecords.sort(key=lambda x:x.time)
+
+	sFilename = os.path.basename(sPath)
+	sStart = das.formattime(lRecords[0].time)
+	sEnd = das.formattime(lRecords[-1].time)
+	antennas = set()
+	for record in lRecords:
+		antennas.add(antennaLabels[record.metaData.antenna])
+	
+	return dict(
+		fileName=sFilename,
+		timeRange=( sStart, sEnd ),
+		frequencyRange=( ldFrequencies[0], ldFrequencies[-1] ),
+		antennas=antennas
+	)
+
+def main(argv):
+
+	parser = configureArgumentParser()
+
+	args = parser.parse_args(argv)
+
+	dStart = args.dStart
+	dEnd = args.dEnd
+	sRoot = args.pds_root
+	fOut = args.fOut
+	lReceivers = ["LFR","MFR","MFDR","HFR"]
+	#lReceivers = ["HFR"]
+
+	args.output_type.write_header(dStart,dEnd,args.fOut)
+		
+	for ldFreq, table, offsets in getdata(sRoot,dStart,dEnd,lReceivers):
+		iPacketTag=args.output_type.write_packet_descriptor(ldFreq,fOut)
+		args.output_type.write_packets(table,iPacketTag,args.fOut)
+	if args.fOut != sys.stdout:
+		args.fOut.close()
+
+	return 0
+
+
+
+
+############################################################################
+# ID GENERATOR FOR das2 STREAMS AND QSTREAMS
+############################################################################
+def _id_gen(min=1,max=100):
+	while True:
+		for id in range(min,max):
+			yield id
+
+############################################################################
+# QSTREAM OUPUT ROUTINES
+############################################################################
+
+def write_qstream_header(dStart, dEnd, fOut):
+	'''\
+	Write an xml document representing the qstream header.
+	The xml document is preceded by '[00]' and the length of the xml document
+	encoded in 6 byte ascii field.
+	Following the header is another xml document defining the join dimension
+	of the dataset preceded by '[01]' and a 6 byte length field.
+	'''
+	sHeader='''<stream dataset_id="lowRate" />\n'''
+	fOut.write("[00]{:06d}".format(len(sHeader)))
+	fOut.write(sHeader)
+	sJoin='''
+<packet>
+	<qdataset id="lowRate" rank="3">
+		<values join="lr" />
+		<properties>
+			<property name="JOIN_0" type="String" value="DEPEND_1" />
+		</properties>
+	</qdataset>
+</packet>
+'''
+	fOut.write("[01]{:06d}".format(len(sJoin)))
+	fOut.write(sJoin)
+
+_struct_cache = {}
+def write_binary_packets(table,iPacketId,fOut):
+	'''\
+	Write a binary packet.
+	The format of the packet will be 4 characters ':XY:' followed by a
+	8 byte big-endian float and a series of 4 byte big-endian floats.
+	XY is a 2 digit number identifying the packet format previously defined
+	on the stream. The 8 byte float is a time value in seconds since
+	2000-01-01T00:00:00.000.  The 4 byte floats are the spectral density
+	measurements for each frequency channel previously defined on the stream.
+	These binary packets are compatible with both qstreams and das2 streams.
+	'''
+	itemCount = len(table[0].data)
+	if itemCount not in _struct_cache:
+		_struct_cache[itemCount] = struct.Struct('>d{:d}f'.format(itemCount))
+	dataStruct = _struct_cache[itemCount]
+	sTag=':{:02d}:'.format(iPacketId)
+	for rpwsPacket in table:
+		dTime = rpwsPacket.time - T2000_EPOCH
+		sPacket = dataStruct.pack(dTime,*rpwsPacket.data)
+		fOut.write(sTag)
+		fOut.write(sPacket)
+	
+def write_qstream_frequency_dataset(ldFrequencies,iDataNo,fOut):
+	'''\
+	Write an xml document and a data packet that encodes the frequency
+	channels for a particular packet type.
+	'''
+	sDesc='''
+<packet>
+	<qdataset id="freq_{dataNo:d}" rank="1">
+		<properties>
+			<property name="UNITS" type="units" value="hertz" />
+			<property name="SCALE_TYPE" type="String" value="log" />
+		</properties>
+		<values encoding="float" length="{itemCount:d}" />
+	</qdataset>
+</packet>
+'''.format(dataNo=iDataNo,itemCount=len(ldFrequencies))
+	iTagNo = iDataNo*2
+	fOut.write('[{:02d}]{:06d}'.format(iTagNo,len(sDesc)))
+	fOut.write(sDesc)
+	sStructFmt = '>{:d}f'.format(len(ldFrequencies))
+	try:
+		sData = struct.pack(sStructFmt,*ldFrequencies)
+	except struct.error as e:
+		print ldFrequencies
+		raise e
+
+	fOut.write(':{:02d}:'.format(iTagNo));
+	fOut.write(sData)
+
+_qstream_data_no = _id_gen(max=50)
+def write_qstream_packet_descriptor(ldFrequencies,fOut):
+	'''\
+	Write an xml document defining a particular packet format.
+	This method also calls write_qstream_frequency_dataset to
+	output the frequency channels for this packet type.
+	'''
+	iDataNo = _qstream_data_no.next()
+	write_qstream_frequency_dataset(ldFrequencies,iDataNo,fOut)
+	sPacket='''
+<packet>
+	<qdataset id="time_{dataNo:d}" rank="1">
+		<properties>
+			<property name="UNITS" type="units" value="t2000" />
+			<property name="MONOTONIC" type="Boolean" value="true" />
+		</properties>
+		<values encoding="double" />
+	</qdataset>
+	<qdataset id="lr" joinId="lowRate" rank="2">
+		<properties>
+			<property name="DEPEND_0" type="qdataset" value="time_{dataNo:d}" />
+			<property name="DEPEND_1" type="qdataset" value="freq_{dataNo:d}" />
+			<property name="QUBE" type="Boolean" value="true" />
+			<property name="VALID_MIN" type="double" value="0.0" />
+			<property name="FILL_VALUE" type="double" value="0.0" />
+			<property name="SCALE_TYPE" type="String" value="log" />
+		</properties>
+		<values encoding="float" length="{itemCount:d}" />
+	</qdataset>
+</packet>
+'''.format(dataNo=iDataNo,itemCount=len(ldFrequencies))
+	iTagNo = iDataNo*2+1
+	fOut.write('[{:02d}]{:06d}'.format(iTagNo,len(sPacket)))
+	fOut.write(sPacket)
+
+	return iTagNo
+
+
+############################################################################
+# das2 STREAM OUPUT ROUTINES
+############################################################################
+def write_das2_header(dStart, dEnd, fOut):
+	sStart = das.formattime(dStart)
+	sEnd = das.formattime(dEnd)
+	sHeader = '''
+<stream version="2.2">
+	<properties DatumRange:xCacheRange="{} to {} UTC"
+               Datum:xTagWidth="158 s"
+					String:xLabel="%{{RANGE}} SCET"
+               DatumRange:yRange="1.0 to 2e7 Hz"
+					String:yScaleType="log"
+					String:yLabel="Frequency (Hz)"
+					DatumRange:zRange="1e-18 to 1e-6 V**2 m**-2 Hz**-1"
+					String:zScaleType="log"
+					String:zLabel="Spec. Dens. (V!a2!n m!a-2!n Hz!a-1!n)"
+					String:title="RPWS Low Rate Electric Spectral Density"
+					String:renderer="spectrogram"
+					
+   />
+</stream>'''.format(sStart, sEnd)
+	fOut.write('[00]{:06d}'.format(len(sHeader)))
+	fOut.write(sHeader)
+
+_das2_packet_id=_id_gen()
+def write_das2_packet_descriptor(ldFrequencies,fOut):
+	iPacketId = _das2_packet_id.next()
+	sPacket = '''
+<packet>
+	<properties Datum:xTagWidth="158 s" />
+	<x type="sun_real8" units="t2000" />
+	<yscan nitems="{nItems}" type="sun_real4" yTags="{yTags}" yUnits="Hz"
+		name="" zUnits="V**2 m**-2 Hz**-1" />
+</packet>'''.format(nItems=len(ldFrequencies),
+		yTags=','.join(map(str,ldFrequencies)))
+	fOut.write('[{:02d}]{:06d}'.format(iPacketId,len(sPacket)))
+	fOut.write(sPacket)
+
+	return iPacketId
+
+def run_test(argv):
+	sPdsRoot='/opt/project/cassini/pds'
+	sLowRatePath='DATA/RPWS_LOW_RATE_FULL'
+	sFile0='T20110XX/T2011057/T2011057_HFR0.DAT'
+	data = readFile(os.path.join(sPdsRoot,sLowRatePath,sFile0))
+
+	startRecord = rpws.RpwsRecord(das.ttime(das.parsetime('2011-02-26 12:00')),None,None)
+	endRecord = rpws.RpwsRecord(das.ttime(das.parsetime('2011-02-26 13:00')),None,None)
+
+	iStart = _bisect_left(data[1],startRecord)
+	iEnd = _bisect_right(data[1],endRecord)
+
+	data = (data[0], data[1][iStart:iEnd])
+
+	f = open('hfr.txt','w')
+	for fFreq in data[0]:
+		f.write(str(fFreq))
+		f.write(' ')
+	f.write('\n')
+	for fTime, ant, record in data[1]:
+		f.write(das.formattime(fTime))
+		for item in record:
+			f.write(' ')
+			f.write(str(item))
+		f.write('\n')
+
+	f.close()
+
+
+if __name__ == "__main__":
+	sys.exit(main(sys.argv[1:]))
+

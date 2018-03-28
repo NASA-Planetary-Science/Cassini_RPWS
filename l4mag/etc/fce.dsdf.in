@@ -1,0 +1,14 @@
+description	= 'Cassini electron cyclotron frequency from MAG data'
+form		= x_multi_y ; time tag and multiple y values
+reader		= '%(INST_ETC)s/invoke.sh mag_fce_rdr_c'
+ny		= 1 ; number of y items
+spacecraft	= 'Cassini'
+spacecraft_id	= 'CO'
+instrument	= 'Magnetometer'
+instrument_id	= 'MAG'
+x_parameter	= 'time'
+x_unit		= 's'
+x_sample_width	= 120.0 ; interpolate across 1 minute
+y_parameter	= 'frequency' ; need a way to distinguish different y parameters
+y_unit		= 'Hz'
+y_fill		= 1.0e-32 ; substitute this in place of missing data
