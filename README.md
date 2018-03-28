@@ -73,53 +73,40 @@ Install the prerequisites
 -------------------------
 The RPWS Core software depends on eight custom libraries and tools:
 
+  - **Giferator** - Larry's Das1 gifferator:
+    git clone https://github.com/das-developers/das1-giferator.git
+
   - **liddas2** - The Das2 server side C-library
-	 svn co https://saturn.physics.uiowa.edu/svn/das2/core/stable/libdas2
-
-
-  - **libfg** - Willy's command line parsing library,
-	 svn co https://saturn.physics.uiowa.edu/svn/util/C/trunk/libfg
-
-  - **gllspice**  Extra Spice transformations library used by Joe's programs:
-     svn co https://saturn.physics.uiowa.edu/svn/util/fortran/trunk/gllspice  
+	 git clone https://github.com/das-developers/libdas2.git
 
   - **pspice** - Python spice wrappers used by the PDS volume creation software:
-      svn co https://saturn.physics.uiowa.edu/svn/util/python/trunk/pspice
+    git clone https://github.com/das-developers/pspice.git
 	     
-  - ** libwtrplot** - Willy's plotting library.  This dependency will disappear in the future.  Only archive needs it and that code is going to the PDS area.
-	 svn co https://saturn.physics.uiowa.edu/svn/util/C/trunk/libwtrplot
-
-  - **fftpack** - An FFT library someone downloaded from somewhere
-   svn co https://saturn.physics.uiowa.edu/svn/util/fortran/trunk/fftpack
-
-  - **rpwPDS** - Generic PDS3 tools, used by the PDS volume creation software:
-     svn co https://saturn.physics.uiowa.edu/svn/util/python/trunk/rpwPDS
-	 
-  - **Giferator** - Larry's Das1 gifferator:
-     svn co https://saturn.physics.uiowa.edu/svn/util/IDL/devel/giferator
-    
-  - **pdspad** - Robert's PDS label fixup tool:
-     svn co https://saturn.physics.uiowa.edu/svn/util/C/trunk/pdspad
   
-Do an install of these libraries *USING THE SAME PREFIX* setting as you will use when making the Cassini GSE tools.  When you're done, come back to this directory and continue the build/install.
+Install these libraries *USING THE SAME ENVIRONMENT* settings as you will use when making the Cassini GSE tools.  When you're done, come back to this directory and continue the build/install.
 
 
 Build the Iowa Cassini data handling software in this order:
 
+1.  Build the support libraries
+    ---------------------------------------------------------
+    $ cd support
+	 $ gmake && gmake install
 
-1.  Build the Ancillary information libs  (builds on linux)
+
+2.  Build the Ancillary information libs  (builds on linux)
     ----------------------------------------------------------
     $ cd l6ephem
     $ gmake && gmake test && gmake install
 
 
-2. Build the low level data handling libs and programs  (solaris only)
+3. Build the low level data handling libs and programs  (solaris only)
     ----------------------------------------------------------------------
     $ cd l2rpws
     $ gmake && gmake test && gmake install
 
 
-3. Build the calibrated-level handling libs and programs  (builds on linux)
+4. Build the calibrated-level handling libs and programs  (builds on linux)
     ---------------------------------------------------------------------------
     $ cd l3rpws/lowrate
     $ gmake && gmake test && gmake install
@@ -131,19 +118,17 @@ Build the Iowa Cassini data handling software in this order:
     $ gmake && gmake test && gmake install
 
 
-4. Build the MAG data handling programs and libs  (builds on linux)
+5. Build the MAG data handling programs and libs  (builds on linux)
     -------------------------------------------------------------------
     $ cd l3mag
     $ gmake && gmake test && gmake install
 
 
-5. Build the re-mapped data level handling libs and programs  (builds on linux)
+6. Build the re-mapped data level handling libs and programs  (builds on linux)
     -------------------------------------------------------------------------------
     $ cd l4rpws/keyparam
     $ gmake && gmake test && gmake install
     
     $ cd l4rpws/std_archive
     $ gmake && gmake test && gmake install
-      ( This program also requres the pds_tools library, last know download location is:      https://pds.jpl.nasa.gov/tools/pds-tools-package.shtml )
-
-
+      (This program also requres the pds_tools library, last know download location is:      https://pds.jpl.nasa.gov/tools/pds-tools-package.shtml )
