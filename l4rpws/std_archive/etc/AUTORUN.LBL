@@ -1,0 +1,23 @@
+PDS_VERSION_ID          = PDS3
+LABEL_REVISION_NOTE     = "
+  2004-02-26, S.L.Adams (CN), initial release;
+  2005-02-22, L.J.Granroth (PPI), put file name in quotes, edited;"
+RECORD_TYPE             = STREAM
+^FILE                   = "AUTORUN.INF"
+OBJECT                  = TEXT
+  PUBLICATION_DATE        = 2005-02-22
+  INTERCHANGE_FORMAT      = ASCII
+  NOTE                    = "
+    The ASCII file pointed to by this PDS label contains parameters for
+    the autorun mechanism of Microsoft Windows running on Intel
+    architecture computers.  This file will not be utilized on computers
+    running the MAC/OS, Linux, Unix, or VMS operating systems (unless
+    running some type of Windows emulation software).  On initial
+    insertion of the volume on compatible systems, this file instructs
+    the system to execute the SHELLRUN program located in the EXTRAS
+    sub-directory which, in turn, loads the default web browser to view
+    the HTML file AAREADME.HTM located in this volume's root directory.
+    Additionally, the RPWS.ICO graphical icon located in the EXTRAS
+    directory is associated with this volume."
+END_OBJECT              = TEXT
+END

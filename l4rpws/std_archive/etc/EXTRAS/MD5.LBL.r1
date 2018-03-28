@@ -1,0 +1,38 @@
+PDS_VERSION_ID          = PDS3
+RECORD_TYPE             = STREAM
+
+^MD5CRLF_TEXT           = "MD5CRLF.TXT"
+^MD5LF_TEXT             = "MD5LF.TXT"
+
+OBJECT                  = MD5CRLF_TEXT
+  PUBLICATION_DATE        = %(pub-date)s
+  INTERCHANGE_FORMAT      = ASCII
+  NOTE                    = "
+    The file MD5CRLF.TXT contains a complete list of the md5 checksums
+    for all files on this volume, excluding this file and MD5LF.TXT.
+    This version uses cr-lf line termination.
+	 "
+END_OBJECT              = MD5CRLF_TEXT
+
+
+OBJECT                  = MD5LF_TEXT
+  PUBLICATION_DATE        = %(pub-date)s
+  INTERCHANGE_FORMAT      = ASCII
+  NOTE                    = "
+    The file MD5LF.TXT contains a complete list of the md5 checksums
+    for all files on this volume, excluding this file and MD5CRLF.txt.
+    This version uses UNIX lf line termination.
+
+    The entire contents of the volume can be verified with the command:
+
+      md5sum -c EXTRAS/MD5LF.TXT
+
+    executed from the root of this volume.
+
+    To obtain the md5sum software, see
+
+      http://www.gnu.org/software/coreutils/
+    "
+END_OBJECT              = MD5LF_TEXT
+
+END

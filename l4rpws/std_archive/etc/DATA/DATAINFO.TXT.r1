@@ -1,0 +1,156 @@
+PDS_VERSION_ID          = PDS3
+RECORD_TYPE             = STREAM
+OBJECT                  = TEXT
+  PUBLICATION_DATE        = %(pub-date)s
+  NOTE                    = "
+    DATAINFO.TXT describes the contents of the DATA directory."
+END_OBJECT              = TEXT
+END
+
+The DATA directory and its subdirectories contain the primary archive
+products of this volume.  The ANCILLARY subdirectory contains text
+files describing spacecraft and instrument sequences.  Calibrated
+reduced-resolution RPWS Key Parameters data are found in ASCII text
+files under RPWS_KEY_PARAMETERS.  Other directories contain
+full-resolution Cassini RPWS data in binary files.  The general
+subdirectory structure is as follows:
+
+[DATA]                  This directory.
+   |
+   |- DATAINFO.TXT      This file.
+   |
+   |- [ANCILLARY]       Ancillary information.
+   |     |
+   |     |- [TyyyydXX]  Contains data for SCET year "yyyy" and
+   |     |     |        3-digit day of year beginning with digit "d".
+   |           |        For example, T19992XX includes the range
+   |           |        1999-200 (July 19) to 1999-300 (October 27).
+   |           |        These directories are duplicated on each volume
+   |           |        containing days in the corresponding intervals.
+   |           |
+   |           |- TyyyydXX_STIM.LBL
+   |           |- TyyyydXX_STIM.TAB
+   |           |        Label and table files containing "STIM records"
+   |           |        that indicate the executing IEB trigger for a
+   |           |        given time period in the interval corresponding
+   |           |        to "yyyydXX" as described above.
+   |           |
+   |           |- [seq] Contains information corresponding the the
+   |           |     |  spacecraft sequence "seq" (for example C1
+   |                 |  through C44 and S01 on).  These will be
+   |                 |  duplicated where they overlap 100-day
+   |                 |  intervals.
+   |                 |
+   |                 |- seq_IEB.TXT
+   |                 |  Text overview of the instrument modes
+   |                 |  (triggers) and commands used during the
+   |                 |  sequence.
+   |                 |
+   |                 |- seq_TOL.LBL
+   |                 |- seq_TOL.TAB
+   |                 |  Label and table files containing the Time
+   |                 |  Ordered Listing of commands and triggers sent
+   |                 |  to the RPWS instrument, plus occasional
+   |                 |  comments about occurrences in the timeline.
+   |                 |
+   |                 |- TRIG_nn.TXT
+   |                 |  Text description of the instrument state for
+   |                    trigger nn.
+   |
+   |- [RPWS_KEY_PARAMETERS]
+   |     |              Key parameters data.
+   |     |
+   |     |- [TyyyydXX]  Contains data for up to a 100 day range
+   |     |     |        of SCET as described above.
+   |           |
+   |           |- RPWS_KEY__yyyyddd_v.LBL
+   |           |- RPWS_KEY__yyyyddd_v.TAB
+   |           |        Individual day-long ASCII text label and data
+   |                    files, where "yyyyddd" is the SCET date and v
+   |                    is a version number.
+   |
+   |
+   |- [RPWS_LOW_RATE_FULL]
+   |     |              Low rate full resolution data.
+   |     |
+   |     |- [TyyyydXX]  Contains data for up to a 100 day range
+   |     |     |        of SCET as described above.
+   |           |
+   |           |- [Tyyyyddd]
+   |           |     |  Contains all data files for SCET date "yyyyddd".
+   |                 |
+   |                 |- Tyyyyddd_HFRn.LBL
+   |                 |- Tyyyyddd_HFRn.DAT
+   |                 |  Label and data files containing data from the
+   |                 |  High Frequency Receiver.  The first instrument
+   |                 |  configuration (and file format) of the day is
+   |                 |  labelled with n = 0 and incremented for each new
+   |                 |  configuration as it occurs.
+   |                 |
+   |                 |- Tyyyyddd_LFRn.LBL
+   |                 |- Tyyyyddd_LFRn.DAT
+   |                 |  As above, for the Low Frequency Receiver.
+   |                 |
+   |                 |- Tyyyyddd_MFRn.LBL
+   |                 |- Tyyyyddd_MFRn.DAT
+   |                 |  As above, for the Medium Frequency Receiver.
+   |                 |
+   |                 |- Tyyyyddd_MFDRn.LBL
+   |                 |- Tyyyyddd_MFDRn.DAT
+   |                 |  As above, for the Medium Frequency Digital Receiver.
+   |
+   |- [RPWS_RAW_COMPLETE]
+   |     |              Raw RPWS telemetry packets.
+   |     |              These are not expected to be useful for most
+   |     |              science users.  All other full resolution
+   |     |              archive products are derived from these.
+   |     |
+   |     |- [TyyyydXX]  Contains data for up to a 100 day range
+   |     |     |        of SCET as described above.
+   |           |
+   |           |- [Tyyyyddd]
+   |           |     |  Contains all data files for SCET date "yyyyddd".
+   |                 |
+   |                 |- Tyyyyddd_hh_RAW.LBL
+   |                 |- Tyyyyddd_hh_RAW.PKT
+   |                 |  Label and data files containing raw packet data.
+   |                    The digits hh specifies a SCET hour interval.
+   |
+   |- [RPWS_WAVEFORM_FULL]
+   |     |              Full resolution WFR data.
+   |     |
+   |     |- [TyyyydXX]  Contains subdirectories for up to 100 individual
+   |     |     |        days of SCET as described above.
+   |           |
+   |           |- [Tyyyyddd]
+   |           |     |  Contains all data files for an individual day.
+   |                 |
+   |                 |- Tyyyyddd_bandHZs_WFRFR.LBL
+   |                 |- Tyyyyddd_bandHZs_WFRFR.DAT
+   |                 |  Label and data files containing waveform receiver
+   |                    data. The band field will contain 26 or 2_5K for
+   |                    the 2 frequency bands the receiver operates in. The
+   |                    s field indicates the size of the data record (see
+   |                    DOCUMENT/VOLSIS for details).
+   |
+   |- [RPWS_WIDEBAND_FULL]
+         |              Full resolution WBR data.
+         |
+         |- [TyyyydXX]  Contains subdirectories for up to 100 individual
+         |     |        days of SCET as described above.
+               |
+               |- [Tyyyyddd]
+               |     |  Contains all data files for an individual day.
+                     |
+                     |- Tyyyyddd_hh_bandHZs_WBRFR.LBL
+                     |- Tyyyyddd_hh_bandHZs_WBRFR.DAT
+                     |  Similar to RAW and Waveform data, hh is the hour of
+                        the day and band indicates the frequency band the
+                        wideband receiver is operating in.  When this
+                        receiver is connected to the HFR the band field
+                        indicates the conversion frequency.  The s field
+                        is used to indicate the record size.  In the case
+                        of dust waveforms, which are always 1024 samples,
+                        the s field is set to "D" as an indication of dust
+                        data
+

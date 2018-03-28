@@ -1,0 +1,96 @@
+PDS_VERSION_ID          = PDS3
+RECORD_TYPE             = STREAM
+OBJECT                  = TEXT
+  PUBLICATION_DATE        = %(pub-date)s
+  NOTE                    = "
+    BROWINFO.TXT describes the contents of the BROWSE directory."
+END_OBJECT              = TEXT
+END
+
+The BROWSE directory contains Portable Network Graphics (PNG) files of
+survey plots of the data which constitute the primary archive products
+of this volume.  These plots are organized by data set and spacecraft
+event time, with full-size plots segregated above HTML subdirectories
+containing thumbnail images and markup documents used to facilitate
+browsing the collection with a web browser.  The general subdirectory
+structure is as follows:
+
+[BROWSE]                This directory.
+   |
+   |- BROWINFO.TXT      This file.
+   |
+   |- BROWSE.HTM        Entry point for web browser access.
+   |
+   |- [ANCILLARY]       Ancillary information.
+   |
+   |- [RPWS_KEY_PARAMETERS]
+   |     |              Spectrograms using key parameters data.
+   |     |
+   |     |- [TyyyydXX]  Contains plots for SCET year "yyyy" and
+   |     |     |        3-digit day of year beginning with digit "d".
+   |           |        For example, T19992XX includes the range
+   |           |        1999-200 (July 19) to 1999-300 (October 27).
+   |           |
+   |           |- KPB_HTML.LBL
+   |           |- BROWSE.HTM
+   |           |        PDS label and HTML "thumbnail index" page
+   |           |
+   |           |- Tyyyyddd_a_KPB.PNG
+   |           |        Individual day-long plot files, where "yyyyddd"
+   |           |        is the SCET date, "a" is either E for electric
+   |           |        or B for magnetic, and "KPB" indicates "Key
+   |           |        Parameters Browse".
+   |           |
+   |           |- [HTML]
+   |           |        Associated thumbnail images and HTML wrappers.
+   |
+   |- [RPWS_LOW_RATE_FULL]
+   |     |              Spectrograms using low rate data.
+   |     |
+   |     |- [TyyyydXX]  Contains plots for up to a 100 day range
+   |     |     |        of SCET as described above.
+   |           |
+   |           |- Tyyyyddd_a_LRB.PNG
+   |           |        Individual day-long plot files, where "yyyyddd"
+   |           |        is the SCET date, "a" is either E for electric
+   |           |        or B for magnetic, and "LRB" indicates "Low
+   |           |        Rate Browse".
+   |           |
+   |           |- [HTML]
+   |           |        Associated thumbnail images and HTML wrappers.
+   |
+   |- [RPWS_WAVEFORM_FULL]
+   |     |              Spectrograms using transformed WFR data.
+   |     |
+   |     |- [TyyyydXX]  Contains subdirectories for up to 100 individual
+   |     |     |        days of SCET as described above.
+   |           |
+   |           |- [Tyyyyddd]
+   |           |     |  Contains all plots for an individual day.
+   |                 |
+   |                 |- Tyyyyddd_bandHZ_WFB.PNG
+   |                 |  Browse images for the waveform receiver.  The band
+   |                 |  portion of the filename field will contain 26 or
+   |                 |  2_5K for the 2 frequency bands the receiver
+   |                 |  operates in.
+   |                 |
+   |                 |- [HTML]
+   |                 |  Associated thumbnail images and HTML wrappers.
+   |
+   |- [RPWS_WIDEBAND_FULL]
+         |              Spectrograms using transformed WBR data.
+         |
+         |- [TyyyydXX]  Contains subdirectories for up to 100 individual
+         |     |        days of SCET as described above.
+               |
+               |- [Tyyyyddd]
+               |     |  Contains all plots for an individual day.
+                     |
+                     |- Tyyyyddd_hh_bandHZ_WBB.PNG
+                     |  Similar to Waveform images, hh is the hour of
+                     |  the day and band indicates the frequency band the
+                     |  wideband receiver is operating in.
+                     |
+                     |- [HTML]
+                     |  Associated thumbnail images and HTML wrappers.
+

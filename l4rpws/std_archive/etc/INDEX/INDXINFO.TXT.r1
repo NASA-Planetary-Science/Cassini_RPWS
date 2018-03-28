@@ -1,0 +1,25 @@
+PDS_VERSION_ID          = PDS3
+RECORD_TYPE             = STREAM
+OBJECT                  = TEXT
+  PUBLICATION_DATE        = %(pub-date)s
+  NOTE                    = "
+    INDXINFO.TXT describes the contents of the INDEX directory."
+END_OBJECT              = TEXT
+END
+
+The file INDEX.TAB gives the name, associated dataset and location for each
+data file on this volume.  The file CUMINDEX.TAB lists the cumulative
+indices for all volumes in this volume set up to and including this one.
+Both tables have exactly the same format.
+
+key files in the INDEX directory:
+
+  INDEX.TAB     contains an index of this volume, listing label files
+                (*.LBL) for the data files.
+
+  INDEX.LBL     detached PDS label for INDEX.TAB
+
+  CUMINDEX.TAB  cumulative index for all volumes in this set, up to and
+                including this one
+
+  CUMINDEX.LBL  detached PDS label for CUMINDEX.TAB

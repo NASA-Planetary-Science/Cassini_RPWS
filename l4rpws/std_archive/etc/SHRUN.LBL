@@ -1,0 +1,22 @@
+PDS_VERSION_ID          = PDS3
+LABEL_REVISION_NOTE     = "
+  2004-02-26, S.L.Adams (CN), initial release;
+  2005-02-22, L.J.Granroth (PPI), put file name in quotes, edited;"
+RECORD_TYPE             = STREAM
+^FILE                   = "SHRUN.INF"
+OBJECT                  = TEXT
+  PUBLICATION_DATE        = 2005-02-22
+  INTERCHANGE_FORMAT      = ASCII
+  NOTE                    = "
+    The ASCII file pointed to by this PDS label contains parameters for
+    the program SHELLRUN located in the EXTRAS sub-directory on this
+    volume and executed automatically on Intel architecture computers
+    running Microsoft Windows when the volume is initially inserted into
+    the DVD drive of the computer.  This file will not execute on
+    computers running the MAC/OS, Linux, Unix, or VMS operating systems,
+    (unless running some type of Windows emulation software).  This
+    parameter file instructs the SHELLRUN program to invoke the default
+    web browser with the HTML file AAREADME.HTM located in this volume's
+    root directory."
+END_OBJECT              = TEXT
+END

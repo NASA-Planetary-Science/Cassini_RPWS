@@ -1,0 +1,1120 @@
+PDS_VERSION_ID          = PDS3
+RECORD_TYPE             = STREAM
+OBJECT                  = TEXT
+  PUBLICATION_DATE        = %(top-pub-date)s
+  NOTE                    = "This file describes known errors or
+    deficiencies in this archive volume set."
+END_OBJECT              = TEXT
+END
+
+Users are encouraged to provide comments back to the PPI Node of the PDS
+if errors or omissions are found either in data or in documentation.
+Please send comments by e-mail or U.S. mail to
+
+     Steven Joy, sjoy@igpp.ucla.edu
+     405 Hilgard Ave
+     UCLA - IGPP
+     Los Angeles, CA 90095-1567
+
+Questions regarding data content, processing, or quality should be sent
+to
+
+     Dr. William S. Kurth, william-kurth@uiowa.edu
+     Dept. of Physics & Astronomy
+     The University of Iowa
+     Iowa City, IA 52242
+
+An updated version of this file is maintained online at the Planetary
+Plasma Interactions Node of the Planetary Data System.  The online
+errata list can be found on the World Wide Web at
+
+  http://www.igpp.ucla.edu/cgi-bin/ditdos?errata=CORPWS_0XXX
+
+
+General disclaimer:
+===================
+
+  All trademarks are acknowledged as the property of their respective
+  owners.  The producers and publishers of this archive do not endorse
+  any commercial entities which may be mentioned for clarity.
+
+
+Variances applying to all volumes:
+==================================
+
+  The files AUTORUN.INF and SHRUN.INF appear in the root directory of
+  these volumes in order to provide an automatic method to launch the
+  user's default web browser and load the AAREADME.HTM document upon
+  insertion of the DVD in compatible Microsoft Windows systems.  This
+  functionality is purely for convenience and is not required.  A
+  freeware license for the program EXTRAS/SHELLRUN.EXE, copyright PHD
+  Computer Consultants Ltd, U.K., was obtained from
+  http://www.phdcc.com/.
+
+  Human-friendly ASCII text versions of some documents in the DOCUMENT
+  directory are not yet available due to the evolution of those
+  documents and the difficulty in automatically translating them into
+  usable plain text versions.  These include RPWSCAL, describing
+  instrument calibrations, and RPWSUG, describing instrument
+  operations.  These are currently available only in PDF form but will
+  be provided in ASCII form in the future.
+
+  The instrument description paper is not currently available but will
+  be provided in the future after it is published in Space Science
+  Reviews and permission is obtained from the copyright holder, Kluwer
+  Academic Publishers.
+
+  HTML markup files and thumbnail images are included under the top
+  level BROWSE directory in order to facilitate navigating these
+  directories with a web browser.  Except for the top thumbnail index
+  file for each directory, all of these ancillary files are segregated
+  to subdirectories named HTML in order to minimize directory clutter
+  when browsing the primary image files with other tools.  Since these
+  HTML files are produced in concert with the browse images, we elected
+  to maintain them in the same directory structure rather than
+  segregating them under the EXTRAS directory.
+
+  An HTML link to http://validator.w3.org/check/referer is associated
+  with the "Valid HTML 3.2" image at the bottom of HTML documents.  This
+  link provides a mechanism for checking conformance of the document to
+  HTML standards, but will work only if the document is being viewed via
+  a web-accessible (e.g. http:) URI.  If the file is accessed as a local
+  file system reference (e.g. file:) URI, then, of course, the remote
+  validation service will not be able to access the file in order to
+  check it.
+
+  The EXTRAS/SEQUENCE_INFO directory contains instrument sequence
+  information similar to that under DATA/ANCILLARY but in HTML
+  browser-searchable form.  This is a snapshot of a working directory,
+  and as such, contains information beyond the time range of individual
+  archive volumes.  Also, files beyond the end time of the current
+  volume may not be in their final form and errors such as broken links
+  may exist.
+
+  Generally, volume-specific errors noted below will be fixed in all
+  on-line versions of the data sets.
+
+
+Cumulative errata for the CORPWS_0xxx volume set:
+=================================================
+
+Volume  Error/Variance Description
+------  ----------------------------------------------------------------
+
+   001  No release notes.  (See below.)
+        AAREADME.HTM HTML TITLE indicates CORPWS_0002.
+        AAREADME.TXT] spurious file in root directory.
+        CATALOG/*DS.CAT all data set catalog files missing required
+          DATA_SET_MISSION object.
+        INDEX/*INDEX.TAB table column header inadvertently sorted to
+          end of file.
+        DATA/RPWS_LOW_RATE_FULL/T19983XX/T1998364/T1998364_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T19983XX/T1998364/T1998364_CAL1.LBL
+          Label files are non-conforming.
+
+   002  No release notes.
+        EXTRAS/SEQUENCE_INFO/INDEX.HTML highlighted rows are off by one.
+        CATALOG/*DS.CAT all data set catalog files missing required
+          DATA_SET_MISSION object.
+        INDEX/*INDEX.TAB table column header inadvertently sorted to
+          end of file.
+        DATA/RPWS_LOW_RATE_FULL/T20001XX/T2000153/T2000153_CAL0.LBL
+          Label file is non-conforming.
+
+   007  DATA/RPWS_LOW_RATE_FULL/T20003XX/T2000348/T2000348_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20003XX/T2000352/T2000352_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20003XX/T2000357/T2000357_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20003XX/T2000361/T2000361_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20003XX/T2000365/T2000365_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001003/T2001003_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001006/T2001006_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001010/T2001010_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001014/T2001014_CAL0.LBL
+          Label files are non-conforming.
+        DATA/ANCILLARY/T20010XX/C24/C24_TOL.TAB
+          Some entries for RPWS_OPERATION exceed specified length.
+
+   008  DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001017/T2001017_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001021/T2001021_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001024/T2001024_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001028/T2001028_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001031/T2001031_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001038/T2001038_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001041/T2001041_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001044/T2001044_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001048/T2001048_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001051/T2001051_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001061/T2001061_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001066/T2001066_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001073/T2001073_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001077/T2001077_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001077/T2001077_CAL1.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001081/T2001081_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001085/T2001085_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001094/T2001094_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20010XX/T2001099/T2001099_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001103/T2001103_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001107/T2001107_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001112/T2001112_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001118/T2001118_CAL0.LBL
+          Label files are non-conforming.
+        DATA/ANCILLARY/T20010XX/C24/C24_TOL.TAB
+          Some entries for RPWS_OPERATION exceed specified length.
+
+   009  DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001121/T2001121_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001125/T2001125_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001144/T2001144_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001149/T2001149_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001153/T2001153_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001165/T2001165_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001179/T2001179_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001182/T2001182_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001186/T2001186_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001192/T2001192_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001192/T2001192_CAL1.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001193/T2001193_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001193/T2001193_CAL1.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001193/T2001193_CAL2.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001193/T2001193_CAL3.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20011XX/T2001196/T2001196_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001200/T2001200_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001204/T2001204_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001208/T2001208_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001212/T2001212_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001220/T2001220_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001224/T2001224_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001228/T2001228_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001232/T2001232_CAL0.LBL
+          Label files are non-conforming.
+
+   010  DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001236/T2001236_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001240/T2001240_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001245/T2001245_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001248/T2001248_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001251/T2001251_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001258/T2001258_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001262/T2001262_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001270/T2001270_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001274/T2001274_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001278/T2001278_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001282/T2001282_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001286/T2001286_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001290/T2001290_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001294/T2001294_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20012XX/T2001298/T2001298_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20013XX/T2001302/T2001302_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20013XX/T2001306/T2001306_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20013XX/T2001310/T2001310_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20013XX/T2001314/T2001314_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20013XX/T2001318/T2001318_CAL0.LBL
+          Label files are non-conforming.
+        DATA/ANCILLARY/T20013XX/C29/C29_TOL.TAB
+          Some entries for RPWS_OPERATION exceed specified length.
+
+   011  DATA/RPWS_LOW_RATE_FULL/T20013XX/T2001330/T2001330_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20013XX/T2001334/T2001334_CAL0.LBL
+          Label files are non-conforming.
+        DATA/ANCILLARY/T20013XX/C29/C29_TOL.TAB
+          Some entries for RPWS_OPERATION exceed specified length.
+
+   012  DATA/RPWS_LOW_RATE_FULL/T20013XX/T2001338/T2001338_CAL0.LBL
+          Label file is non-conforming.
+        DATA/ANCILLARY/T20013XX/C29/C29_TOL.TAB
+          Some entries for RPWS_OPERATION exceed specified length.
+
+   013  DATA/RPWS_LOW_RATE_FULL/T20013XX/T2001342/T2001342_CAL0.LBL
+          Label file is non-conforming.
+        DATA/ANCILLARY/T20013XX/C29/C29_TOL.TAB
+          Some entries for RPWS_OPERATION exceed specified length.
+
+   014  DATA/RPWS_LOW_RATE_FULL/T20013XX/T2001346/T2001346_CAL0.LBL
+        DATA/RPWS_LOW_RATE_FULL/T20013XX/T2001350/T2001350_CAL0.LBL
+          Label files are non-conforming.
+        DATA/ANCILLARY/T20013XX/C29/C29_TOL.TAB
+          Some entries for RPWS_OPERATION exceed specified length.
+
+   015  DATA/RPWS_LOW_RATE_FULL/T20013XX/T2001354/T2001354_CAL0.LBL
+          Label file is non-conforming.
+        DATA/ANCILLARY/T20013XX/C29/C29_TOL.TAB
+          Some entries for RPWS_OPERATION exceed specified length.
+
+   016  DATA/RPWS_LOW_RATE_FULL/T20013XX/T2001358/T2001358_CAL0.LBL
+          Label file is non-conforming.
+
+   017  DATA/RPWS_LOW_RATE_FULL/T20013XX/T2001362/T2001362_CAL0.LBL
+          Label file is non-conforming.
+
+   018,020,025-042  The original volumes (VOLUME_VERSION_ID =
+        "VERSION 1") contained several faulty label files under
+        DATA/RPWS_KEY_PARAMETERS.
+
+   001-055 The following table structure format files are missing
+        from volume LABEL directory:
+        HFR_HF2_CAL_LEVELS_TABLE.FMT
+        HFR_HF1_FILTER_CAL_TABLE.FMT
+        HFR_HF1_FILTER_AGC_TABLE.FMT
+        HFR_HF12_CAL_LEVELS_TABLE.FMT
+        HFR_ABC_CAL_LEVELS_TABLE.FMT
+        HFR_ABC_CAL_LEVELS_AGC_TABLE.FMT
+
+   001-087 DATA/RPWS_LOW_RATE_FULL/TXXXXXXX/TXXXXXXXX/TXXXXXXXX_CALX.LBL
+      All table pointers erroneously point to a file named
+      T2001362_CAL0.TAB.  These should reference files with the same
+      base name as the label but with the extension TAB instead of LBL.
+      
+      ALL table objects EXCEPT the HFRHF1_FILTER_AGC_F19_TABLE have an
+      incorrect number of columns.
+
+   001-087 DATA/RPWS_LOW_RATE_FULL/TXXXXXXX/TXXXXXXX/TXXXXXXX_HFRXX.LBL
+           DATA/RPWS_LOW_RATE_FULL/TXXXXXXX/TXXXXXXX/TXXXXXXX_LFRXX.LBL
+           DATA/RPWS_LOW_RATE_FULL/TXXXXXXX/TXXXXXXX/TXXXXXXX_MFDRXX.LBL
+           DATA/RPWS_LOW_RATE_FULL/TXXXXXXX/TXXXXXXX/TXXXXXXX_MFRXX.LBL
+           DATA/RPWS_LOW_RATE_FULL/TXXXXXXX/TXXXXXXX/TXXXXXXX_MSCXX.LBL
+      The number of COLUMNS given for the LRFULL_TABLE should be 7.  The
+      number of COLUMNS given for the SPECTRAL_DENSITY_TABLE should be
+      2.
+
+   001-087 DATA/RPWS_RAW_COMPLETE/TXXXXXXX/TXXXXXXX/TXXXXXXX_XX_RAW.LBL
+      The number of COLUMNS given for the RPWS_RAW_ROW_PREFIX_TABLE
+      should be 5.  The number of COLUMNS given for the
+      RPWS_RAW_PACKET_TABLE should be 3.
+
+   001-087 BROWSE/RPWS_LOW_RATE_FULL/TXXXXXXX/TXXXXXXX_X_LRB.LBL
+      The DATA_SET_ID should be "CO-V/E/J/S/SS-RPWS-3-RDR-LRFULL-V1.0"
+
+   105 DATA/RPWS_LOW_RATE_FULL/T20080XX/T2008003/T2008003_CAL0.LBL
+      DATA/RPWS_LOW_RATE_FULL/T20080XX/T2008003/T2008003_CAL0.TAB
+      Are unnecessary and misnamed.  They should be ignored.
+
+   105-114 DATA/RPWS_RAW_COMPLETE/T2008XX/T2008XXX/T2008XXX_XX_RAW.LBL
+      The TARGET_NAME list value should not include the invalid target 
+      "END-OF-MISSION-tgt".
+
+   105-114 DATA/RPWS_WIDEBAND_FULL/T2008XX/T2008XXX/T2008XXX_XX_RAW.LBL
+      The TARGET_NAME list value should not include the invalid target 
+      "END-OF-MISSION-tgt".
+
+   112-114 DATA/RPWS_RAW_COMPLETE/T2008XX/T2008XXX/T2008XXX_XX_RAW.LBL
+      The MISSION_PHASE_NAME list value should not include the invalid
+      phase "END-OF-MISSION-mpn".
+
+   112-114 DATA/RPWS_WIDEBAND_FULL/T2008XX/T2008XXX/T2008XXX_XX_RAW.LBL
+      The MISSION_PHASE_NAME list value should not include the invalid
+      phase "END-OF-MISSION-mpn".
+
+   114 DATA/RPWS_KEY_PARAMETERS/T20081XX/*.LBL
+       DATA/RPWS_LOW_RATE_FULL/T20081XX/T20081XX/*.LBL
+       DATA/RPWS_RAW_COMPLETE/T20081XX/T20081XX/*.LBL
+       DATA/RPWS_WAVEFORM_FULL/T20081XX/T20081XX/*.LBL
+       DATA/RPWS_WIDEBAND_FULL/T20081XX/T20081XX/*.LBL
+      For all products starting on day 2008-183 and continuing to the 
+      end of the volume, the MISSION_PHASE_NAME should have the value
+      "EXTENDED MISSION".
+
+   052-114 DATA/RPWS_RAW_COMPLETE/T200XXXX/T200XXXX/*.LBL
+           DATA/RPWS_WAVEFORM_FULL/T200XXXX/T20081XX/*.LBL
+           DATA/RPWS_WIDEBAND_FULL/T200XXXX/T200XXXX/*.LBL
+      ORBIT_NAME values are often incorrect and should be ignored.
+      
+   122-165 DATA/all files
+           BROWSE/all files
+      These volumes were originally generated using outdated SPICE
+      clock and leapsecond kernels.  Thus all Spacecraft Event Time 
+      fields are incorrect.  The error starts as small as 1.1 seconds
+      on volume 122 and grows to 23 seconds by volume 165.
+      
+      These volumes have been re-issued with VOLUME_VERSION_ID = 2
+      to resolve the problem.
+      
+      Version 1 of the volumes should *not* be used for any calculations
+      sensitive to a time variation on the scale of a minute.
+      
+
+   ALL VOLUMES  The field SCET_DAY for data products with DATA_SET_IDs
+      CO-V/E/J/S/SS-RPWS-2-REFDR-WFRFULL-V1.0, and 
+      CO-V/E/J/S/SS-RPWS-2-REFDR-WBRFULL-V1.0 is incorrect for
+      all rows whose start time is after Julian noon.  For
+      rows whose start time is prior to Julian noon SCET_DAY
+      is correct.
+
+
+Release notes for the CORPWS_0xxx volume set:
+=============================================
+
+Volume  Release Date and Notes
+------  ----------------------------------------------------------------
+
+   001  2005-04-21
+
+   002  2005-04-26
+
+   003  2005-05-04
+        ERRATA.TXT added release notes.
+        EXTRAS/SOFTWARE/KEY_BROWSE.JAR updated.
+        EXTRAS/SOFTWARE/SOFTINFO.TXT added acknowledgement of open
+          source libraries.
+        CATALOG/*DS.CAT files updated.
+        INDEX/CUMINDEX.TAB processing updated.
+
+   004  2005-05-04
+
+   005  2005-05-04
+
+   006  2005-05-04
+
+   007  2005-05-04
+
+   008  2005-05-04
+
+   009  2005-05-05
+
+   010  2005-05-05
+
+   011  2005-05-05
+
+   012  2005-05-05
+
+   013  2005-05-05
+
+   014  2005-05-06
+
+   015  2005-05-06
+
+   016  2005-05-06
+
+   017  2005-05-06
+
+   018  2005-06-25
+        All RPWS calibration files
+          DATA/RPWS_LOW_RATE_FULL/TyyydXX/Tyyyyddd/Tyyyyddd_CALx.LBL
+        have been revised and are now PDS conforming.
+        Minor updates to:
+          VOLDESC.CAT
+          CATALOG/KEYDS.CAT
+          CATALOG/LRFULLDS.CAT
+          CATALOG/PERSON.CAT
+          CATALOG/RAWDS.CAT
+          CATALOG/WBFULLDS.CAT
+          CATALOG/WFFULLDS.CAT
+        2006-01-05
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   019  2005-06-26
+
+   020  2005-12-28
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   021  2005-06-26
+
+   022  2005-06-26
+
+   023  2005-06-26
+
+   024  2005-06-26
+
+   025  2005-12-28
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   026  2005-12-28
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   027  2005-12-28
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   028  2005-12-28
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   029  2005-12-28
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   030  2005-12-28
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   031  2005-12-28
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   032  2005-12-28
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   033  2005-12-28
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   034  2005-12-28
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   035  2005-12-28
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   036  2005-12-28
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   037  2005-12-28
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   038  2005-12-28
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   039  2005-12-28
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   040  2005-12-28
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   041  2005-12-28
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   042  2005-12-28
+        Reissued with fixed DATA/RPWS_KEY_PARAMETERS label files.
+
+   043  2005-12-29
+
+   044  2005-12-29
+
+   045  2005-12-29
+
+   046  2005-12-29
+
+   047  2005-12-29
+
+   048  2006-03-24
+
+   049  2006-03-24
+
+   050  2006-03-24
+
+   051  2006-03-24
+
+   052  2006-03-24
+
+   053  2006-03-24
+
+   054  2006-03-24
+
+   055  2006-03-24
+
+   056  2006-09-21
+
+   057  2006-09-21
+
+   058  2006-09-22
+
+   059  2006-09-22
+
+   060  2006-09-22
+
+   061  2006-09-25
+
+   062  2006-12-20
+
+   063  2006-12-20
+
+   063  2006-12-20
+
+   063  2006-12-20
+
+   063  2006-12-20
+
+   063  2006-12-20
+
+   064  2006-12-20
+
+   064  2006-12-20
+
+   065  2006-12-20
+
+   066  2006-12-20
+
+   067  2006-12-20
+
+   068  2006-12-20
+
+   069  2006-12-20
+
+   070  2006-12-21
+
+   071  2006-12-21
+
+   072  2006-12-21
+
+   073  2006-12-21
+
+   074  2006-12-21
+
+   075  2006-12-21
+
+   076  2006-12-21
+
+   076  2006-12-21
+
+   077  2006-12-21
+
+   078  2007-09-24
+
+   079  2007-09-24
+
+   080  2007-09-24
+
+   081  2007-09-24
+
+   081  2007-09-24
+
+   082  2007-09-24
+
+   083  2007-12-19
+
+   084  2007-12-20
+
+   085  2007-12-20
+
+   086  2007-12-20
+
+   087  2007-12-20
+
+   088  2008-03-20
+
+   089  2008-03-20
+
+   090  2008-03-20
+
+   091  2008-03-20
+
+   092  2008-03-20
+
+   093  2008-03-21
+
+   094  2008-03-21
+
+   095  2008-03-21
+
+   096  2008-03-21
+
+   097  2008-03-21
+
+   098  2008-03-21
+
+   099  2008-03-21
+
+   100  2008-04-07
+
+   101  2008-04-07
+
+   102  2008-04-07
+
+   103  2008-09-26
+
+   104  2008-09-26
+
+   105  2008-09-26
+
+   106  2008-09-29
+
+   107  2008-09-30
+
+   107  2008-09-30
+
+   108  2008-09-30
+
+   109  2008-09-30
+
+   110  2008-12-23
+
+   111  2009-03-24
+
+   112  2009-03-25
+
+   113  2009-03-25
+
+   114  2009-03-25
+
+   115  2009-06-22
+        CATALOG/MISSION.CAT has been updated to include the extended
+        mission phase. All CATALOG/*DS.CAT files have been updated to
+        remove the CURATING_NODE_ID keyword.  CATALOG/INSTHOST.CAT has
+        been updated.
+
+   116  2009-06-22
+
+   117  2009-06-22
+
+   118  2009-06-23
+
+   119  2009-09-24
+
+   120  2009-09-24
+
+   121  2009-09-25
+
+   122  2009-09-25
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 1.2 seconds.
+        Version 2 of this volume corrects the issue.
+
+   123  2009-12-17
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 1.3 seconds.
+        Version 2 of this volume corrects the issue.
+
+   124  2009-12-17
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 1.3 seconds.
+        Version 2 of this volume corrects the issue.
+
+   125  2009-12-17
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 1.4 seconds.
+        Version 2 of this volume corrects the issue.
+
+   126  2009-12-17
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 1.5 seconds.
+        Version 2 of this volume corrects the issue.
+
+   127  2009-12-17
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 1.5 seconds.
+        Version 2 of this volume corrects the issue.
+
+   128  2009-12-18
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 1.6 seconds.
+        Version 2 of this volume corrects the issue.
+
+   129  2009-12-18
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 1.7 seconds.
+        Version 2 of this volume corrects the issue.
+
+   130  2009-12-18
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 1.7 seconds.
+        Version 2 of this volume corrects the issue.
+
+   131  2009-12-18
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 1.7 seconds.
+        Version 2 of this volume corrects the issue.
+
+   132  2010-06-28
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 1.8 seconds.
+        Version 2 of this volume corrects the issue.
+
+   133  2010-06-28
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 1.9 seconds.
+        Version 2 of this volume corrects the issue.
+
+   134  2010-06-29
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 1.9 seconds.
+        Version 2 of this volume corrects the issue.
+
+   135  2010-06-30
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 1.9 seconds.
+        Version 2 of this volume corrects the issue.
+
+   136  2010-09-21
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 1.8 seconds.
+        Version 2 of this volume corrects the issue.
+
+   137  2010-09-21
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 1.9 seconds.
+        Version 2 of this volume corrects the issue.
+
+   138  2010-09-21
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 2.0 seconds.
+        Version 2 of this volume corrects the issue.
+
+   139  2010-09-21
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 2.0 seconds.
+        Version 2 of this volume corrects the issue.
+
+   140  2010-09-21
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 2.1 seconds.
+        Version 2 of this volume corrects the issue.
+
+   141  2010-09-21
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 2.2 seconds.
+        Version 2 of this volume corrects the issue.
+
+   142  2010-12-22
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 2.2 seconds.
+        Version 2 of this volume corrects the issue.
+
+   143  2010-12-22
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 2.2 seconds.
+        Version 2 of this volume corrects the issue.
+
+   144  2010-12-22
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 2.2 seconds.
+        Version 2 of this volume corrects the issue.
+
+   145  2010-12-22
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 2.3 seconds.
+        Version 2 of this volume corrects the issue.
+
+   146  2010-12-22
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 2.3 seconds.
+        Version 2 of this volume corrects the issue.
+
+   147  2010-12-22
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 2.4 seconds.
+        Version 2 of this volume corrects the issue.
+
+   148  2010-12-22
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 2.5 seconds.
+        Version 2 of this volume corrects the issue.
+
+   149  2010-12-22
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 2.6 seconds.
+        Version 2 of this volume corrects the issue.
+
+   150  2010-12-22
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 2.6 seconds.
+        Version 2 of this volume corrects the issue.
+
+   151  2010-12-22
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 2.7 seconds.
+        Version 2 of this volume corrects the issue.
+
+   152  2010-12-22
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 2.8 seconds.
+        Version 2 of this volume corrects the issue.
+
+   153  2010-12-23
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 2.9 seconds.
+        Version 2 of this volume corrects the issue.
+
+   154  2011-03-23
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 3.3 seconds.
+        Version 2 of this volume corrects the issue.
+
+   155  2011-03-23
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 3.6 seconds.
+        Version 2 of this volume corrects the issue.
+
+   156  2011-03-23
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 3.9 seconds.
+        Version 2 of this volume corrects the issue.
+
+   157  2011-09-29
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 4.1 seconds.
+        Version 2 of this volume corrects the issue.
+
+   158  2011-09-30
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 2.4 seconds.
+        Version 2 of this volume corrects the issue.
+
+   159  2011-12-21
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 2.7 seconds.
+        Version 2 of this volume corrects the issue.
+
+   160  2011-12-21
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 5.3 seconds.
+        Version 2 of this volume corrects the issue.
+
+   161  2011-12-21
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 7.3 seconds.
+        Version 2 of this volume corrects the issue.
+
+   162  2011-12-21
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 8.3 seconds.
+        Version 2 of this volume corrects the issue.
+
+   163  2011-12-22
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 9.4 seconds.
+        Version 2 of this volume corrects the issue.
+
+   164  2011-12-22
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 10.5 seconds.
+        Version 2 of this volume corrects the issue.
+
+   165  2011-12-22
+        Version 1 of this volume used incorrect SPICE kernels to calculate
+        Spacecraft Event Time from spacecraft clock values.  SCET error
+        is less than 11.7 seconds.
+        Version 2 of this volume corrects the issue.
+
+   122  2012-04-09  Version 2
+
+   123  2012-04-09  Version 2
+
+   124  2012-04-09  Version 2
+
+   125  2012-04-09  Version 2
+
+   126  2012-04-09  Version 2
+
+   127  2012-04-09  Version 2
+
+   128  2012-04-09  Version 2
+
+   129  2012-04-09  Version 2
+
+   130  2012-04-09  Version 2
+
+   131  2012-04-09  Version 2
+
+   132  2012-04-09  Version 2
+
+   133  2012-04-09  Version 2
+
+   134  2012-04-09  Version 2
+
+   135  2012-04-09  Version 2
+
+   136  2012-04-09  Version 2
+
+   137  2012-04-09  Version 2
+
+   138  2012-04-09  Version 2
+
+   139  2012-04-10  Version 2
+
+   140  2012-04-10  Version 2
+
+   141  2012-04-10  Version 2
+
+   142  2012-04-10  Version 2
+
+   143  2012-04-10  Version 2
+
+   144  2012-04-10  Version 2
+
+   145  2012-04-10  Version 2
+
+   146  2012-04-10  Version 2
+
+   147  2012-04-10  Version 2
+
+   148  2012-04-10  Version 2
+
+   149  2012-04-10  Version 2
+
+   150  2012-04-10  Version 2
+
+   151  2012-04-10  Version 2
+
+   152  2012-04-10  Version 2
+
+   153  2012-04-10  Version 2
+
+   154  2012-04-10  Version 2
+
+   155  2012-04-10  Version 2
+
+   156  2012-04-10  Version 2
+
+   157  2012-04-10  Version 2
+
+   158  2012-04-10  Version 2
+
+   159  2012-04-10  Version 2
+
+   160  2012-04-10  Version 2
+
+   161  2012-04-11  Version 2
+
+   162  2012-04-11  Version 2
+
+   163  2012-04-11  Version 2
+
+   164  2012-04-11  Version 2
+
+   165  2012-04-11  Version 2
+
+   166  2012-06-29  Version 1
+
+   167  2012-06-29  Version 1
+
+   168  2012-06-29  Version 1
+
+   169  2012-06-29  Version 1
+
+   170  2012-09-27  Version 1
+
+   171  2012-09-27  Version 1
+
+   172  2012-09-27  Version 1
+
+   173  2012-12-19  Version 1
+
+   174  2012-12-19  Version 1
+
+   175  2012-12-19  Version 1
+
+   176  2012-12-21  Version 1
+
+   177  2013-03-27  Version 1
+
+   178  2013-03-27  Version 1
+
+   179  2013-03-28  Version 1
+
+   180  2013-03-28  Version 1
+
+   181  2013-09-26  Version 1
+
+   182  2013-09-26  Version 1
+
+   183  2013-09-26  Version 1
+
+   184  2013-09-26  Version 1
+
+   185  2013-09-26  Version 1
+
+   186  2014-03-27  Version 1
+
+   187  2014-03-27  Version 1
+
+   188  2014-03-27  Version 1
+
+   189  2014-03-27  Version 1
+
+   190  2014-03-27  Version 1
+
+   191  2014-03-27  Version 1
+
+   192  2014-03-27  Version 1
+
+   193  2014-09-29  Version 1
+
+   194  2014-12-29  Version 1
+
+   195  2014-12-29  Version 1
+
+   196  2014-12-29  Version 1
+
+   197  2014-12-29  Version 1
+
+   198  2014-12-29  Version 1
+
+   199  2014-12-29  Version 1
+
+   200  2014-12-29  Version 1
+
+   201  2014-12-29  Version 1
+
+   202  2014-12-29  Version 1
+
+   203  2014-12-29  Version 1
+
+   204  2014-12-29  Version 1
+
+   205  2014-12-29  Version 1
+
+   206  2015-09-26  Version 1
+
+   207  2015-09-26  Version 1
+
+   208  2015-12-19  Version 1
+
+   209  2015-12-19  Version 1
+
+   210  2015-12-21  Version 1
+
+   211  2015-12-21  Version 1
+
+   212  2015-12-23  Version 1
+
+   213  2015-12-23  Version 1
+
+   214  2015-12-23  Version 1
+
+   215  2015-12-23  Version 1
+
+   216  2015-12-23  Version 1
+
+   217  2015-12-23  Version 1
+
+   218  2015-12-23  Version 1
+
+   219  2015-12-23  Version 1
+
+   220  2015-12-23  Version 1
+
+   221  2015-12-23  Version 1
+
+   221  2016-09-30  Version 1
+
+   222  2016-09-30  Version 1
+
+   223  2016-09-30  Version 1
+
+   224  2016-09-30  Version 1
+
+   %(vol-int)03i  %(pub-date)s  Version %(version)s
+%(release-notes)s

@@ -1,0 +1,91 @@
+PDS_VERSION_ID          = PDS3
+RECORD_TYPE             = STREAM
+
+OBJECT                  = VOLUME
+  VOLUME_SERIES_NAME      = "MISSION TO SATURN"
+  VOLUME_SET_NAME         = "CASSINI ORBITER RADIO AND PLASMA WAVE SCIENCE"
+  VOLUME_SET_ID           = "USA_NASA_PDS_CORPWS_0XXX"
+  VOLUMES                 = NULL
+  VOLUME_NAME             = "
+    VOLUME %(vol-num-int)03d: CASSINI RADIO AND PLASMA WAVE STANDARD PRODUCTS"
+  VOLUME_ID               = CORPWS_%(vol-num)s
+  VOLUME_VERSION_ID       = "VERSION %(version)s"
+  VOLUME_FORMAT           = "UDF_ISO-9660_BRIDGE"
+  MEDIUM_TYPE             = "DVD-R"
+  PUBLICATION_DATE        = %(pub-date)s
+  DESCRIPTION             = "
+    This volume contains documentation and all available Cassini Radio
+    and Plasma Wave Science (RPWS) data for spacecraft event time
+    (SCET) dates %(scet-start)s through %(scet-through)s."
+
+  MISSION_NAME            = "CASSINI-HUYGENS"
+  SPACECRAFT_NAME         = "CASSINI ORBITER"
+  DATA_SET_ID             = { "CO-V/E/J/S/SS-RPWS-4-SUMM-KEY60S-V1.0",
+                              "CO-V/E/J/S/SS-RPWS-2-REFDR-ALL-V1.0",
+                              "CO-V/E/J/S/SS-RPWS-3-RDR-LRFULL-V1.0",
+                              "CO-V/E/J/S/SS-RPWS-2-REFDR-WBRFULL-V1.0",
+                              "CO-V/E/J/S/SS-RPWS-2-REFDR-WFRFULL-V1.0" }
+
+  OBJECT                  = DATA_PRODUCER
+    INSTITUTION_NAME        = "UNIVERSITY OF IOWA"
+    FACILITY_NAME           = "DEPARTMENT OF PHYSICS AND ASTRONOMY"
+    FULL_NAME               = "DR. WILLIAM S. KURTH"
+    ADDRESS_TEXT            = "DR. WILLIAM S. KURTH
+      DEPARTMENT OF PHYSICS AND ASTRONOMY
+      THE UNIVERSITY OF IOWA
+      IOWA CITY, IOWA 52242"
+    TELEPHONE_NUMBER        = "3193351926"
+    ELECTRONIC_MAIL_ID      = "WILLIAM-KURTH@UIOWA.EDU"
+    ELECTRONIC_MAIL_TYPE    = "INTERNET"
+  END_OBJECT              = DATA_PRODUCER
+
+  OBJECT                  = DATA_PRODUCER
+    INSTITUTION_NAME        = "UNIVERSITY OF IOWA"
+    FACILITY_NAME           = "DEPARTMENT OF PHYSICS AND ASTRONOMY"
+    FULL_NAME               = "DR. DONALD A. GURNETT"
+    ADDRESS_TEXT            = "DR. DONALD A. GURNETT
+      DEPARTMENT OF PHYSICS AND ASTRONOMY
+      THE UNIVERSITY OF IOWA
+      IOWA CITY, IOWA 52242"
+    TELEPHONE_NUMBER        = "3193351697"
+    ELECTRONIC_MAIL_ID      = "DONALD-GURNETT@UIOWA.EDU"
+    ELECTRONIC_MAIL_TYPE    = "INTERNET"
+  END_OBJECT              = DATA_PRODUCER
+
+  OBJECT                  = DATA_SUPPLIER
+    INSTITUTION_NAME        = "UNIVERSITY OF CALIFORNIA, LOS ANGELES"
+    FACILITY_NAME           = "GEOPHYSICS AND PLANETARY PHYSICS"
+    DISCIPLINE_NAME         = "PLASMA INTERACTIONS"
+    FULL_NAME               = "DR. RAYMOND J. WALKER"
+    ADDRESS_TEXT            = "DR. RAYMOND J. WALKER
+      INST. OF GEOPHYSICS AND PLANETARY PHYSICS
+      UCLA
+      405 HILGARD AVE.
+      LOS ANGELES, CA 90095-1567"
+    TELEPHONE_NUMBER        = "3108257685"
+    ELECTRONIC_MAIL_ID      = "RWALKER@IGPP.UCLA.EDU"
+    ELECTRONIC_MAIL_TYPE    = "INTERNET"
+  END_OBJECT              = DATA_SUPPLIER
+
+  OBJECT                  = CATALOG
+    ^MISSION_CATALOG         = "MISSION.CAT"
+    ^INSTRUMENT_HOST_CATALOG = "INSTHOST.CAT"
+    ^INSTRUMENT_CATALOG      = "RPWSINST.CAT"
+    DATA_SET_ID              = {
+      "CO-V/E/J/S/SS-RPWS-4-SUMM-KEY60S-V1.0",
+      "CO-V/E/J/S/SS-RPWS-2-REFDR-ALL-V1.0",
+      "CO-V/E/J/S/SS-RPWS-3-RDR-LRFULL-V1.0",
+      "CO-V/E/J/S/SS-RPWS-2-REFDR-WBRFULL-V1.0",
+      "CO-V/E/J/S/SS-RPWS-2-REFDR-WFRFULL-V1.0" }
+    ^DATA_SET_CATALOG        = {
+      "KEYDS.CAT",
+      "RAWDS.CAT",
+      "LRFULLDS.CAT",
+      "WBFULLDS.CAT",
+      "WFFULLDS.CAT" }
+    ^REFERENCE_CATALOG       = { "REF.CAT", "PROJREF.CAT" }
+    ^PERSONNEL_CATALOG       = "PERSON.CAT"
+  END_OBJECT              = CATALOG
+
+END_OBJECT              = VOLUME
+END

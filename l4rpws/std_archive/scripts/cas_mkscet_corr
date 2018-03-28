@@ -1,0 +1,301 @@
+#!/usr/bin/env python2.7
+
+import sys
+import os
+import optparse
+from multiprocessing import Process, Pipe
+
+from os.path import basename as bname
+from os.path import join as pjoin
+
+import rpw_pds.util as U
+
+import time
+import pspice as S
+
+
+##############################################################################
+def errval_main(conn):
+	
+	S.ldpool('/opt/project/cassini/spice/kernels/lsk/naif0008.tls')
+	S.ldpool('/opt/project/cassini/spice/kernels/sclk/cas00124.tsc')
+	
+	while True:
+		sSclk = conn.recv()
+		if sSclk == "END":
+			break	
+		
+		rEt = S.scs2e(-82, sSclk)
+		sScet = S.et2utc(rEt, "ISOD", 3)
+		
+		conn.send(sScet)
+
+	#print "Child Exit"
+	return 0
+	
+##############################################################################
+# Marching segments, replace points if best fit line would cover them
+
+def best_fit(x1, x2, y1, y2):
+	
+	m = (y1 - y2)/(x1-x2)
+	
+	b = y1 - m*x1
+	
+	return (m, b)
+	
+
+def marching_segments_reduction(lTups, Xidx, Yidx, fEpsilon):
+	"""Starting at a point, see how many points you can move out removing
+	intermediate values while still covering all removed values with a best
+	fit line
+	
+	Input format is:
+	   [ tup1, tup2, ... ]
+	"""
+	if Xidx == Yidx:
+		raise ValueError("Xindex = %d and Yindex = %d"%(Xidx, Yidx))
+	
+	nRm = 0
+	
+	iStart = 0
+	while iStart + 2 < len(lTups):  # Can't use a for loop here as the array
+	                                # shrinks during processing
+	
+		# Test how big iEnd can get, given this value of epsilon
+		nPops = 0
+
+		for iEnd in xrange(iStart + 2, len(lTups)):
+			
+			# Get best fit line for this j
+			(m, b) = best_fit(lTups[iStart][Xidx], lTups[iEnd][Xidx],
+	   	                  lTups[iStart][Yidx], lTups[iEnd][Yidx])
+			
+			# Test all the intermediate points for this iEnd
+			bRmOkay = True
+			for iMid in xrange(iStart+1, iEnd):
+				
+				Xmid = lTups[iMid][Xidx]
+				Ymid = m * Xmid + b
+				
+				if abs( Ymid - lTups[iMid][Yidx] ) > fEpsilon:
+					bRmOkay = False
+					break
+				
+			if bRmOkay:
+				nPops = iEnd - iStart - 1 # Bank this number of pops
+			else:
+				break                     # Stop moving iEnd
+		
+		# Okay, pop what you can, alters the input array
+		sys.stderr.write("Popping %d points from the input array\n"%nPops)
+		for i in xrange(0, nPops):
+			lTups.pop(iStart + 1)
+			nRm += 1
+		
+		iStart += 1                     # Due to the pops, this is end of 
+		                                # the segment
+	
+	return nRm	
+
+##############################################################################
+class SclkAdjuster(object):
+	def __init__(self, sAdjFile):
+		
+		self.lTbl = []
+		
+		fIn = file(sAdjFile, 'rb')
+		
+		nLine = 0
+		for sLine in fIn:
+			
+			nLine += 1
+			if(nLine == 1):
+				continue
+			
+			sLine = sLine.strip()
+			if len(sLine) < 1:
+				continue
+			
+			lLine = sLine.split(',')
+			if len(lLine) != 4:
+				raise ValueError("Expecting 5 items per line in %s"%sAdjFile)
+			
+			sOldScet = lLine[1].strip('"')
+			
+			rEtOld = S.utc2et(sOldScet)
+			
+			rAdj = float(lLine[3].strip('"'))
+			
+			
+			self.lTbl.append( (sOldScet, rEtOld, rAdj) )
+			sys.stderr.write("Loaded line: (%s,%s,%s)\n"%self.lTbl[-1])
+		
+	########################################################################
+	def checkSclk(self, sErrScet, sGoodScet, fEpsilon):
+		
+		rEtErr = S.utc2et(sErrScet)
+		pout = sys.stderr.write
+		
+		if rEtErr < self.lTbl[0][1] or rEtErr >= self.lTbl[-1][1]:
+			return True
+		
+		iSeg = -1
+		for i in xrange(0, len(self.lTbl) - 1):
+		
+			if rEtErr >= self.lTbl[i][1] and rEtErr < self.lTbl[i+1][1]:
+				iSeg = i
+				break
+		
+		if iSeg == -1:
+			raise ValueError("WTF??")
+		
+		x0 = self.lTbl[iSeg][1]
+		x1 = self.lTbl[iSeg+1][1]
+		y0 = self.lTbl[iSeg][2]
+		y1 = self.lTbl[iSeg+1][2]
+		
+		
+		rAdj = y0 + (rEtErr - x0)*( (y1 - y0)/(x1 - x0) )
+				
+		rEtGood = S.utc2et(sGoodScet)
+		
+		if abs(rEtGood - (rEtErr + rAdj)) < fEpsilon:
+			return True
+		
+		sAdjScet = S.et2utc(rEtErr + rAdj, "ISOD", 3)
+		
+		pout("ERROR: Check failed, ERRSCET: %s ADJ: %s EXPECTED: %s DIFF: %.6f (sec)\n"%(
+		     sErrScet, sAdjScet, sGoodScet, rEtGood - (rEtErr + rAdj)))
+			  
+		return False		
+		
+
+##############################################################################
+def main(argv):
+	pout = sys.stdout.write
+	perr = sys.stderr.write
+	
+	sUsage="cas_scet_correction [SCLK1 SCLK2 ...]"
+	
+	sDesc="""
+Start two instances of the spice routiens and calculate the difference
+between the old kernels and the new ones.  Really wish SPICE didn't use
+global variables a this could be done with two pools.
+
+All information is sent to standard output.
+"""
+	psr = optparse.OptionParser(usage=sUsage, prog="cas_scet_correction",
+	                            description=sDesc)
+										 
+	psr.add_option('-c', '--check', dest="sCheck", help="Instead of generating "+\
+	               'a table of correction points, check a given table against '+\
+						'the spice kernels', metavar='FILE', default=None)
+						
+	(opts, lSclks) = psr.parse_args()
+	
+	bDoSclkPoints = False
+	if len(lSclks) > 0:
+		bDoSclkPoints = True
+	
+	(conn, child_conn) = Pipe()
+	p = Process(target=errval_main, args=(child_conn,))
+	p.start()
+	             
+	nSclkStart = 1606757972
+	#nFracStart = 0
+	
+	nSclkStop  = 1703551839
+	
+	S.ldpool('/opt/project/cassini/spice/kernels/lsk/leapseconds.tls')
+	S.ldpool('/opt/project/cassini/spice/kernels/sclk/cassini.tsc')
+	
+	if bDoSclkPoints:
+		perr("Outputing differences for specific SCLKs\n")
+		
+		pout('"SCLK","Old Scet","New Scet","Difference"\n')	
+		for sSclk in lSclks:
+			conn.send(sSclk)
+			
+			rEt = S.scs2e(-82, sSclk)
+			sScet = S.et2utc(rEt, "ISOD", 3)
+	
+			sErrScet = conn.recv()
+			rErrEt = S.utc2et(sErrScet)
+			
+			pout('"%s",%s,%s,%.8f\r\n'%(sSclk, sErrScet, sScet, rEt - rErrEt))
+		
+		conn.send('END')
+		p.join()
+		return 0
+			
+	lBuf = []
+	
+	adj = None
+	if opts.sCheck:
+		adj = SclkAdjuster(opts.sCheck)
+	
+	perr("Generating New vs. Old SCETs at 10 minute intervals ...\n")
+	
+	fEpsilon = 0.064
+	rWallStart = time.time()
+	nChecks = 0
+	nSclk = nSclkStart
+	#nFrac = nFracStart
+	nCheckErr = 0
+	while nSclk < nSclkStop:
+		
+		#sSclk = "1/%d:%03d"%(nSclk, nFrac)
+		sSclk = "1/%d"%nSclk
+	
+		conn.send(sSclk)
+	
+		rEt = S.scs2e(-82, sSclk)
+		sScet = S.et2utc(rEt, "ISOD", 3)
+	
+		sErrScet = conn.recv()
+		rErrEt = S.utc2et(sErrScet)
+		
+		if opts.sCheck:
+			if not adj.checkSclk(sErrScet, sScet, fEpsilon):
+				nCheckErr = 13
+						
+		else:				
+			#              0,       1,       2,      3,     4,    5
+			lBuf.append( (sSclk, sErrScet, rErrEt, sScet, rEt, rEt-rErrEt) )
+			
+			
+		nSclk += 600
+		nChecks += 1
+	
+	rWallEnd = time.time()
+	conn.send("END")
+	p.join()
+	
+	perr("done.\n")
+	
+	if opts.sCheck:
+		return nCheckErr
+	
+	
+	perr("%.0f comparisons generated per second\n"%(nChecks/(rWallEnd - rWallStart)))
+	
+	perr("Generating Reduced Dataset at %f second tollerance..."%fEpsilon)	
+	
+	nRemoved = marching_segments_reduction(lBuf, 2, 5, fEpsilon)
+	
+	perr("done\n")
+	perr("Old dataset %d points, new dataste %d points\n"%(nChecks, 
+	     nChecks - nRemoved))
+	
+	pout('"SCLK","Old Scet","New Scet","Difference"\r\n')
+	for tup in lBuf:
+		pout('"%s",%s,%s,%.8f\r\n'%(tup[0], tup[1], tup[3], tup[5]))
+	
+	return 0	
+	
+	
+	
+#############################################################################
+if __name__ == '__main__':
+	sys.exit(main(sys.argv))

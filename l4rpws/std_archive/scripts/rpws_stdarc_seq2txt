@@ -1,0 +1,190 @@
+#!/usr/bin/env python
+"""seq2text.py -- Generate text sequence information from HTML version."""
+
+import sys
+import os
+from os.path import join as pjoin
+import logging
+import optparse
+import StringIO
+import traceback
+
+import pspice
+
+# General local libs
+import rpw_pds.util
+
+# Libs in this module
+import rpws.stdarch as A
+
+##############################################################################
+# Globals
+
+# NOTE: Uses globals from cassini.py
+
+##############################################################################
+def get100Dirs(doyStart, doyEnd, sOutDir=""):
+	"""Make list of sub directories for each partial 100 day span in
+	   a time range."""
+	
+	lDirs = []
+		
+	s = doyStart.nYear * 1000 + doyStart.nDOY
+	e = doyEnd.nYear * 1000 + doyEnd.nDOY
+
+	n = (s/1000) * 1000 + ((s % 1000)/100) * 100
+	while n <= e:
+	
+		sTmp = "T%04d%dXX"%(n/1000, (n % 1000)/ 100) 
+		if sOutDir != None and len(sOutDir) > 0:
+			lDirs.append(pjoin(sOutDir, sTmp))
+		else:
+			lDirs.append(sTmp)
+		
+		n += 100
+		if n % 1000 == 400:
+			n += 1000
+			n -= 400
+	
+	return lDirs
+
+##############################################################################
+def main():
+	""" Main funciton for cassini html sequence generation, uses sys.argv """
+
+	sUsage = """
+CASSEQ_TO_TXT - Generate Text version of Cassini Sequence info
+
+usage:  casseq_to_txt [options] [seq1 seq2 seq3 ...]
+
+If no sequences are given, a list input sequences is printed.
+"""  
+	
+	psr = optparse.OptionParser(usage=sUsage)
+	
+	grp = optparse.OptionGroup(psr, "Logging Options")
+	grp.add_option("-l", "--log-level", dest="sLevel", metavar="LOG_LEVEL",
+	               help="Logging level one of [critical, error, warning, "+\
+	               "info, debug].  The default is error.", type="string",
+	               action="store", default="error")
+							
+	grp.add_option("-f", "--log-file", dest="sFile", metavar="LOG_FILE",
+	               help="If specified logging information is sent to "+\
+	               "LOG_FILE *in addition* to standard out", type="string",
+	               action="store", default=None)
+	
+	grp.add_option("", "--no-stdout", dest="bStdout", action="store_false",
+	               help="Do not log to standard output.  If this option "+\
+                  "is specified but -f is not, then the program doesn't "+\
+                  "produce any output, except for uncaught tracebacks.",
+                  default=True)
+	psr.add_option_group(grp)
+	
+	
+	grp = optparse.OptionGroup(psr, "Output Options")
+
+	sTmp = pjoin(A.g_sSuperVol, 'DATA', 'ANCILLARY')
+	grp.add_option("-o", "--outdir", dest="sOutDir", default=sTmp,
+	               help="Output directory, default is %s."%sTmp)
+						
+	grp.add_option("-c", "--check", dest="bCheckOnly", default=False,
+	               action="store_true", help="Only check the sequences "+\
+	               "don't actually output anything.")
+	
+	grp.add_option("-w", "--over-write", dest="bOver", default=False,
+	               action="store_true", help="All overwriting existing "+\
+						"sequence information directories.")
+	psr.add_option_group(grp)
+				 
+	
+	psr.add_option('-t','--vol-template', dest='sVolTplt', 
+	               default=A.g_sTemplateVol,  metavar='TEMPLATE',
+	               help='Template files directory.  Template files are '+\
+	               "copied as is, or have replaceable parameters that are "+\
+	               "substituted at run time.  "+\
+	               "Default: [%s]"%A.g_sTemplateVol)
+
+	sTmp = os.getenv('CAS_TIME_KERNELS')
+	sHelp = ""
+	if sTmp == None:
+		sHelp = "  CAS_TIME_KERNELS is not defined, so this is a REQUIRED "+\
+		        "option for your environment!"
+	psr.add_option('-k', '--meta-kernel', dest="sMetaKern", metavar="FILE",
+	                  default=sTmp, help="Provide an alternate spice metakernel "+\
+							"for conversion of Cassini SCETs to SCLKs")
+
+
+	(opts, lSeq) = psr.parse_args()
+	
+	rpw_pds.util.setupLogging(opts.sLevel, opts.sFile, opts.bStdout)
+	log = logging.getLogger('main')
+	
+	# Try to load the spice metakernel
+	try:
+		pspice.furnsh(opts.sMetaKern)
+		log.info("Spice metakernel %s loaded"%opts.sMetaKern)
+	except pspice.error, e:
+		log.error("Loading Cassini SPICE metakernel: %s"%str(e))
+	
+	if len(lSeq) < 1:
+		
+		print "Listing all Cassini RPWS sequences..."
+	
+		l = A.seq.listSeq(log, A.g_sSuperVol)
+		for d in l:
+			print "%4s: %s through %s in %s"%(d['seq'], d['start'].getDOMstr(),
+			                                  d['end'].getDOMstr(), d['link'])
+		return 0
+		
+	#Load the sequences:
+	for sSeq_l in lSeq:
+		sSeq = sSeq_l.upper()
+		
+		l = A.seq.listSeq(log, A.g_sSuperVol, sSeq)
+		if len(l) == 0:
+			log.error("Couldn't gather information on sequence %s."%sSeq)
+			return 2
+		
+		dSeqInfo = l[0]
+		log.info("Reading sequence %s"%dSeqInfo['seq'])
+		
+		seqCur = None
+		try:
+			seqCur = A.seq.seq(dSeqInfo['link'], dSeqInfo['seq'])
+			log.info("Sequence %s loaded okay."%dSeqInfo['seq'])
+		except RuntimeError, e:
+			strFile = StringIO.StringIO()
+			traceback.print_exc(file=strFile)
+			log.critical("Unhandeled Exception. %s"%(strFile.getvalue()))
+			return 2
+		
+		#Now, if they want to output stuff, make the directories.
+		if opts.bCheckOnly:
+			continue
+		
+		l100Dirs = get100Dirs(seqCur.startDOY(), seqCur.endDOY(), opts.sOutDir)
+		
+		for sTmp in l100Dirs:
+			if not os.path.exists( sTmp ):
+				os.makedirs(sTmp)
+		
+		sSeqOutDir = pjoin(l100Dirs[0], sSeq)
+		if not os.path.exists(sSeqOutDir):
+			os.makedirs(sSeqOutDir)
+		
+		#PDS template: 
+		sTplt = pjoin(opts.sVolTplt, 'DATA', 'ANCILLARY', 'TXXXXXXX', 'SXX', 
+		              'SXX_TOL.LBL.r2')
+		seqCur.pdsOutput(sTplt, sSeqOutDir, opts.bOver)
+		
+		#Now link other dirs:
+		for sOtherDir in l100Dirs[1:]:
+			sDest = pjoin(sOtherDir, sSeq)
+			if not os.path.exists(sDest):
+				os.symlink(sSeqOutDir, sDest)
+		
+		
+##############################################################################
+if __name__ == "__main__":
+	sys.exit(main())	
+	

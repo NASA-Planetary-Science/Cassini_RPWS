@@ -1,0 +1,82 @@
+Prerequistes
+============
+
+This python module depends on the python package rpw_pds, which can be found
+in SVN at:  
+
+   https://saturn.physics.uiowa.edu/svn/rpws/python/trunk/rpwPDS
+
+That package in turn depends on the "PDS Tools Package" at:
+
+   http://pds.jpl.nasa.gov/tools/software_download.cfm 
+
+
+Running From Source
+===================
+
+This is a pure python module and my thus be run from the source tree without
+installation.  If you'd like to do that, then add the module directory to your
+PYTHONPATH and the scripts directory to your PATH.  The following commands
+issued from the directory containing this file should do the trick.
+
+  $ export PYTHONPATH=`pwd`:$PYTHONPATH
+  $ export PATH=`pwd`/scripts:$PATH
+
+This will insure that the versions here are picked up first.
+
+NOTE: You could also use the dependency library rpw_pds in a similar manner
+by adding it's top level directory rpwPDS (not rpw_pds) to your PYTHONPATH
+as well. 
+
+
+Installation
+============
+
+1. Run installation script.
+
+
+  * To install in your home directory under $HOME/lib/python and $HOME/bin:
+   
+    $ python setup.py install --home=$HOME
+      
+    and set PYTHONPATH in your .bashrc or .kshrc.
+
+    This will install files in: 
+	 
+	    $HOME/lib/python/rpw_cas
+	
+	 and will put the scripts caslen0HRfix, casmstrdvd, casseq_to_txt, and
+    casvolreport in:
+	 
+	    $HOME/bin
+	 
+
+  * To install in the standard sys location:
+
+    $ python setup.py install
+   
+    The standard system location varies but on unix it's usually
+    /usr/local/lib/pythonX.X/site-packages or /usr/lib/pythonX.X/site-packages
+    where X.X is your python major and minor versions.  On windows it is
+    usually C:\PythonXX where XX is the python major and minor versions.
+
+    On UNIX this will (typically) install files in:
+
+       /usr/local/lib/pythonX.X/site-packages/rpw_cas
+		 
+	 and will put the scripts caslen0HRfix, casmstrdvd, casseq_to_txt, and
+    casvolreport in:
+	 
+	    /usr/local/bin
+   
+
+2. If you are maintaining a personal stock of python libraries in your home
+   directory, you should set PYTHONPATH in your login shell to point to that
+   location, which is typically $HOME/lib/python.  This way all of your
+   personal python libs will be found automatically when python is invoked.
+
+
+Testing the Installation
+========================
+
+(TODO: Add this part)

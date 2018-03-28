@@ -1,0 +1,462 @@
+#!/usr/bin/env python
+
+"""
+Master a CASSINI PDS Volume for export.
+"""
+
+import sys        #Gets sys.argv
+import traceback  #for logging unhandled exceptions
+import StringIO
+import string
+import optparse   #Command line option parser
+import os
+import os.path
+import logging
+from copy import deepcopy
+from os.path import join as pjoin
+
+import pspice
+
+#related module imports
+import rpw_pds.util
+import rpw_pds.verify
+
+#Module Local imports
+import rpws.stdarch as A
+
+g_sProgInfo = '0.5 2016-10-12 11:41 cwp'
+
+############################################################################
+def checkArgs(lArgs):
+	"""Check program args, expects to find a year, day of year, and vol num
+		
+		lArgs -- A two typle of arg strings ['YYYYDDD',vol_num]
+	
+	   Returns - Three tuple of integers (nYear, nDOY, nVol)
+		Throws  - Raises ValueError if args are not correct.
+	"""
+			
+	if len(lArgs) < 1:
+		raise ValueError('No starting date specifed, use -h for help')
+	
+	if len(lArgs) < 2:
+		raise ValueError('No volume number specifed, use -h for help')
+	
+	if len(lArgs[0]) <> 7:
+		raise ValueError('Starting data must be in YYYYDDD format (day of year).')
+
+	for c in lArgs[0]:
+		if not c.isdigit():
+			raise ValueError('Non digits in start data argument')
+	
+	for c in lArgs[1]:
+		if not c.isdigit():
+			raise ValueError('Non digits in volume number argument')
+	
+	
+	if len(lArgs[1]) > 4:
+		raise ValueError('Max cassini volume number is 9999')
+	 
+			
+	
+	doyStart = rpw_pds.util.DOYdate(int(lArgs[0][:4]), int(lArgs[0][4:]))
+	nVol = int(lArgs[1])
+	
+	return (doyStart, nVol)
+	
+############################################################################
+def parseMaxSize(sMax):
+	
+	sError = "Format error for Media max file storage space: '%s'."%sMax
+	nMax = 0L
+	if sMax == None:
+		raise ValueError(sError)
+	if len(sMax) < 2:
+		raise ValueError(sError)
+		
+	if not sMax[:-1].isdigit():
+		raise ValueError(sError)
+	else:
+		nMax = long(sMax[:-1])
+		
+	sTmp = sMax.lower()
+	if sTmp[-1:] == 'm':
+		nMax *= 1000000L
+	elif sTmp[-1:] == 'g':
+		nMax *= 1000000000L
+	elif sTmp[-1:] == 't':
+		nMax *= 1000000000000L
+	else:
+		raise ValueError(sError)
+	
+	return nMax
+
+############################################################################
+def backout(lBackouts):
+	"""Delete any files mentioned in backouts.  Throw if can't delete, but
+	but not if they don't exist."""
+	
+	log = logging.getLogger('backout')
+	
+	if len(lBackouts) < 1:
+		return
+	else:
+		log.info('Backing out changes in template volume: %s'%A.g_sTemplateVol)
+		
+	for sPath in lBackouts:
+		if os.path.exists(sPath):
+			log.info('   Removing: %s'%sPath)
+			os.remove(sPath)
+
+############################################################################
+def prnBurnInstructions(sStageDir, sVolName):
+	"""print cdrecord instructions, just a reminder"""
+	
+	log = logging.getLogger('burnInfo')
+	
+	log.info("BURN INSTRUCTIONS:")
+	log.info("$ ssh betazed")
+	log.info("$ cd %s"%sStageDir)
+	
+	sTmp = '$ mkisofs -f -iso-level 2 -l -r -J -udf'
+	sTmp += ' -A "Cassini RPWS standard data products archive" '
+	sTmp += ' -p "chris-piker@uiowa.edu" -publisher "The University of Iowa"'
+	sTmp += ' -input-charset utf-8 -V %s -o /opt/project/cassini/CORPWS_ISOs/%s.iso .'%(sVolName,sVolName)	
+	log.info(sTmp)
+	#log.info('$ nautilus-cd-burner --source-iso=%s.iso #(on hoth)'%sVolName)
+	
+	#sExtras = rpw_pds.util.getVerFile(pjoin(A.g_sTemplateVol, 'ERRATA.TXT.r4'))
+	#log.info("")
+	#log.info("NOTE: If you edit ERRATA.TXT,  you *must* update EXTRAS/MD5LF.TXT")
+	#log.info("      EXTRAS/MD5CRLF.TXT, and %s !"%sExtras)
+	
+	log.info("")
+
+############################################################################
+def main():
+	"""Top level function, make use of sys.argv
+	"""
+	
+	sUsage = """
+
+rpws_stdarc_mkvol - Master Cassini RPWS Standard PDS Archive DVDs
+
+   usage:  rpws_stdarc_mkvol [options] start_YYYYDDD vol_num
+	
+   start_YYYYDDD - The inclusive start date for output data, the stop date
+           is computed automatically from the media type.  Example
+           December 31st of 2004 would be:  '2004366'.
+
+   vol_num - Volume number for this DVD/CD
+"""
+	
+	parser = optparse.OptionParser(usage=sUsage)
+	
+	parser.add_option('','--no-lint', dest="bNoLint", action="store_true",
+	                  default=False, help="Don't run linklint after "+\
+	                  "mastering the volume.  Useful if you don't have linklint.")
+							
+	parser.add_option('','--no-pvt', dest="bNoPvt", action="store_true",
+	                  default=False, help="Don't run perl validation tools "+\
+	                  "after mastering the volume.  The perl validation tools "+\
+	                  "are part of the PDS tools downloadable from: "+\
+	                  "ftp://pds.jpl.nasa.gov/pub/toplevel/tools/bin/tools_45_solaris.bin")
+	
+	sTmp = os.getenv('CAS_TIME_KERNELS')
+	sHelp = ""
+	if sTmp == None:
+		sHelp = "  CAS_TIME_KERNELS is not defined, so this is a REQUIRED "+\
+		        "option for your environment!"
+	parser.add_option('-k', '--meta-kernel', dest="sMetaKern", metavar="FILE",
+	                  default=sTmp, help="Provide an alternate spice metakernel "+\
+							"for conversion of Cassini SCETs to SCLKs")
+	
+	sTmp = '/usr/local/pds/tools'
+	parser.add_option('-a','--pds-tools', dest="sPvtDir", metavar="DIR",
+	                  help="The path for the pds_tools.  This DIRectory should"+\
+	                  " contain testline.pl, validate.pl etc.  The default is "+\
+							sTmp + ".", default=sTmp) 
+							
+	parser.add_option('','--perl', dest="sPerl", metavar="PERL_BIN",
+	                  help="Path to the perl binary for running validation tools.",
+							default='perl')
+	
+	parser.add_option("-l", "--log-level", dest="sLevel", metavar="LOG_LEVEL",
+	                  help="Logging level one of [critical, error, warning, "+\
+	                  "info, debug].  The default is error.", type="string",
+	                  action="store", default="error")
+							
+	parser.add_option("-f", "--log-file", dest="sFile", metavar="LOG_FILE",
+	                  help="If specified logging information is sent to "+\
+	                  "LOG_FILE *in addition* to standard out", type="string",
+	                  action="store", default=None)
+	
+	parser.add_option("", "--no-stdout", dest="bStdout", action="store_false",
+	                  help="Do not log to standard output.  If this option "+\
+                     "is specified but -f is not, then the program doesn't "+\
+                     "produce any output, except for uncaught tracebacks.",
+                     default=True)
+	
+	sTmp = os.path.join(os.getcwd(), 'CORPWS_XXXX')
+	
+	parser.add_option("-o","--output-dir", dest='sStageDir', metavar="STAGE_DIR",
+	                  help="Set an alternate staging directory.  Default:  ["+\
+	                  "%s] where XXXX is replaced by a zero padded "%sTmp +\
+	                  "volume number.", default=None)
+	
+							
+	parser.add_option('-t','--vol-template', dest='sVolTemplate', 
+	                  default=A.g_sTemplateVol,  metavar='TEMPLATE',
+	                  help='Template files directory.  Template files are '+\
+	                  "copied as is, or have replaceable parameters that are "+\
+	                  "substituted at run time.  These are:  (pub-date, "+\
+							"vol-num, vol-ord-name, scet-start, scet-stop, "+\
+	                  "scet-through, version).  "+\
+	                  "Default: [%s]"%A.g_sTemplateVol)
+	
+	parser.add_option('-e', '--end-date', dest='sEndDate', default=None,
+	                  metavar='END_DATE',
+	                  help='The *exclusive* stop date in YYYYDDD format '+\
+							'by default this is calculated automatically based '+\
+							'on the media size.')
+	
+	doyTmp = rpw_pds.util.DOYdate()
+	parser.add_option('-p','--pub-date', dest='sPubDate', default=str(doyTmp), 
+	                  metavar='PUB_DATE', help='Publication date, defualts'+\
+	                  ' to today, [%s (%03i)]'%(doyTmp.getDOMstr(), doyTmp.nDOY)+\
+	                  ' Give the date as YYYYDDD (day of year format).')
+	
+	parser.add_option('-s','--media-size', dest='sMaxSize', default="4500M",
+	                  metavar="MEDIA_SIZE",
+	                  help='Maximum file storage space on expected media.'+\
+	                  ' MEDIA_SIZE must be an integer followed by one of:'+\
+	                  'T, G or M where T-Terabytes, G-Gigabytes '+\
+	                  'and M-Megabytes.  Default [4500M]')
+	
+	parser.add_option('-d','--del-stage', dest='bDelStage', default=False,
+	                  action="store_true", help="Delete the staging directory"+\
+	                  " before mastering the volume.  Only removes symlinks, "+\
+	                  " not what they point to.")
+	
+	parser.add_option('-i', '--low-index', dest='bLowIndex', default=False, 
+	                  action="store_true",
+	                  help="As each volume's index is created it is stored"+\
+	                  " in TEMPLATE/INDEX as a lowercase numbered and versioned"+\
+							" index file.  By default cumlative indecies are generated"+\
+	                  " from the highest version number index for each volume."+\
+							" use this option to include the lowest version number"+\
+							" volume index when generating the cumlative index.")
+	
+	parser.add_option('-n','--release-notes', dest='sRelNotes', default='',
+	                  metavar='RELEASE_NOTES', help='Release notes to add for'+\
+							' this volume from the command line.')
+							
+	parser.add_option('','--release-file', dest='sRelFile', default='',
+	                  metavar='RELEASE_FILE', help='A file of release notes to '+\
+	                  'add to this volume.  All text in the file should start'+\
+	                  ' on column 8 and end on column 72 if you wish to avoid.'+\
+							' automatic formatting of the notes.  If both '+\
+	                  '--release-notes and --release-file are specifed, '+\
+							'--release-file wins.')
+							
+	parser.add_option('-V','--vol-version-id', dest="nVolVer", default=1,
+	                  type="int", help='The VOLUME_VERSION_ID value, defaults '+\
+							'to 1.  Use this for re-released volumes.')
+							
+	parser.add_option('-m','--skip-md5', dest='bSkipHash', default=False,
+	                  action="store_true", help="Skip creation of the md5 hash "+\
+	                  "files MD5LF.TXT and MD5CRLF.TXT.  This will force an "+\
+	                  "automatic error that will undo changes to the template "+\
+	                  "volume.  This is a good way do a test run.")
+							
+	parser.add_option('-z', '--skip-size-check', dest='bSkipSzCk', default=False,
+	                  action="store_true", help="Skip the size check, requires "+\
+	                  "a specified end date (-e).")
+	
+	(lOpts, lArgs) = parser.parse_args()
+	
+	# Check that '-e' is specified if '-z' is specified
+	if lOpts.bSkipSzCk and lOpts.sEndDate == None:
+		print "Size check cannot be skipped without specifing an end date (-z requires -e)."
+		return 1
+	
+	# Save super volume and template volume directories is shorter vars
+	sSuperVol = A.g_sSuperVol
+	sTpltVol  = A.g_sTemplateVol
+	
+	
+	# Replaceable parameters in documents
+	dDocReplace = {
+		'pub-date':None,
+		'scet-start':None,
+		'scet-stop':None,  # !!BIG FAT WARNING!! end date is not in the interval.
+		'scet-through':None, #One day less then sect-stop
+		'vol-num':None,
+		'vol-num-int':None,
+		'vol-ord-name':None,
+		'version':'1'
+	}
+	
+	#Setup logging, uses some of the options 
+	rpw_pds.util.setupLogging(lOpts.sLevel, lOpts.sFile, lOpts.bStdout)
+	log = logging.getLogger('main')
+	log.info(g_sProgInfo)
+	
+	log.info("Cmd line was: %s"%(string.join(sys.argv[1:])))
+	
+	# Try to load the spice metakernel
+	try:
+		pspice.furnsh(lOpts.sMetaKern)
+		log.info("Spice metakernel %s loaded"%lOpts.sMetaKern)
+	except pspice.error, e:
+		log.error("Loading Cassini SPICE metakernel: %s"%str(e))
+	
+	doyStart = None
+	nVol = None
+	try:
+		# Check the arguments, raises value error on problem
+		(doyStart, nVol) = checkArgs(lArgs)
+		dDocReplace['scet-start'] = doyStart.getDOMpDOYstr()
+		dDocReplace['vol-num-int'] = nVol
+		dDocReplace['vol-num'] = "%04i"%nVol
+		dDocReplace['vol-ord-name'] = rpw_pds.util.ordnalName(nVol)
+		dDocReplace['version'] = '%d'%lOpts.nVolVer
+
+	except:
+		log.critical("%s"%sys.exc_info()[1])
+		raise
+		#return 1
+	
+	lBackouts = []
+	try:
+	
+		nMaxBytes = parseMaxSize(lOpts.sMaxSize)  # Set max size
+		
+		#What the HELL is this, supposed to be strings in dict, not objs
+		doyPub = rpw_pds.util.strToDOYdate(lOpts.sPubDate)
+		dDocReplace['pub-date'] = doyPub.getDOMstr()
+	
+		# Setup the staging directory
+		sStageDir = lOpts.sStageDir
+		if sStageDir == None:
+			sTmp = "CORPWS_%04d"%nVol
+			sStageDir = os.path.join(os.getcwd(), sTmp)
+
+			if os.path.isdir(sStageDir) and lOpts.bDelStage:
+				log.info("Removing old staging directory: %s"%sStageDir)
+				rpw_pds.util.rmRecursive(sStageDir)
+				
+			os.mkdir(sStageDir)
+			
+	
+		# Link the unchanged files included in each volume 
+		nSizeStatic = A.linkUnchanged(sTpltVol, sSuperVol, sStageDir)
+		nOutputSize = nSizeStatic
+		lDates = []
+		
+		if lOpts.sEndDate == None:
+			# If no size has been specifed, then just see how many days
+			# I can get, else take the stop date from the command line.
+			# remember the stop date is *NOT* in the volume
+			lDates = A.daysToFillSize(sSuperVol, doyStart, nMaxBytes-nSizeStatic)
+			
+		else:
+			if lOpts.bSkipSzCk:
+				lDates = rpw_pds.util.mkDateRange(doyStart,rpw_pds.util.strToDOYdate(lOpts.sEndDate))
+			else:
+				lDates = A.mkAndCkFixedDateRange(sSuperVol, doyStart,
+								rpw_pds.util.strToDOYdate(lOpts.sEndDate),
+				            nMaxBytes-nSizeStatic
+							)
+		
+		dDocReplace['scet-through'] = lDates[-1].getDOMpDOYstr()		
+		doyThrough = deepcopy(lDates[-1])
+		doyTo = deepcopy(lDates[-1])
+		doyTo.incDay()
+		dDocReplace['scet-stop'] = doyTo.getDOMpDOYstr()
+		
+		
+		# Output the documents with simple replaceable parameters
+		nOutputSize += rpw_pds.util.makeFromTemplate(A.g_sTemplateVol, 
+		                                      sStageDir, dDocReplace, '.r1')
+	
+		# Output the EXTRAS/SEQUENCE_INFO/INDEX.HTM file
+		reWriter = A.seqInfoRewrite(sSuperVol, lDates, sStageDir)
+		nOutputSize += reWriter.parse()
+	
+		# Output the DATA/ANCILLARY dir
+		nOutputSize += A.linkDataAncillary(sSuperVol, sStageDir, lDates)
+	
+		# Generate the Browse directory tree
+		nOutputSize += A.lnBrowseMakeIndex(sSuperVol, sStageDir, lDates, doyPub)
+	
+		# Loop over days, making links to DATA files and generating INDEX/INDEX.*
+		(nSz, lBks) = A.linkDataMkIndex(sTpltVol, sSuperVol, sStageDir, nVol, lDates, doyPub)
+		nOutputSize += nSz
+		lBackouts += lBks
+		
+		sTmp = os.path.join(A.g_sTemplateVol, 'INDEX')
+		nOutputSize += A.mkCumulativeIndex(sTpltVol, sStageDir, nVol, doyPub,
+		                                   lOpts.bLowIndex)
+		
+		# Copy ERRATA.TXT and make new ERRATA.TXT template
+		(nSz,sBk) = A.copyUpdateErrata(sTpltVol, sStageDir, doyPub, nVol,
+		               lOpts.nVolVer, lOpts.sRelNotes, lOpts.sRelFile
+		            )
+		nOutputSize += nSz
+		lBackouts.append(sBk)
+	
+	
+		if not lOpts.bNoLint:
+			rpw_pds.verify.runLinkLint(sStageDir, "%s_linklint.log"%sStageDir)
+		
+		if not lOpts.bNoPvt:
+			rpw_pds.verify.runPVTools(sStageDir, "%s_pvt.log"%sStageDir, 
+			                         lOpts.sPvtDir, lOpts.sPerl)
+			
+		# Generate the MD5 hash records
+		if not lOpts.bSkipHash:
+			nOutputSize += rpw_pds.util.genMD5hashLists(sStageDir)
+		else:
+			sTmp = "MD5 Hash creation skipped.  This is NOT a shippable volume!\n"
+			sTmp += "The program will now end with an error and back out \n"
+			sTmp += "changes to the template volume... This is normal."
+			raise RuntimeError(sTmp)
+	
+	except ValueError, e:
+		log.critical(e)
+		backout(lBackouts)
+		return 1
+		
+	except RuntimeError, e:
+		log.critical(e)
+		backout(lBackouts)
+		return 1
+		
+	except rpw_pds.util.recursionError, e:
+		log.critical(e)
+		backout(lBackouts)
+		return 1
+	
+	except:  #Handle user hit CTRL-C here.
+		strFile = StringIO.StringIO()
+		traceback.print_exc(file=strFile)
+		log.critical("Unhandled Exception.  %s"%(strFile.getvalue()))
+		backout(lBackouts)
+		return 3
+		
+	
+	log.info("Total Size of all files in volume CORPWS_%04d: %s (%d Bytes)."%(
+	         nVol, rpw_pds.util.bytes2str(nOutputSize, 'M'), nOutputSize))
+	
+	
+	
+	if not lOpts.bSkipHash:
+		#prnVerifyInstructions(sStageDir)
+		prnBurnInstructions(sStageDir, "CORPWS_%04d"%nVol)
+		A.printLblTxt(sStageDir, doyPub, doyStart, doyTo, nVol)
+	
+	return 0
+
+if __name__ == "__main__":
+	sys.exit(main())

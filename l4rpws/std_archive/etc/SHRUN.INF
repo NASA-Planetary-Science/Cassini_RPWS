@@ -1,0 +1,6 @@
+[Info]
+Filename=AAREADME.HTM
+Message="Launching your web browser to view DVD data . . ."
+Display="NASA Planetary Data System"
+Web="http://pds.jpl.nasa.gov/"
+WebMsg="Connecting to NASA PDS Web Page . . ."

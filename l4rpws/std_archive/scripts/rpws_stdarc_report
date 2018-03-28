@@ -1,0 +1,196 @@
+#!/usr/bin/env python
+
+""" casvolreport.py - report on data files and size by dataset id in
+cassini volumes"""
+
+import os
+import sys
+import os.path
+from os.path import join as pjoin
+
+from copy import deepcopy
+
+#module local imports
+from rpw_pds import util
+
+##############################################################################
+def report(sIndex, sWhich="ALL", boundary=None):
+	"""Generate a volume report.
+	@parma sIndex - the cassini INDEX.TAB in question
+	@param sWhich 
+	       if "ALL" then report out all data
+	       if "BEFORE", report out all data whose start day is less than
+			    boundary
+			 if "AFTER", report out all data whose start day is greater than
+			    or equal to the boundary day.
+	
+	@param Exclusive end day for a boundary
+	
+	@return (doyEarliestStart, doyLastestStart, sReport)
+	"""
+	sRet = ""
+	doyFirstStart = util.DOYdate(2100,1)
+	doyLastStart  = util.DOYdate(1900,1)
+	
+	fIn = file(sIndex, 'rb')
+	nLine = 0
+	dProducts = {}
+		
+	sVolRoot = os.path.abspath(sIndex)
+	sVolRoot = os.path.dirname(sVolRoot) # up to INDEX level
+	sVolRoot = os.path.dirname(sVolRoot) # up to VOLUME Root
+	
+	for sLine in fIn:
+		nLine += 1
+		if nLine < 2:
+			continue
+		
+		doyCur = util.DOYdate(int(sLine[114:118]), int(sLine[119:122]))
+		if doyCur < doyFirstStart:
+			doyFirstStart = deepcopy(doyCur)
+		
+		if doyCur > doyLastStart:
+			doyLastStart = deepcopy(doyCur)
+		
+		sProduct = sLine[38:78].strip()
+		if sProduct not in dProducts.keys():
+			dProducts[sProduct] = [0L,0L]
+		
+		sTmp = sLine[183:256].strip()
+		sPath = pjoin(sVolRoot, sTmp)
+		
+		#Strip extension
+		sPath = sPath[:-4]
+	
+		#1st look for .TAB, then .DAT
+		sDataPath = ""
+		nFound = 0
+		
+		lTmp = ["%s.TAB", "%s.DAT", "%s.PKT"]
+		for sTmp in lTmp:
+			if os.path.exists(sTmp%sPath):
+				nFound += 1
+				sDataPath = sTmp%sPath				
+	
+		if nFound > 1:
+			sys.stderr.write("ERROR: Found more that one of *.DAT, *.PKT and *.TAB file for label %s.LBL\n"%sPath)
+			continue
+			
+		if nFound < 1:
+			sys.stderr.write("ERROR: Couldn't find a *.DAT, *.PKT or *.TAB file for label %s.LBL\n"%sPath)
+			continue
+		
+		if (sWhich == "ALL") or \
+		   (sWhich == "BEFORE" and doyCur < boundary) or \
+			(sWhich == "AFTER" and doyCur >= boundary):
+
+			dProducts[sProduct][0] += 1
+			
+			if os.path.exists(sDataPath):
+				dProducts[sProduct][1] += os.path.getsize(sDataPath)
+			else:
+				sys.stderr.write("ERROR: File %s does not exist!\n"%sDataPath)
+				continue
+	
+	fIn.close()
+	# Out of per line loop, print report, use explicit keys to keep
+	# the order constant.
+	
+	lKeys = ['CO-V/E/J/S/SS-RPWS-4-SUMM-KEY60S-V1.0',
+	         'CO-V/E/J/S/SS-RPWS-2-REFDR-ALL-V1.0',
+	         'CO-V/E/J/S/SS-RPWS-3-RDR-LRFULL-V1.0',
+	         'CO-V/E/J/S/SS-RPWS-2-REFDR-WBRFULL-V1.0',
+	         'CO-V/E/J/S/SS-RPWS-2-REFDR-WFRFULL-V1.0']
+	
+	if sWhich == "ALL":
+		 sRet = "Summary for volume: %s\n"%os.path.basename(sVolRoot)
+		 sRet += "Dates: %s through %s\n"%(doyFirstStart.getDOMpDOYstr(),
+		                                   doyLastStart.getDOMpDOYstr())
+		 
+	elif sWhich == "BEFORE":
+		 sRet = "PRE reporting period summary for volume: %s\n"%os.path.basename(sVolRoot)
+		 doyTmp = deepcopy(boundary)
+		 doyTmp.decDay()
+		 sRet += "Dates: %s through %s\n"%(doyFirstStart.getDOMpDOYstr(),
+		                                   doyTmp.getDOMpDOYstr())
+		 
+	elif sWhich == "AFTER":
+		 sRet = "POST reporting period summary for volume: %s\n"%os.path.basename(sVolRoot)
+		 sRet += "Dates: %s through %s\n"%(boundary.getDOMpDOYstr(),
+		                                   doyLastStart.getDOMpDOYstr())
+		 
+	else:
+		raise ValueError("Fix the program")		
+	
+	sRet += "=====================================================================\n"
+	
+	for sKey in lKeys:
+		lVal = dProducts[sKey]
+		
+		sRet += "%-40s: %7s in %4s data files.\n"%(sKey, 
+		   util.bytes2str(lVal[1], "M", True), lVal[0])
+			
+	sRet += "\n"
+	
+	return (doyFirstStart, doyLastStart, sRet)
+
+
+##############################################################################
+def main():
+	"""Uses sys.argv"""
+	
+	if '-h' in sys.argv or '--help' in sys.argv:
+		print "Data set ID based report of MegaBytes and number of files"
+		print "cassini volumes."
+		print
+		print "   usage:  %s [-b YYYYDDD] INDEX.TAB [INDEX.TAB INDEX.TAB ...]"%sys.argv[0]
+		print 
+		print "where INDEX.TAB is a cassini index table.  If -b is specified then"
+		print "two reports will be generated for any volume that straddles a "
+		print "boundary, one up to but excluding the boundary, and the other "
+		print "afterwords."
+		return 0
+	
+	
+	if len(sys.argv) < 2:
+		sys.stderr.write("""Specify index tables use, and optionally a date boundary
+-h for more info
+""")
+		return 1
+	
+	doyBoundary = None
+	lIndicies = None
+		
+	if sys.argv[1] == "-b":
+		if len(sys.argv) < 3:
+			sys.stderr.write("Boundary Day of Year missing, use -h for more info.\n")
+			return 1
+		if len(sys.argv) < 4:
+			sys.stderr.write("Index table missing after boundary date, use -h for more info\n")
+			return 1
+		
+		doyBoundary = util.strToDOYdate(sys.argv[2])
+		lIndicies = sys.argv[3:]
+	else:
+		lIndicies = sys.argv[1:]
+		
+	print 
+	
+	for sIndex in lIndicies:
+		(doyStart, doyEnd, sReport) = report(sIndex, "ALL")
+		if doyBoundary != None and doyStart < doyBoundary and doyBoundary <= doyEnd:
+			sSummary = sReport
+			(doyStart, doyEnd, sReport) = report(sIndex, "BEFORE", doyBoundary)
+			print sReport			
+			(doyStart, doyEnd, sReport) = report(sIndex, "AFTER", doyBoundary)
+			print sReport
+			print "COMPLETE", sSummary
+		else:
+			print sReport
+		
+	
+	return 0
+
+##############################################################################
+if __name__ == "__main__":
+	sys.exit(main())

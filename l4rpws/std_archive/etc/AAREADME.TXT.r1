@@ -1,0 +1,417 @@
+PDS_VERSION_ID          = PDS3
+RECORD_TYPE             = STREAM
+OBJECT                  = TEXT
+  PUBLICATION_DATE        = %(pub-date)s
+  NOTE                    = "AAREADME.TXT describes this volume."
+END_OBJECT              = TEXT
+END
+
+                            Volume CORPWS_%(vol-num)s
+                             Cassini Orbiter
+                      Radio and Plasma Wave Science
+
+                      RPWS Standard Products Archive
+                              Entire Mission
+              Planetary Plasma Interactions Discipline Node
+                                  of the
+                          Planetary Data System
+
+
+========================================================================
+Introduction
+========================================================================
+
+This volume set contains the Cassini Orbiter Radio and Plasma Wave
+Science standard data products from the entire mission, submitted to the
+Planetary Data System (PDS).  Every effort has been made to ensure that
+the data and documentation are of the best possible quality.  However,
+mistakes are inevitable.  The PPI Node of the PDS will maintain an
+online list of ERRATA where errors and updates are documented.  Should
+any user of this product find an error on this volume, please report the
+error to the PPI Node so that the finding can be made public.  All users
+are encouraged to verify the "correctness" of the data prior to
+submitting any publications or other work based on these data.  Users of
+these data are encouraged to acknowledge both the PDS and the principal
+investigators of the instruments whose data are used in analysis in all
+publications.
+
+
+========================================================================
+IMPORTANT INFORMATION ABOUT THIS DISK -- READ THIS FIRST!
+========================================================================
+
+This volume set contains Cassini Orbiter RPWS data from the entire
+mission.  New data will be added on subsequent volumes as they become
+available.  This volume, CORPWS_%(vol-num)s, includes all available data files
+with start times (SCET) in the interval %(scet-start)s through
+%(scet-through)s.
+
+KEY THINGS TO KNOW IN USING DATA ON THIS DISK:
+
+A web browser can be used to view all the data on this disk in the form
+of Portable Network Graphics (PNG) files which are image files of
+frequency-time spectrograms by clicking on "Graphical Data Browser
+Index" in AAREADME.HTM in the root directory.  The browse data under the
+BROWSE directory consist of the "*.PNG" files.  Survey plots are
+presented along with links to corresponding data files and their PDS
+label files.
+
+All data files are stored under the DATA top-level directory and are
+organized by data set and spacecraft event time.  The DATA directory
+branches off into:
+
+    * ANCILLARY, containing instrument mode and sequence information
+    * RPWS_KEY_PARAMETERS, containing the primary key parameters data
+    * RPWS_LOW_RATE_FULL, containing the low rate full resolution data
+    * RPWS_RAW_COMPLETE, containing complete instrument telemetry
+      packets
+    * RPWS_WAVEFORM_FULL, containing high rate waveform (WFR) data
+    * RPWS_WIDEBAND_FULL, containing high rate wideband (WBR) data
+
+The data are stored in text (key parameters) or binary (all others)
+files with labels and format descriptions included as separate files.
+PDS labels are contained in associated "*.LBL" text files in the same
+directories as the data files and shared descriptions of many of the
+data structures are stored in "*.FMT" files in the LABEL top-level
+directory.
+
+General information for this volume set is provided in PDS catalog files
+located in the CATALOG directory.  The data sets are documented in:
+
+    * KEYDS.CAT, describing RPWS_KEY_PARAMETERS
+    * LRFULLDS.CAT, describing RPWS_LOW_RATE_FULL
+    * RAWDS.CAT, describing RPWS_RAW_COMPLETE
+    * WFFULLDS.CAT, describing RPWS_WAVEFORM_FULL
+    * WBFULLDS.CAT, describing RPWS_WIDEBAND_FULL
+
+Other PDS catalog files include:
+
+    * INSTHOST.CAT, describing the Cassini Orbiter spacecraft
+    * MISSION.CAT, describing the Cassini-Huygens mission
+    * PERSON.CAT, listing RPWS and PDS personnel
+    * REF.CAT, listing useful literature references
+    * RPWSINST.CAT, describing the RPWS instrument
+
+
+=======================================================================
+Related PDS Products
+=======================================================================
+
+Planned for archive later are higher level data products from the Radio
+and Plasma Wave Science investigation including polarization and
+direction-finding measurements of planetary radio emissions, electron
+density measurements via a number of techniques including the use of a
+Langmuir Probe and sounder, and wave-normal analysis results of plasma
+waves.
+
+Another related PDS product is the Cassini Magnetosphere and Plasma
+Science Key Parameter data set which includes the RPWS Key Parameter
+data set included herein along with similar products from the Cassini
+Magnetometer, Magnetospheric Imaging Instrument, and Cassini Plasma
+Spectrometer Subsystem.
+
+
+========================================================================
+Volume Set Information
+========================================================================
+
+This DVD-R is the %(vol-ord-name)s volume of the CORPWS_0xxx set.  This volume,
+CORPWS_%(vol-num)s, contains all available RPWS standard data products from the
+spacecraft event time (SCET) interval %(scet-start)s through
+%(scet-through)s.  Volumes will be added as new data are archived.
+
+
+========================================================================
+Volume Format Information
+========================================================================
+
+The disk is organized into a hierarchical directory structure.  The disk
+is formatted according to a combination of ISO 9660, UDF, Rock Ridge
+(UNIX), and Joliet (Microsoft) standards in order to accommodate users
+on a wide variety of platforms.  This volume does not contain any
+Extended Attribute Records (XAR).  Thus, VMS users may have some
+problems accessing files on this volume.
+
+
+========================================================================
+File Formats
+========================================================================
+
+The data files on this volume are ASCII text and binary files.  Browse
+data are provided in Portable Network Graphics (PNG) format.  All data
+files are described by detached PDS labels.  A detached label file has
+the same name as the data file that it describes, but with the extension
+.LBL.  For example, the file T1999227_HFR0.DAT is accompanied by the
+detached label file T1999227_HFR0.LBL in the same directory.  File names
+within this archive comply with the "27.3" convention for compliance
+with ISO 9660 Level 2 interchange requirements.
+
+All documents, detached PDS labels, and HTML files are stream format
+files, with a carriage return (ASCII 13) and a line feed character
+(ASCII 10) at the end of the record.  This allows the files to be read
+by MacOS, DOS, Windows, UNIX, and VMS operating systems.  UNIX system
+users may see an unnecessary carriage return character (^M) at the end
+of each line.  Mac users may see an unnecessary line feed character (^J)
+at the start of each line.
+
+ASCII tabular data files (.TAB) are formatted so that they may be read
+directly into many database management systems (DBMS) or spreadsheet
+programs on various computers.  All fields are of fixed length and are
+separated by white space or commas.  Character fields are left
+justified, and numeric fields are right justified.  The records are of
+fixed length, and the last two bytes of each record contain the ASCII
+carriage return and line feed characters.  This allows a table to be
+treated as a fixed length record file on computers that support this
+file type and as a normal text file on other computers.
+
+The document, PDS label, and ASCII table files on this volume can be
+viewed with a Web browser.  Note that to view these files, the browser
+may need to be configured to recognize files with extensions of .CAT,
+.LBL, and .TAB as text files.  Users with Web browsers also can navigate
+the disk via the HTML file AAREADME.HTM in the disk's root directory and
+the HTML files in the BROWSE directory.
+
+PDS labels are object-oriented.  The object to which the label refers
+(e.g., SERIES, TABLE, etc.) is denoted by a statement of the form:
+
+^object                 = location
+
+in which the caret character (^, also called a pointer in this context)
+indicates that the object starts at the given location.  For an object
+in the same file as the label, the location is an integer representing
+the starting record number or byte of the object (the first record/byte
+in the file is 1).  For an object located outside the label file, the
+location denotes the name of the file containing the object, along with
+the starting record or byte number.  For example:
+
+^SPECTRAL_DENSITY_TABLE = ("T1999227_HFR0.DAT", 4)
+
+indicates that the SPECTRAL_DENSITY_TABLE object begins at record 4 of
+the file T1999227_HFR0.DAT, in the same directory as the detached label
+file.  Below is a list of the possible formats that use the ^object
+keyword.
+
+^object = n
+^object = n<BYTES>
+^object = ("filename.ext",n)
+^object = ("filename.ext",n<BYTES>)
+
+    where
+    n is the starting record or byte number of the object, counting from
+    the beginning of the file (record 1, byte 1); default is record
+    number.
+    <BYTES> indicates that number given is in units of bytes.
+    filename upper-case file name.
+    ext upper-case file extension.
+
+In cases where many files of the same format or structure are present,
+the structure description component is detached from the primary label.
+This minimizes repeating information which does not vary from file to
+file.  In these cases, a format file (.FMT) contains the file structure
+information and the base label (.LBL) describes the parameters which
+generally do vary from file to file (number of records, file name,
+start/stop time, etc.).  When a format file is used within the PDS label,
+the syntax is:
+
+^STRUCTURE              = filename
+
+Example:
+
+^STRUCTURE              = "LRFULL_TABLE.FMT"
+
+Syntactically, the contents of the format file can be inserted directly
+into the base label such that the entire file contents replace the
+single line ^STRUCTURE = filename.  Note that these shared format files
+are collected in the top-level LABEL directory on this volume.
+
+
+========================================================================
+Errata
+========================================================================
+
+There is a file called ERRATA.TXT found at the root level of this volume
+which contains a list of known deficiencies or caveats associated with
+data on this volume at the time this DVD-R was published.  Any changes
+or errors that are found on this or any CORPWS_0xxx DVD-R after the
+production of this volume can be found on the PPI Node errata Web page
+(http://www.igpp.ucla.edu/cgi-bin/ditdos?errata=CORPWS_0XXX).
+
+If you find an error on this disk, please report the error to the PDS
+Operator at the PPI Node of the PDS.
+
+    Internet            pds_operator@igpp.ucla.edu
+    Telephone           (310) 206-6073
+    U.S. Mail           PDS Operator
+                        c/o Dr. Raymond Walker
+                        UCLA - IGPP
+                        Los Angeles, CA 90095-1567
+
+Only through support and feedback of the users of these data can an
+effective errata list be maintained.
+
+
+========================================================================
+Software
+========================================================================
+
+Example code for reading some of the binary data file formats on this
+volume are available in the EXTRAS/SOFTWARE directory.  This software is
+provided "as is" and is distributed as a service to the community.
+
+    * LRF_LIST.C generates a text listing of data from binary
+      RPWS_LOW_RATE_FULL files.
+    * WBR_WFR_LIST.C reads binary RPWS_WAVEFORM_FULL and
+      RPWS_WIDEBAND_FULL files and produces a calibrated listing
+      including status information.
+
+KEY_BROWSE.JAR contains a complete Java application for viewing and
+manipulating the key-parameters data.  Updates and source code will be
+available online and on future volumes.
+
+See the file EXTRAS/SOFTWARE/SOFTINFO.TXT for further information.
+
+========================================================================
+Volume Contents and Structure
+========================================================================
+
+This section describes the volume structure and naming conventions.
+Below is a tree diagram of the volume, followed by a description of the
+directory function and key files in each directory.
+
+[CORPWS_%(vol-num)s] (root directory)
+   |
+   |- AAREADME.TXT      Plain text describing volume contents,
+   |                    organization, and use (this file)
+   |
+   |- ERRATA.TXT        Describes known deficiencies or caveats in the
+   |                    data on this volume.
+   |
+   |- VOLDESC.CAT       High level description of volume contents.
+   |
+   |- [BROWSE]          Contains browse plots depicting the data.
+   |     |
+   |     |- [ANCILLARY]         Ancillary support files.
+   |     |
+   |     |- [RPWS_KEY_PARAMETERS] Plots for this data set.
+   |     |
+   |     |- [RPWS_LOW_RATE_FULL] Plots for this data set.
+   |     |
+   |     |- [RPWS_WAVEFORM_FULL] Plots for this data set.
+   |     |
+   |     |- [RPWS_WIDEBAND_FULL] Plots for this data set.
+   |
+   |- [CATALOG]         Information on data sets and how they are
+   |                    processed and produced, on Cassini spacecraft
+   |                    and mission, on RPWS instrument, on cognizant
+   |                    personnel, and on references to various
+   |                    related documents.
+   |
+   |- [DATA]            Contains text and binary files of instrument
+   |     |              measurements and supporting information
+   |     |              constituting the primary archive products.
+   |     |
+   |     |- [ANCILLARY]         Ancillary support files.
+   |     |
+   |     |- [RPWS_KEY_PARAMETERS] Data files for this data set.
+   |     |
+   |     |- [RPWS_LOW_RATE_FULL] Data files for this data set.
+   |     |
+   |     |- [RPWS_RAW_COMPLETE] Raw instrument telemetry packets.
+   |     |
+   |     |- [RPWS_WAVEFORM_FULL] Data files for this data set.
+   |     |
+   |     |- [RPWS_WIDEBAND_FULL] Data files for this data set.
+   |
+   |- [DOCUMENT]        Instrument paper, RPWS calibration document,
+   |                    RPWS users' guide.
+   |
+   |- [EXTRAS]          Bonus content not necessarily conforming to
+   |     |              PDS archive standards.
+   |     |
+   |     |- [SEQUENCE_INFO]     Instrument sequence information.
+   |     |
+   |     |- [SOFTWARE]          Example code.
+   |
+   |- [INDEX]           Volume and cumulative indices of archive
+   |                    products.
+   |
+   |- [LABEL]           Shared format descriptions.
+
+
+========================================================================
+Driver and Hardware Information
+========================================================================
+
+This disk has been formatted according to a combination of ISO 9660
+level 2, Rock Ridge (UNIX), Joliet (Microsoft), and UDF standards.  It
+has been recorded on DVD-R media and should be readable on all major
+computing platforms hosting DVD readers.
+
+
+========================================================================
+Contacts
+========================================================================
+
+The person most directly responsible for the construction and release of
+this archive volume is Mr. Steven Joy.  He was the PPI Node Data
+Administrator at the time this disk was created and understands as much
+about the disk structure and data organization as anyone.  Other PPI
+personnel who may be aware of issues related to this archive volume
+include Dr. William Kurth and Dr. Raymond Walker, the PDS/PPI Node
+manager.
+
+For questions or problems regarding this volume, please contact the
+PDS/PPI operator:
+
+    Internet            pds_operator@igpp.ucla.edu
+    Telephone           (310) 206-6073
+    U.S. Mail           PDS Operator
+                        c/o Dr. Raymond Walker
+                        3845 Slichter Hall
+                        UCLA - IGPP
+                        Los Angeles, CA 90095-1567
+
+For questions regarding PDS Standards or other archive volumes available
+from the PDS, please contact PDS Operator at the PDS Central Node (at
+JPL):
+
+    Internet            pds_operator@jpl.nasa.gov
+    U.S. Mail           Planetary Data System, PDS Operator
+                        Jet Propulsion Laboratory
+                        Mail Stop 202-101
+                        4800 Oak Grove Dr.
+                        Pasadena, CA 91109-8099
+
+
+=======================================================================
+Disclaimer
+=======================================================================
+
+The PDS and the Planetary Plasma Interactions (PPI) Node in particular,
+assume no legal liability for errors on this disk.  All users are
+encouraged to verify the "correctness" of the data prior to submitting
+any publications or other work based on these data.  Errors on this disk
+should be reported back to the PPI Node of the PDS through the ERRATA
+reporting procedures described above.
+
+All trademarks are acknowledged as the property of their respective
+owners.  The producers and publishers of this archive do not endorse any
+commercial entities which may be mentioned for clarity.
+
+
+=======================================================================
+Acknowledgements
+=======================================================================
+
+These data were collected under the auspices of the Cassini Project.
+Donald A. Gurnett was the Radio and Plasma Wave Science Principal
+Investigator.  The archiving effort at The University of Iowa was
+supported by T. Averkamp, L. Granroth,  R. Johnson, C. Piker and
+W. Robison.
+
+This archiving effort was supported by the Planetary Plasma Interactions
+Node of the Planetary Data System.  Assistance was provided by S. Joy
+and J. Mafi of the University of California, Los Angeles, and by R.
+Joyner and S. Adams of the Jet Propulsion Laboratory.
+
+========================================================================

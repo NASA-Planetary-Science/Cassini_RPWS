@@ -1,0 +1,15 @@
+PDS_VERSION_ID          = PDS3
+RECORD_TYPE             = STREAM
+^HTML_DOCUMENT          = "AAREADME.HTM"
+
+OBJECT                  = HTML_DOCUMENT
+  DOCUMENT_NAME           = "AAREADME FOR THIS VOLUME"
+  PUBLICATION_DATE        = 2006-07-12
+  DOCUMENT_TOPIC_TYPE     = "VOLUME CONTENTS"
+  INTERCHANGE_FORMAT      = ASCII
+  DOCUMENT_FORMAT         = HTML
+  DESCRIPTION             = "This file describes the contents of this
+    volume and provides a top-level entry point for HTML browser
+    access."
+END_OBJECT              = HTML_DOCUMENT
+END

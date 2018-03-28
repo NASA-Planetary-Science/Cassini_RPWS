@@ -1,0 +1,161 @@
+#!/usr/bin/env python
+import sys
+import os
+import optparse
+
+from os.path import basename as bname
+from os.path import join as pjoin
+
+import rpw_pds.util as U
+import pspice as S
+
+
+##############################################################################
+def sort_on_sclk(tup1, tup2):
+	SCLK = 1
+	return cmp(tup1[SCLK], tup2[SCLK])
+
+##############################################################################
+def main(argv):
+	perr = sys.stderr.write
+	pout = sys.stdout.write
+	
+	sUsage = """
+cas_get_time_diff [options] DIR_NAME
+
+   Generate a report to standard out of the time correctness of Cassini
+   PDS labels under a given directory.  Uses the spice kernel files:
+	
+      /opt/project/cassini/spice/kernels/lsk/leapseconds.tls
+      /opt/project/cassini/spice/kernels/sclk/cassini.tsc
+"""
+	
+	psr = optparse.OptionParser(usage=sUsage)
+	
+	psr.add_option('-d','--min-delta', dest="rOffset", help="The minimum difference"+\
+	               "between the calculated SCET value and the old value "+\
+	               "needed to trigger a line of output.", type="float",
+						default=0.0, metavar="MIN_DELTA")
+	
+	psr.add_option('-c','--csv', dest="bCsv", action="store_true", 
+	               default=False, help="Output data in CSV (Comma "+\
+	               "Seperated Records) format, instead of a whitespace "+\
+	               "delineated table.")
+						
+	psr.add_option('-t','--min-time', dest="sMinScet", metavar="MIN_SCET",
+	               default=None, help="Ignore all SCETs earlier than MIN_SCET. "+\
+	               "The given time must be parsable by spice")
+						
+	(opts, lArgs) = psr.parse_args()
+	
+	if len(lArgs) < 1:
+		perr("ERROR: Missing directory to process, use -h for usage info\n")
+		return 1
+	elif len(lArgs) == 1:
+		sTop = lArgs[0]
+	else:
+		perr("ERROR: Unknown command line arguments: %s\n"%lArgs[1:])
+		return 1
+	
+	S.ldpool('/opt/project/cassini/spice/kernels/lsk/leapseconds.tls')
+	S.ldpool('/opt/project/cassini/spice/kernels/sclk/cassini.tsc')
+	
+	rEtMin = 0.0
+	if opts.sMinScet:
+		rEtMin = S.utc2et(opts.sMinScet)
+	
+	perr("Reading all labels under %s...\n"%sTop)
+	nTotal = 0
+	nReport = 0
+	bDidHdr = False
+	lBuf = []
+	for sPath, lDirs, lFiles in os.walk( sTop ):
+		
+		for sFile in lFiles:
+			if not sFile.endswith(".LBL"):
+				continue
+			
+			
+			nTotal += 1
+			fIn = file( pjoin(sPath, sFile), 'rb')
+			
+			sOrigScet = None
+			rOrigEt = None
+			sSclk = None
+			sNewScet = None
+			rNewEt = None
+
+			for sLine in fIn:
+				
+				if sOrigScet and rOrigEt and sSclk and sNewScet and rNewEt:
+					break
+			
+				lWords = sLine.split()
+				if len(lWords) < 3:
+					continue
+			
+				if lWords[0] == "START_TIME" and lWords[1] == '=':
+					sOrigScet = lWords[2]
+					sOrigScet = sOrigScet.strip('Z')
+					rOrigEt = S.utc2et(sOrigScet)
+					if rOrigEt < rEtMin:
+						break   # Don't fill out the SCLK, tuple will not be made
+			
+				if lWords[0] == "SPACECRAFT_CLOCK_START_COUNT" and lWords[1] == '=':
+					sSclk = lWords[2]
+					sSclk = sSclk.strip('"')	
+					rNewEt = S.scs2e(-82, sSclk)
+					sNewScet = S.et2utc(rNewEt, "ISOD", 3)
+					
+			
+			fIn.close()
+			
+			
+			if sOrigScet and rOrigEt and sSclk and sNewScet and rNewEt:
+			
+				rDiff = rNewEt - rOrigEt
+				
+				if opts.rOffset > 0.0 and abs(rDiff) < opts.rOffset:
+					continue
+					
+				nReport += 1
+				
+				sRelPath = pjoin(sPath,sFile)[30:]
+				lBuf.append( (sRelPath, sSclk, sOrigScet, sNewScet, rDiff) )
+				
+			#else:
+			#	perr("Couldn't get SCLK SCET from %s\n"%pjoin(sPath, sFile))
+	
+	# Sort 
+	perr("Sorting by SCLK...\n")
+	lBuf.sort(sort_on_sclk)
+	
+	# Print what you found
+	if opts.bCsv:
+		pout('"LABEL","SCLK","ORIG_SCET","NEW_SCET","ORIG_SCET_DOM","NEW-OLD"\r\n')
+		for tup in lBuf:
+			doy = U.DOYdate(int(tup[2][:4]), int(tup[2][5:8]))
+			sDomOrig = doy.getDOMstr() + tup[2][8:]
+			pout('"%s","%s",%s,%s,%s,%.3f\r\n'%(tup[0],tup[1],tup[2],
+			     tup[3], sDomOrig, tup[4]))
+	else:
+		pout("%-80s %16s %21s %21s %8s\n"%('LABEL','SCLK','ORIG_SCET',
+					     'NEW_SCET','NEW-OLD'))
+		for tup in lBuf:
+			pout('%-80s %16s %21s %21s %8.3f\n'%tup)
+	
+				
+	# Overall Report
+	if opts.sMinScet:
+		perr("%d Labels checked, %d labels with SCET > %s, were off by at least %.3f seconds \n"%(
+		     nTotal, nReport, opts.sMinScet, opts.rOffset))
+	else:
+		perr("%d Labels checked, %d were off by at least %.3f seconds \n"%(
+		     nTotal, nReport, opts.rOffset))
+	
+	return 0
+
+
+##############################################################################
+if __name__ == "__main__":
+	sys.exit( main(sys.argv) )

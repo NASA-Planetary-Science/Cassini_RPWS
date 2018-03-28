@@ -1,0 +1,71 @@
+(Original archiving instructions made by Willy)
+
+Cassini/RPWS Archiving Procedure
+--------------------------------
+
+
+1.	Data directories are generated individually
+	in separate directories in the 
+	/opt/project/cassini/archive heirarchy
+	----------------------------------------------
+  	    Key Parameters	Terry Averkamp
+
+	    Low Rate		Bob Johnson
+
+	    High Rate		Willy Robison
+			script/mkdir_hr \
+					0001 \
+					1997-298T00:00:00 \
+					2000-001T00:00:00
+			    this script automatically strips empty 
+				directories from the BROWSE diectories.
+			    this script depends on a "tmp" directory
+				(/opt/project/cassini/archive/tmp)
+				to store temporary files during browse
+				image processing.
+
+
+2.	Common Directory Structure is built
+	-----------------------------------
+		Links to data directories are established (i.e.
+		    link the KEY, LR, and HR DATA and BROWSE
+		    directories.
+
+		DOCUMENT
+		--------
+		RPWSUG
+		    Use Staroffice-6 to "save as HTML" & "print PS" if the
+			users guide has been updated.
+		    Copy & reformat the users guide (latest version).
+			volume_template/DOCUMENT/RPWSUG/rpwsug/perl
+		    Produces 2 Labels, 1 for the main directory and
+			1 for the PNG directory.
+			
+		EXTRAS
+		------
+		WBR_WFR_LIST example code (WBRWFR.TXT created)
+			script/software.perl \
+					CORPWS_xxxx \
+					TyyydXX \
+					Tyyyyddd \
+					WFR/WBF-data-file
+
+		Files in volume_template structure with UPPER CASE NAMES
+		    are linked/copied to the corresponding directories
+		    in the newly created directory structure.
+
+		Cumulative Index is updated (if appropriate)
+			volume_template/INDEX/cumindex.new copied to
+			volume_template/INDEX/cumindex.tab
+		Index and Cumulative_Index are built
+			script/index.perl (this step destroys cumindex)
+			script/cumindex.perl
+
+
+3.	Calculate MD5 Checksums for the volume
+	--------------------------------------
+		Produce both Unix and Windows style output files in EXTRAS
+		  (i.e. <cr><lf> and <lf> terminated).
+		Label for these files in volume_template.
+
+4.	MKISOFS/CDRECORD
