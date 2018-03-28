@@ -1,0 +1,142 @@
+#!/usr/bin/env python
+
+import sys
+import os
+from os.path import join as pjoin
+from os.path import basename
+import shutil
+
+##############################################################################
+def fixHRLabel(sAbsPath):
+	"""Returns 0 if the label was fixed, 1 if not, this is to make it
+		easy for the caller to track the "didn't get fixed" count.
+	"""
+	fIn = file(sAbsPath, 'rb')
+	sIn = fIn.read()
+	
+	sIn = sIn.replace("END-OF-MISSION-tgt,\r\n                       ", "")
+	sIn = sIn.replace('"END-OF-MISSION-tgt",\r\n                                ','')
+	
+	if sIn.find('END-OF-MISSION-tgt') > 0:
+		print "%s, One or more occurances of END-OF-MISSION-tgt remain!"%sAbsPath
+		return 1
+	
+	fIn.close()
+	
+	try:
+		os.rename(sAbsPath, sAbsPath + ".bak")
+	except:
+		print "%s, Could not create backup file, no changes made.\n"%(sAbsPath+'.bak')
+		return 1
+	
+	try:
+		fOut = file(sAbsPath + '.tmp', 'wb')
+	except:
+		os.rename(sAbsPath+'.bak', sAbsPath)
+		print "%s, could not open temporary file, no changes made.\n"%(sAbsPath+'.tmp')
+		return 1
+	
+	try:
+		fOut.write(sIn)
+	except:
+		os.rename(sAbsPath+'.bak', sAbsPath)
+		print "%s, could not write replacement label, no changes made.\n"%(sAbsPath+'.tmp')
+		return 1
+		
+	fOut.close()
+	os.rename(sAbsPath+'.tmp', sAbsPath)
+	print "%s, Erroneous target 'END-OF-MISSION-tgt' removed"%sAbsPath
+	
+	return 0
+	
+##############################################################################
+def main(argv):
+	perr = sys.stderr.write
+	
+	if argv[1] == '-h' or argv[1] == '--help':
+		perr("\n")
+		perr("%s - Adjust the target name in cassini High Rate labels\n"%basename(argv[0]))
+		perr("\n")
+		perr("SYNOPSIS:\n")
+		perr("     %s [--fix] DIR_NAME [DIR_NAME DIR_NAME ...]\n"%basename(argv[0]))
+		perr("\n")
+		perr("DESCRIPTION:\n")
+		perr("     Removes the erroneous target: 'END-OF-MISSION-tgt' from Willy's\n")
+		perr("     Cassini High Rate PDS labels or complains if it can't do so.\n")
+		perr("\n")
+		perr("OPTIONS:\n")
+		perr("     --fix Try to fix incorrect labels.  By default the program\n")
+		perr("           only prints the labels it thinks are in error\n")
+		perr("\n")
+		perr("RETURN VALUE:\n")
+		perr("   0 If no labels with erroneous target names remain\n")
+		perr("   1 If labels with errors were left in the directories\n")
+		perr("   2 If some other fatal error occured\n")
+		perr("\n") 
+		return 0
+	
+	lTops = argv[1:]
+	bChange = False 
+	if argv[1] == '--fix':
+		bChange = True	
+		lTops = argv[2:]
+	
+	if len(lTops) < 1:
+		perr("ERROR: Missing directory to process, use -h for usage info\n")
+		return 2
+	
+	# walk the given directory tree looking for files named *.LBL
+	nTotal = 0
+	lFix = []
+	
+	for sTop in lTops:
+	
+		for sPath, lDirs, lFiles in os.walk( sTop ):
+		
+			for sFile in lFiles:
+				if not sFile.endswith(".LBL"):
+					continue
+				
+				sAbsPath = pjoin(sPath, sFile)
+				nTotal += 1
+				fIn = file(sAbsPath, 'rb')
+				sIn = fIn.read()
+		
+				if sIn.find("END-OF-MISSION-tgt") > -1:
+					lFix.append( sAbsPath )
+					print "%s has erroneous target name"%sAbsPath
+				
+				fIn.close()
+	
+	print "%d of %d labels require(d) changes"%(len(lFix), nTotal)
+	
+	if not bChange:
+		if len(lFix) > 0:
+			return 1
+		else:
+			return 0
+	
+	if len(lFix) == 0:
+		return 0
+	
+	nErrors = 0
+	nFixed  = 0
+	for sAbsPath in lFix:
+		if fixHRLabel(sAbsPath) == 0:
+			nFixed += 1
+		else:
+			nErrors += 1
+		
+	print "%d of %d labels changed"%(nFixed, nTotal)
+	
+	if nErrors > 0:
+		print "ERROR: %d of %d labels could NOT be fixed!!!"%(nErrors, nTotal)
+		return 1
+	else:
+		print "All erroneous target names in labels were corrected."
+		return 0
+
+
+##############################################################################
+if __name__ == "__main__":
+	sys.exit( main(sys.argv) )

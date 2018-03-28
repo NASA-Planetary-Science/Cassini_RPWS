@@ -1,0 +1,337 @@
+#!/usr/bin/env bash
+
+
+# This shell scripts runs all tools to make weekly wideband quicklook files
+source %(SETUP_FILE)s
+
+# No, I'm mean really set the umask this time
+umask 0002
+
+##############################################################################
+# DEFINITIONS
+
+QUICKLOOK_DIR=${RPWS_TEMP}/CORPWS_QuickLook
+
+TEMPLATE="%(INST_ETC)s/vol_template"
+
+# Tools, assumes you're running this script for the svn download directory,
+# there are no sub dependencies the the current directory other than finding
+# these tools.  Switch the definitions as neccessary.
+
+RPWS_ARCHIVE="%(INST_NAT_BIN)s/rpws_archive"
+
+RPWS_HOUSEKEEPING="%(INST_NAT_BIN)s/rpws_housekeeping"
+
+HR_STATIC_HTML=%(INST_NAT_BIN)s/rpws_hr_static_html
+
+HR_BUILD_LABEL=%(INST_NAT_BIN)s/rpws_hr_build_lbl
+
+#PRUNE_BROWSE=%(INST_NAT_BIN)s/rpws_hr_prune
+
+BROWSE_HTML_LABLER=%(INST_NAT_BIN)s/rpws_hr_html_lbl
+
+
+# Value of the -debug argument to rpws_archive. OR one or more of these
+#
+#  0x0800000			Suppress Archive write
+#  0x0400000			Suppress STIM Write
+#  0x0200000			Suppress Raw Write
+#  0x0100000			HTML 4.01 (0 means HTML3.2)
+#  0x 080000			suppress data write
+#  0x 040000			VERBOSE label file debug
+#  0x 020000			STIM file debug
+#  0x 010000			master HTML debug
+#  0x  08000			Input file messages
+#  0x  04000			SC Event message
+#  0x  02000			Event message
+#  0x  01000			Output file messages
+#  0x   0800			write record message
+#  0x   0400			label file debug
+#  0x 	080			wbr file size calculations
+#  0x 	040			label file progress
+
+ARCH_DEBUG=0x8040
+
+
+##############################################################################
+# Setup directory structure and return output base
+#
+# args:     $1 - the base output directory
+#
+# globals:  none
+
+function mk_dirs
+{
+
+echo "* STEP 1 ****************************************************************"
+echo "*                 Make/Check Directory Structure                        *"
+echo "*************************************************************************"
+
+	umask 0002
+	if [ ! -e $QUICKLOOK_DIR ] ; then
+		echo "mkdir $QUICKLOOK_DIR"
+		if ! mkdir $QUICKLOOK_DIR ; then
+			echo "Directory $QUICKLOOK_DIR doesn't exist and mkdir failed"
+			return 1
+		fi
+	fi
+
+
+	if cd $QUICKLOOK_DIR; then 
+		echo "cd $QUICKLOOK_DIR"
+	else
+		return 1
+	fi
+	
+
+	if ! mkdir -p BROWSE/ANCILLARY ; then
+		return $?
+	fi
+	if ! mkdir -p BROWSE/RPWS_WIDEBAND_FULL ; then
+		return $?
+	fi
+	if ! mkdir -p BROWSE/RPWS_WAVEFORM_FULL ; then
+		return $?
+	fi
+	
+	if ! mkdir -p DATA/RPWS_WIDEBAND_FULL ; then
+		return $?
+	fi
+	if ! mkdir -p DATA/RPWS_WAVEFORM_FULL ; then
+		return $?
+	fi
+	if ! mkdir -p DATA/RPWS_RAW_COMPLETE ; then
+		return $?
+	fi
+	if ! mkdir -p DATA/ANCILLARY ; then
+		return $?
+	fi
+	
+	if ! mkdir -p EXTRAS ; then
+		return $?
+	fi
+	
+	#mkdir $QUICKLOOK_DIR/INDEX
+	
+	if ! mkdir -p script ; then
+		return $?
+	fi
+	
+	cd ../
+	
+	return 0
+}
+
+##############################################################################
+# args:    $1 - the base output directory 
+#
+# globals: TEMPLATE
+
+function cp_static
+{
+
+echo "* STEP 2 ****************************************************************"
+echo "*                 Copy Static files into directory                      *"
+echo "*************************************************************************"
+
+#echo "cp ${TEMPLATE}/BROWSE/*.HTM $QUICKLOOK_DIR/BROWSE"
+
+#if ! cp ${TEMPLATE}/BROWSE/*.HTM $QUICKLOOK_DIR/BROWSE; then
+#	return $?
+#fi
+
+#echo "${TEMPLATE}/BROWSE/RPWS_WIDEBAND_FULL/*.HTM $QUICKLOOK_DIR/BROWSE/RPWS_WIDEBAND_FULL"
+
+#if ! cp ${TEMPLATE}/BROWSE/RPWS_WIDEBAND_FULL/*.HTM $QUICKLOOK_DIR/BROWSE/RPWS_WIDEBAND_FULL ; then
+#	return $?
+#fi
+
+#echo "cp ${TEMPLATE}/BROWSE/RPWS_WAVEFORM_FULL/*.HTM $QUICKLOOK_DIR/BROWSE/RPWS_WAVEFORM_FULL"
+#if ! cp ${TEMPLATE}/BROWSE/RPWS_WAVEFORM_FULL/*.HTM $QUICKLOOK_DIR/BROWSE/RPWS_WAVEFORM_FULL ; then
+#	return $?
+#fi
+
+#echo "cp ${TEMPLATE}/BROWSE/*.LBL $QUICKLOOK_DIR/BROWSE"
+#if ! cp ${TEMPLATE}/BROWSE/*.LBL $QUICKLOOK_DIR/BROWSE ; then
+#	return $?
+#fi
+
+#echo "cp ${TEMPLATE}/BROWSE/RPWS_WIDEBAND_FULL/*.LBL $QUICKLOOK_DIR/BROWSE/RPWS_WIDEBAND_FULL"
+#if ! cp ${TEMPLATE}/BROWSE/RPWS_WIDEBAND_FULL/*.LBL $QUICKLOOK_DIR/BROWSE/RPWS_WIDEBAND_FULL ; then
+#	return $?
+#fi
+
+#echo "cp ${TEMPLATE}/BROWSE/RPWS_WAVEFORM_FULL/*.LBL $QUICKLOOK_DIR/BROWSE/RPWS_WAVEFORM_FULL"
+
+#if ! cp ${TEMPLATE}/BROWSE/RPWS_WAVEFORM_FULL/*.LBL $QUICKLOOK_DIR/BROWSE/RPWS_WAVEFORM_FULL ; then
+#	return $?
+#fi
+
+echo "cp ${TEMPLATE}/BROWSE/ANCILLARY/*.LBL $QUICKLOOK_DIR/BROWSE/ANCILLARY"
+if ! cp ${TEMPLATE}/BROWSE/ANCILLARY/*.LBL $QUICKLOOK_DIR/BROWSE/ANCILLARY ; then
+	return $?
+fi
+
+echo "cp ${TEMPLATE}/BROWSE/ANCILLARY/*.PNG $QUICKLOOK_DIR/BROWSE/ANCILLARY"
+if ! cp ${TEMPLATE}/BROWSE/ANCILLARY/*.PNG $QUICKLOOK_DIR/BROWSE/ANCILLARY ; then
+	return $?
+fi
+
+return 0
+}
+
+
+##############################################################################
+# args:    $1 - The base output directory
+#          $2 - The start time
+#          $3 - The exclusive end time
+#          $4 through $9 - extra arguments for rpws_archive
+#
+# globals: RPWS_ARCHIVE
+
+function mk_archive
+{
+begin_tm=$2
+end_tm=$3
+prod_ver_id=$4
+
+echo "* STEP 1 ****************************************************************"
+echo "*                 Update QuickLook Archive                              *"
+echo "*************************************************************************"
+
+
+echo "cd ${QUICKLOOK_DIR}"
+if ! cd ${QUICKLOOK_DIR}; then
+	return $?
+fi
+
+
+echo "${RPWS_ARCHIVE} -size 0 -debug ${ARCH_DEBUG} -database -splitstim100 -spice\
+ +ephem -pad -cd_fromat \"ISO9660\" -cd_index ${QUICKLOOK_DIR} -stsp -dbase_st ${begin_tm}\
+ -dbase_sp ${end_tm} -zero -timeflag 3 +mafi\
+ -prodverid ${prod_ver_id} $5 $6 $7 $8 $9"
+
+if ${RPWS_ARCHIVE} -size 0 -debug ${ARCH_DEBUG} -database -splitstim100 -spice\
+ +ephem -pad -cd_fromat "ISO9660" -cd_index ${QUICKLOOK_DIR} -stsp\
+ -dbase_st ${begin_tm} -dbase_sp ${end_tm} -zero -timeflag 3 +mafi\
+ -prodverid ${prod_ver_id} $5 $6 $7 $8 $9
+then
+	echo
+else
+	echo "Non-zero return value ($?) from rpws_archive!"
+	return 3
+fi
+}
+
+
+##############################################################################
+function prn_help
+{	
+	echo 
+	echo "USAGE"
+	echo "   rpws_hr_quicklook -h"
+	echo "   rpws_hr_quicklook [BEGIN END] [rpws_archive_extra_args]"
+   echo 	
+	echo "PARAMETERS"
+	echo 
+	echo "   BEGIN - inclusive start time in the format yyyy-dddThh:mm:ss"
+	echo
+	echo "   END - exclusive stop time in the format yyyy-dddThh:mm:ss"
+	echo 
+	echo "   rpws_archive_extra_args - any extra arguments are passed to rpws_archive"
+	echo
+	echo "RETURN"
+	echo "If archive updates finish sucessfully, 0 is returned to the calling"
+	echo "shell.  Otherwise a non-zero value is returned to the shell"
+	echo
+	echo "FILES"
+	echo "Complete paths are used in progarm and sub-script execution.  All programs"
+	echo "and scripts are expected to be in the directory:"
+	echo 
+	echo "   " %(INST_NAT_BIN)s
+	echo
+	echo "The output directory initialization files are copied from"
+	echo
+	echo "    %(INST_ETC)s/vol_template"
+	echo
+	echo "EXAMPLE"
+	echo "Usually quick-look PDS data are generated for a 1-week sections "
+	echo "at a time.  So a typical run would be:"
+	echo
+	echo "  rpws_mkhr 2015-273 2008-280"
+	echo
+	echo "This will generate all high rate data that begins with day 273 of"
+	echo "2015, and ends before day 280."
+	
+}
+
+
+##############################################################################
+# "main"
+
+function main
+{
+
+	local opt
+
+	while getopts ":h" opt; do
+		case $opt in 
+			h ) prn_help
+			    return 0 ;;
+			
+			? ) echo "Unrecognize option.  Issue $0 -h for help information."
+			    return 1 ;;
+		esac
+	done
+	
+	#shift args back to thier default positions
+	shift $(($OPTIND - 1))
+
+	
+	if [ "$1" = "" ]; then
+		begin_tm=`/local/gnu/bin/date --date="9 days ago" "+%%Y-%%j"`
+		end_tm=`/local/gnu/bin/date --date="tomorrow" "+%%Y-%%j"`
+	else	
+		if [ "$2" = "" ]; then
+			echo "ERROR: Ending time missing, use -h for help."
+			return 13
+		fi
+		begin_tm=$1
+		end_tm=$2
+	fi
+	
+	if ! mk_dirs; then
+		return 10
+	fi
+	
+	echo "cd $QUICKLOOK_DIR"
+	if ! cd $QUICKLOOK_DIR ; then
+		return 11
+	fi
+				  
+	if ! cp_static; then
+		return 20
+	fi 
+
+	echo "cd $QUICKLOOK_DIR"
+	if ! cd $QUICKLOOK_DIR ; then
+		return 21
+	fi
+				  
+	if ! mk_archive $QUICKLOOK_DIR $begin_tm $end_tm $3 $4 $5 $6 ; then
+		return 30
+	fi
+				  				  
+	return 0
+}
+
+##############################################################################
+# main stub
+
+main "$@"
+exit $?
+
+
+
+
+

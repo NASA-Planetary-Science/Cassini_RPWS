@@ -1,0 +1,170 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+""" specify a time range for WFR printing program,  
+				(example: between the times 1997-297T00 1997-298T00) 
+	Issue the command
+   cas_env in your environment before using this program to make sure the
+	pspice library is on your PYTHONPATH and to make sure that the
+	CAS_TIME_KERNELS environment variable is set.
+"""
+
+import sys
+import optparse
+import os
+import os.path
+import glob
+import logging
+
+import das2 as D 
+
+from os.path import join as pjoin
+from struct import unpack
+from struct import pack
+from os.path import basename as bname
+
+# This should be on your python path
+import pspice as S
+
+from rpws.highrate.l3 import setupLogging, WfrRecord, readWfr, wfrTimeSort, findWfr
+
+# 5 methods above found in ../rpw_cas/wfr.py
+##############################################################################
+# A record printer
+
+def prnRecs(log, lRecs, opts):
+	#print 'SCET  Period(sec)  Antenna  Gain(dB)  Samples
+	
+	pout = sys.stdout.write
+
+	for rec in lRecs:
+		sSclk = "%d/%d:%d"%(rec.nSclkPart, rec.nSclkSec, rec.nSclkFine)
+		
+		et = S.scs2e(-82, sSclk)
+		
+		sScet = S.et2utc(et, "ISOC", 3)
+		
+		pout("%s  %.1e  %2s  %2d "%(sScet, rec.period(), rec.antenna(), rec.gain()))
+		
+		# If user wants to print out data
+		if not opts.bNoData:
+			for nVal in rec.data():
+				pout(" %3d"%nVal)
+		pout("\n")
+
+##############################################################################
+# Main Routine
+
+def main(argv):
+	"""Reads and prints un-calibrated WFR data"""
+	
+	psr = optparse.OptionParser(
+		usage="%prog [options] BEGIN END",
+		prog="rpws_pds_wfrprn2",
+		version="0.1-all-in-one",
+		description="""
+Reads and prints uncalibrated WFR PDS data given a set of input files.  The 
+Input PDS files have names similar to:  T1998365_2_5KHZ1_WFRFR.DAT"""
+	)
+	
+	
+	psr.add_option('-l', "--log-level", dest="sLevel", metavar="LOG_LEVEL",
+	               help="Logging level one of [critical, error, warning, "+\
+	               "info, debug].  The default is info.", type="string",
+	               action="store", default="info")
+
+	sDef = None
+	env = 'RPWS_SUPERVOL'
+	if os.getenv(env):
+		sDef = '%s/DATA/RPWS_WAVEFORM_FULL'%os.getenv(env)
+
+	psr.add_option('-v', '--vol-root', dest="sVolRoot", type="string",
+	               default=sDef, help="Set the super volume directory, "+\
+	               "defaults to '%s'."%sDef)
+	
+	sDefault = os.getenv("CAS_TIME_KERNELS")
+	
+	psr.add_option('-k', '--kernel-list', dest="sKernels", default=sDefault,
+						help="Specify an alternate SPICE kernel list file, the "+\
+	               "default is: %s"%sDefault, metavar="FURNSH_FILE")
+						
+	psr.add_option('-s', '--sort', dest="bSort", action="store_true",
+	               default=False, help="Sort all records by time in memory "
+						"before writing the output.  Make sure you have enough "
+						"RAM for all the files you wish to sort")
+							
+	psr.add_option('-r', '--rm-dulicates', dest="bRmDup", action="store_true",
+	               default=False, help="Remove dublicate records from the"+\
+						"sorted output.  Implies -s.")
+	
+	psr.add_option('-n', '--no-data', dest="bNoData", action="store_true",
+	               default=False, help="Continue printing all of the meta data without the data values themselves")
+	               
+	psr.add_option('-L', '--low-rate', dest="bLowRate",action="store_true",
+	               default=False, help="Set the rate to read only low rate data (25HZ)")
+
+	psr.add_option('-H', '--high-rate', dest="bHighRate",action="store_true",
+	               default=False, help="Set the rate to read only high rate data (2_5KHZ)")
+							
+	(opts, lTimes) = psr.parse_args(argv[1:])
+		
+	# Setup the logging level
+	log = setupLogging(opts.sLevel)
+	log = logging.getLogger('')
+		
+	# Check to see we have a vol-root
+	if opts.sVolRoot == None:
+		log.error("Volume root directory was not specified, try the -r option"
+		          "or source a Cassini environment setup file.")
+		return 3
+		
+	# If user changes the directory
+	if opts.sVolRoot != sDef:
+		sDef = opts.sVolRoot
+		
+	if opts.sKernels == None:
+		log.error("Spice Time Meta-Kernel not defined, either set the "+\
+		          "CAS_TIME_KERNELS environment variable or use the -k "+\
+		          "option")
+		return 3
+		
+	S.furnsh(opts.sKernels)
+
+	if not opts.bLowRate and not opts.bHighRate:
+		log.error("Need to set either low or high rate data (-H or -L)")
+		return 4
+	
+	if opts.bRmDup:
+		opts.bSort = True
+
+	lFiles = findWfr(log, sDef, das2.DasTime(lTimes[0]), das2.DasTime(lTimes[1]), opts)
+		
+	# Handle the loop differently if sorting is used
+	if opts.bSort:
+		lRecs = []
+		for sFile in lFiles:
+			lRecs += readWfr(log, sFile)
+	
+		# Removing any duplicates
+		if opts.bRmDup:
+			prev_len = len(lRecs)
+			unique = []
+			[unique.append(item) for item in lRecs if item not in unique]
+			lRecs = unique
+			log.info("Removing %d duplicates"%(int(prev_len)-len(lRecs)))
+		
+		log.info("Sorting %d records by time"%len(lRecs))
+		lRecs.sort(wfrTimeSort)
+		
+		prnRecs(log, lRecs, opts)
+	else:
+		for sFile in lFiles:
+			lRecs = readWfr(log, sFile)
+		prnRecs(log, lRecs, opts)
+			
+	return 0
+
+##############################################################################
+# kicker stub
+if __name__ == "__main__":
+	sys.exit(main(sys.argv))

@@ -1,0 +1,136 @@
+#!/bin/ksh
+#
+# Purpose:
+# 
+#	$1 WBR or WFR
+#	$2 wildcard *.PNG
+#
+# Format:
+# 
+#
+Title="rpws_hr_static_html.ksh"
+Version="V2.3"
+
+##############################################################################
+
+RollOutHtml(){
+
+	print -u3 '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">'
+	print -u3 "<HTML>"
+	print -u3 "<HEAD>"
+	print -u3 '<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">'
+	print -u3 "<META NAME=\"Producer\" CONTENT=\"$Title\">"	 # 3/2005 WTR
+	print -u3 "<META NAME=\"Version\" CONTENT=\"$Version\">" # 3/2005 WTR
+	print -u3 "<TITLE> $title $png_file </TITLE>"		 # CHANGE change 2/2005
+	print -u3 "</HEAD>"
+	print -u3 "<BODY>"
+	
+	print -u3 "<DIV ALIGN=CENTER>"
+	#print -u3 "<IMG WIDTH=\"800\" HEIGHT=\"600\" SRC=\"$png_dir/$png_file\""
+	print -u3 "<IMG SRC=\"$png_dir/$png_file\""
+	print -u3 ' ALT="RPWS Spectrogram">'
+	print -u3 "</DIV>"
+	
+	print -u3 "<HR>"
+	
+	print -u3 "<DIV ALIGN=CENTER>"
+	print -u3 "<TABLE cellspacing=10>"			# Larry did it 2/2005
+	# print -u3 " <CAPTION><A HREF=\"$dat_dir\">"		# CHANGEd again on 2/2005
+	# print -u3 " $title </A></CAPTION>"		 	# CHANGEd again on 2.2005
+	print -u3 " <TR ALIGN=CENTER>"
+	print -u3 "   <TH>DATA</TH>"
+	print -u3 "   <TH>LABEL</TH></TR>"
+	#print -u3 " <TR ALIGN=CENTER>"
+	#print -u3 " <TR>"
+	
+	year=${png_file%%%%_*};  year=${year#T} 
+	doy=${year#[0-9][0-9][0-9][0-9]};  year=${year%%$doy}
+	dat_file=""
+	
+	#
+	#	select day & band
+	#
+	instx=${inst%%R}
+	dat0=`ls $dat_dir/${png_file%%%%_"$instx"*}*.DAT`
+	
+	dat_file=$dat0
+	
+	for d in $dat_file; do
+	  print -u3 "   <TR><TD><A HREF=\"$d\">${d##*/}</A></TD>"
+	  l=${d%%.DAT}.LBL                                    
+	  print -u3 "   <TD><A HREF=\"$l\">${l##*/}</A></TD></TR>"
+	done
+	print -u3 "   <TR><TD> </TD>"
+	print -u3 "   <TD><A HREF=\"../../../../../LABEL/RPWS_WBR_WFR_ROW_PREFIX.FMT\">RPWS_WBR_WFR_ROW_PREFIX.FMT</A></TD></TR>"
+	print -u3 "   <TR><TD> </TD>"
+	print -u3 "   <TD><A HREF=\"../../../../../LABEL/RPWS_SCLK_SCET.FMT\">RPWS_SCLK_SCET.FMT</A></TD></TR>"
+	print -u3 " "
+	print -u3 "</TABLE>"
+	print -u3 "</DIV>"
+	
+	# w3c html3.2 png
+	print -u3 "<p>"
+	print -u3 "<!--Produced by $Title $Version-->"
+	print -u3 '<A HREF="http://validator.w3.org/check/referer">'
+	print -u3 "<IMG BORDER=\"0\" SRC=\"$valid_html/VALID_HTML32.PNG\""
+	print -u3 ' ALT="Valid HTML 3.2!" HEIGHT="31" WIDTH="88"></A>'
+	print -u3 "</p>"
+	
+	print -u3 "</BODY>"
+	print -u3 "</HTML>"
+
+}
+
+
+##############################################################################
+# Main
+
+# relative path names 
+# assume starting in BROWSE->RPWS_WAVEFORM_FULL->HTML
+
+base_dir="../../../../.."			#
+valid_html="$base_dir/BROWSE/ANCILLARY"		# W3C validation decal
+
+inst=$1						# WBR or WFR
+
+if [[ $inst = "WBR" ]]; then			#--- WBR ---
+	png_dir="$base_dir/BROWSE/RPWS_WIDEBAND_FULL"	# CHANGE SOMEHOW
+	dat_dir="$base_dir/DATA/RPWS_WIDEBAND_FULL"	# CHANGE SOMEHOW
+	title="Cassini RPWS WBR Spectrogram"		# title="Wideband Data Directory" # 2/2005
+fi
+
+if [[ $inst = "WFR" ]]; then			#--- WFR ---
+	png_dir="$base_dir/BROWSE/RPWS_WAVEFORM_FULL"	# CHANGE SOMEHOW
+	dat_dir="$base_dir/DATA/RPWS_WAVEFORM_FULL"	# CHANGE SOMEHOW
+	title="Cassini RPWS WFR Spectrogram"		# title="Waveform Data Directory" # 2/2005
+fi
+
+hml_dir="$png_dir/HTML"				# html directory
+
+shift						# remove receiver mnemonic
+						# assume  
+						# BROWSE->RPWS_WAVEFORM_FULL, 
+						# where the PNGs are
+files=$@
+#cd HTML
+for f in $files; do
+  file3=${f##*/}				# filename
+  dire1=${f%%%%/*}				# day directory
+  dire2=${f%%/*}					# 
+  dire2=${dire2##*/}				# year/100's directory
+  png_file=$f					# file name used by RollOutHtml
+  dat_file=${file3%%%%_$inst}
+  hHtml=${file3%%.PNG}.HTM
+  #echo making $dire1/$dire2/$hHtml
+   cd $dire1
+   cd $dire2
+   cd HTML
+	echo "Writing: $dire1/$dire2/$hHtml" 1>&2
+   exec 3>$hHtml
+   RollOutHtml
+   cd ..
+   cd ..
+   cd ..
+done
+
+exit 0

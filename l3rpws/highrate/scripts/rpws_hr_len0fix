@@ -1,0 +1,387 @@
+#!/usr/bin/env python
+"""up2len1HRlbls - Alter cassini wideband data labels when ROW_BYTES = 0
+and BYTES = 0 and ITEMS = 0 for the TIME_SERIES table object. 
+"""
+
+import sys
+import os
+import StringIO
+import traceback
+from os.path import join as pjoin
+import os.path
+import re
+
+#Local modules:
+import rpw_pds.util
+
+# Global settings from MAIN.  Only using globals due to small program size.
+g_sDefaultWideBandRoot = "/opt/project/cassini/pds/DATA/RPWS_WIDEBAND_FULL"
+g_bReportOnly = False
+g_bCommentOut = True
+g_bTesting = False
+
+# Final report variables
+g_nChecked = 0
+g_nNeedsChange = 0
+g_nChanged = 0
+g_lBackups = []
+
+
+##############################################################################
+def printHelp():
+	print """
+NAME
+     up2len1HRlbls - Alter cassini wideband data labels for zero length
+	       TIME_SERIES objects.
+
+SYNOPSIS
+    up2len1HRlbls [-n] [-h] [-b] [-c] [-t] [DIRECTORY]
+
+DESCRIPTION
+     Alter cassini wideband data labels so that there are no TIME_SERIES
+     objects of zero length.  Zero length TIME_SERIES objects have the
+     following elements equal to 0:
+     
+          ROW_BYTES = 0
+          BYTES = 0
+          ITEMS = 0
+          
+     In the PDS standards reference, none of these elements are allowed
+     to be equal to 0.  This program supports two methods of altering
+     the files so that they validate.  By default no changes are made.
+     
+	  METHOD 1 (which -s):
+     Set the above element values to 1.  This is not correct but is the
+     least disruptive change as all labels will still have the same
+     structure.
+
+     METHOD 2 (with -c):
+     In PDS mentality a zero length item is no item at all and shouldn't
+     be referenced.  With this fix method the TIME_SERIES object is 
+     simply commented out of the label.  So that the files may be
+     recovered the object definition is commented out instead of
+     deleted.
+
+     Original versions of the file are saved as FILENAME.bak[,N] where N
+     is 1 to 999 to denote multiple backups.  The first backup has no
+     numeric identifier.
+
+OPTIONS
+     -h,--help
+          Print help (this output)
+
+     -b,--list-backups
+          At program exit, print the list of backup files created.
+     
+     -c,--comment-time-series
+          Use correction method 2, delete the time series object
+          definition from the label file.  Replace it with a comment.
+			 
+     -s,--set-to-one
+          Use correction method 1, set the erroneous values to 1,
+          this is not correct and this use is *NOT* recommended.
+			 
+     -t,--testing
+          For testing, change at most one label and then halt changes.
+
+     DIRECTORY
+          If DIRECTORY is present it is taken as the top level search
+          path instead of:
+          %s
+
+SOURCE
+     https://saturn/svn/cassini/trunk/rpwCas/scripts/up2len1HRlbls
+
+AUTHOR
+     Chris Piker <chris-piker@uiowa.edu>
+	  
+"""%g_sDefaultWideBandRoot
+
+##############################################################################
+# Patterns include matching the start of the string so that commented out
+# stuff is not picked up.
+
+g_rePointer = re.compile(r'^\^TIME_SERIES\s*=.*$')
+
+g_reTimeSeriesStart = re.compile(r'^\s*OBJECT\s*=\s*TIME_SERIES')
+
+g_reRowBytes0 = re.compile(r'^\s*ROW_BYTES\s*=\s*0')
+g_reBytes0 = re.compile(r'^\s*BYTES\s*=\s*0')
+g_reItems0 = re.compile(r'^\s*ITEMS\s*=\s*0')
+
+g_reTimeSeriesStop  = re.compile(r'^\s*END_OBJECT\s*=\s*TIME_SERIES')
+
+
+##############################################################################
+def changeToOne(fOrig, fNew):
+	
+	bInTimeSeries = False
+	for sLine in fOrig:
+	
+		if not bInTimeSeries:
+			fNew.write(sLine)
+			if len(g_reTimeSeriesStart.findall(sLine)) > 0:
+				bInTimeSeries = True
+			continue
+	
+		#Okay in the time_series object now
+		if len(g_reRowBytes0.findall(sLine)) > 0:
+			fNew.write('/*  Actually ROW_BYTES is 0, 1 was inserted for label validation */\r\n')
+			fNew.write('/*  check WBR_ROW_PREFIX_TABLE column STATUS_FLAG bits 3 and 4   */\r\n')
+			fNew.write('/*  before using any data from the associated table rows.        */\r\n')
+			fNew.write('  ROW_BYTES               = 1\r\n')
+				
+		elif len(g_reBytes0.findall(sLine)) > 0:
+			fNew.write('/*  Actually BYTES is 0, 1 was inserted for label validation.    */\r\n')
+			fNew.write('    BYTES                   = 1\r\n')
+			
+		elif len(g_reItems0.findall(sLine)) > 0:
+			fNew.write('/*  Actually ITEMS is 0, 1 was inserted for label validation.    */\r\n')
+			fNew.write('    ITEMS                   = 1\r\n')
+
+		else:
+			#Other lines just pass through
+			fNew.write(sLine)
+
+
+
+##############################################################################
+def commentOut(fOrig, fNew):
+	
+	bInTimeSeries = False
+	
+	for sLine in fOrig:
+		bComment = False
+		
+		if not bInTimeSeries:
+			if len(g_rePointer.findall(sLine)) > 0:
+				bComment = True
+			
+			elif len(g_reTimeSeriesStart.findall(sLine)) > 0:
+				bInTimeSeries = True
+				bComment = True
+		else:
+			bComment = True
+			if len(g_reTimeSeriesStop.findall(sLine)) > 0:
+				bInTimeSeries = False
+	
+	
+		# Nested comments are legal in PDS.
+		# Std Ref Ver 3.7, Section 12.4.1
+		#   "Any characters on a line following a comment are ignored."
+		if bComment: 
+			fNew.write("/* %s */\r\n"%sLine.rstrip())
+		else:
+			fNew.write(sLine)
+		
+		
+				
+##############################################################################
+def changeFile(sAbsPath):
+	"""Change the label at sPath, assume it's a wideband label with
+	ROW_BYTES = 0, BYTES = 0 and ITEMS = 0 or your not called.  This
+	function is not safe unless called from checkFile below.  
+	
+	Backup the original to sPath.bak[,N]
+	
+	Return False if processing should halt.
+	"""
+	global g_lBackups, g_bCommentOut, g_nChanged
+	
+	# No read tests are done here, assume that caller handled that.
+	
+	sNew = sAbsPath
+	sOrig = rpw_pds.util.mkVerFileName("%s.bak"%sAbsPath)
+	
+	#Make sure can move file first.
+	try:
+		#Save backup
+		os.rename(sNew, sOrig)
+	except OSError, e:
+		print "ERROR: Cannot rename %s to %s"%(sNew, sOrig)
+		return False
+	
+	#Make sure can create new file
+	fNew = None
+	try:
+		fNew = file(sNew, 'wb')
+	except OSError, e:
+		print "ERROR: Cannot create file %s"%sNew
+		
+		try:
+			#Restore from backup
+			os.rename(sNew, sOrig)
+		except OSError, e:
+			print "ERROR: Cannot restore %s from backup %s"%(sNew, sOrig)
+			print "ERROR: you should manually do this *right now*!"
+		
+		return False
+	
+	
+	#Okay, looks good now parse sOrig to sNew
+	print "INFO: changing label", sAbsPath
+	
+	fOrig = file(sOrig, 'rb')
+	
+	if g_bCommentOut:
+		commentOut(fOrig, fNew)
+	else:
+		changeToOne(fOrig, fNew)
+	
+	g_lBackups.append(sOrig)
+	g_nChanged += 1
+	fNew.close()
+	fOrig.close()
+	
+	if g_bTesting:
+		#If testing, halt after this first change.
+		return False
+	else:
+		return True
+	
+
+##############################################################################
+def checkFile(sAbsPath):
+	"""Check to see if file sAbsPath needs changes and depending on the
+	value of the module global variable g_bReportOnly, call changeFile
+	to alter the label"""
+	
+	global g_nChecked, g_nNeedsChange
+	
+	if not sAbsPath.endswith("1_WBRFR.LBL"):
+		return True
+	
+	g_nChecked += 1
+	
+	# See if it needs alteration, get the text between starting and ending
+	# regular expressions.
+	fIn = file(sAbsPath, 'rb')
+	#fOut = file(sAbsPath+".tmp", 'wb')
+	
+	bInTimeSeries = False
+	lChanges = [0,0,0]
+	nLine = 0
+	for sLine in fIn:
+		nLine += 1
+	
+		#Check for time series object start
+		if not bInTimeSeries:
+			if len(g_reTimeSeriesStart.findall(sLine)) > 0:
+				bInTimeSeries = True
+			continue
+		
+		#Check for ROW_BYTES0, BYTES0 or ITEMS0 to change, only match one
+		if len(g_reRowBytes0.findall(sLine)) > 0:
+			lChanges[0] = lChanges[0] + 1
+			#print "DEBUG: Change ROW_BYTES %s,%d: %s"%(sAbsPath, nLine, sLine)
+			continue
+	
+		if len(g_reBytes0.findall(sLine)) > 0:
+			lChanges[1] = lChanges[1] + 1
+			#print "DEBUG: Change BYTES %s,%d: %s"%(sAbsPath, nLine, sLine)
+			continue
+			
+		if len(g_reItems0.findall(sLine)) > 0:
+			lChanges[2] = lChanges[2] + 1
+			#print "DEBUG: Change ITEMS %s,%d: %s"%(sAbsPath, nLine, sLine)
+	
+	fIn.close()
+	
+	if lChanges == [0,0,0]:
+		return True
+	
+	elif lChanges == [1,1,1]:
+		g_nNeedsChange += 1
+		if g_bReportOnly:
+			print "INFO: Label %s requires changes"%sAbsPath	
+		else:
+			bRet = changeFile(sAbsPath)
+			if not bRet:
+				return False    
+			
+	
+	else:
+		print "ERROR: %s non uniformity of ROW_BYTES, BYTES, ITEMS detected! %s"%(
+		      sAbsPath, lChanges)
+		return False
+		
+	return True
+
+##############################################################################
+def printBackups():
+	global g_lBackups
+	
+	if len(g_lBackups) < 1:
+		print "INFO: no backup files created."
+	else:
+		print "INFO: list of backup files follows, 1 per line..."
+	
+	g_lBackups.sort()
+	for sBackup in g_lBackups:
+		print sBackup
+
+##############################################################################
+def main():
+	"""Main function, makes use of sys.argv"""
+	global g_bReportOnly, g_bCommentOut, g_bTesting
+	
+	g_bReportOnly = True
+	
+	if '-h' in sys.argv or '--help' in sys.argv:
+		printHelp()
+		return 0
+			
+	bPrintBak = False
+	if '-b' in sys.argv or '--list-backups' in sys.argv:
+		bPrintBak = True
+	
+	if '-s' in sys.argv or '--set-to-one' in sys.argv:
+		g_bCommentOut = False
+		g_bReportOnly = False
+	
+	if '-c' in sys.argv or '--comment-time-series' in sys.argv:
+		g_bCommentOut = True
+		g_bReportOnly = False
+		
+	if '-t' in sys.argv or '--testing' in sys.argv:
+		g_bTesting = True
+	
+	iLast = len(sys.argv) -1
+	sRoot = ""
+	if iLast > 0 and sys.argv[iLast][0] != '-':
+		sRoot = os.path.abspath(sys.argv[iLast])
+	else:
+		sRoot = g_sDefaultWideBandRoot
+		print "INFO: Searching %s for wideband data labels"%sRoot
+	
+	if not os.path.isdir(sRoot):
+		print "ERROR: %s is not a directory"%sRoot
+		return 3
+	
+	nRet = 0
+	try:
+		bRet = rpw_pds.util.symWalk(sRoot, checkFile)
+		if not bRet:
+			print "WARNING: directory tree walking halted."
+			nRet = 1
+			
+	except:  #Handle user hit CTRL-C here or other freakish occurence.
+		strFile = StringIO.StringIO()
+		traceback.print_exc(file=strFile)
+		print "ERROR: Unhandled Exception.  %s"%(strFile.getvalue())
+		nRet = 2
+	
+	if bPrintBak:
+		printBackups()
+	
+	print "INFO:"
+	print "INFO: Labels Checked: %d,  Labels Requiring Changes: %d,  Labels Changed: %d"%(
+	      g_nChecked, g_nNeedsChange, g_nChanged)
+			
+	return nRet
+
+##############################################################################
+# Stub for direct call without a kicker script.
+if __name__ == "__main__":
+	sys.exit(main())
+

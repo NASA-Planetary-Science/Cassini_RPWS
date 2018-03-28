@@ -1,0 +1,287 @@
+#!/usr/bin/env perl
+#
+# das.batch -- an example perl script to invoke das without going through
+# the web form cgi interface.
+#
+# usage:
+# das.batch 'coord' 'begin time' 'end time' 'plot title' 'orbit string' 'f-lower' 'f-upper'
+# das.batch 'coord' 'begin time' 'end time' 'plot title' 'f-lower' 'f-upper'
+#
+
+if( ($ARGV[1] == "-h" ) or ($ARGV[1] == "--help")){
+	print STDOUT "rpws_hr_browse_wbr_HFR - Makes Specta and Gain plots of HFR down-mixed signals\n";
+	print STDOUT "\n";
+	print STDOUT "Usage:\n";
+	print STDOUT "   rpws_hr_browse_wbr_HFR COORDS BEGIN END TITLE [ORBIT] FREQ_LO FREQ_HI\n";
+	print STDOUT "\n";
+	print STDOUT "Description:\n";
+	print STDOUT "   Generate Das1 style plots for Cassini RPWS HFR down-mixed data.  The command\n";
+	print STDOUT "   line parameters are:\n";
+	print STDOUT "\n";
+   print STDOUT "      COORDS -  One of 'SUN', 'EAR', 'JUP', or 'SAT'.  This option\n";
+   print STDOUT "                sets amplitude axis ranges to values most useful for\n";
+   print STDOUT "                various mission targets.\n";
+	print STDOUT "\n";
+	print STDOUT "      BEGIN  -  The starting spacecraft event time (SCET) for the plot.\n";
+	print STDOUT "\n";
+	print STDOUT "      END    -  The ending SCET for the plot.\n";
+	print STDOUT "\n";
+   print STDOUT "      TITLE -   Text to display along the plot title bar\n";
+   print STDOUT "\n";
+   print STDOUT "      ORBIT -   Text to display below the bottom color bar (optional)\n";
+	print STDOUT "\n";
+	print STDOUT "\n    FREQ_LO - Lower edge of frequency band to plot, needs to be adjusted\n";
+	print STDOUT "                based on the current HFR mixing frequency.\n";
+	print STDOUT "\n";
+	print STDOUT "\n    FREQ_HI - Upper edge of frequency band to plot, needs to be adjusted\n";
+	print STDOUT "                based on the current HFR mixing frequency.\n";
+   print STDOUT "\n";
+	print STDOUT "   The output of the program is a single file name:\n";
+	print STDOUT "\n";
+	print STDOUT "      batch.eps\n";
+	print STDOUT "\n";
+	print STDOUT "   in the current directory.\n";
+	print STDOUT "\n";
+	print STDOUT "Environment:\n";
+	print STDOUT "   Basic operation of the script is to restores giferator.sav then runs\n";
+	print STDOUT "   giferator.pro.  These are assumed to be in the first component of the\n";
+	print STDOUT "   \$IDL_PATH.\n";
+	print STDOUT "\n";
+	print STDOUT "   Before restoring the giferator, \$DAS_DATASETROOT is set to\n";
+	print STDOUT "\n";
+	print STDOUT "      %(INST_ETC)s/datasetroot\n";
+	print STDOUT "\n";
+	print STDOUT "   which is exected to contain the Das 1 datasource definition files:\n";
+	print STDOUT "\n";
+	print STDOUT "       RPWSwb80_HF.dsdf RPWShfrmsagc.dsdf fce.dsdf cephemE.dsdf cephemJ.dsdf \n";
+	print STDOUT "       cephemS.dsdf cephemSun.dsdf cephemV.dsdf color_wedge.dsdf \n";
+
+	print STDOUT "\n";
+	exit(0);
+}
+
+# Setup GIFERATOR environment
+$ENV{'DAS_DATASETROOT'} = "%(INST_ETC)s/datasetroot" ; 
+$ENV{'DAS_TEMP'}        = "%(RPWS_TEMP)s";
+$ENV{'IDL_LIBDIR'}      = "%(INST_EXT_LIB)s";
+
+# Open pipe to IDL process
+print STDERR "INFO: Logging to %(RPWS_TEMP)s/das.batch.log\n";
+if (!open(PROG, "| %(IDL_BIN)s 2>> %(RPWS_TEMP)s/das.batch.log")) {
+  print STDERR "ERROR: Could not open pipe to IDL process\n";
+  exit(1);
+}
+
+# get begin time, end time, and optional title from command line
+
+if ($#ARGV < 6) {
+  print STDERR "       $#ARGV\n";
+  print STDERR "USAGE: $0 \'coordinate system\' \'begin-time\' \'end-time\' \'title\' \'orbit string\' \'f-lower\' f-upper\'\n";
+  exit (1);
+}
+
+$begtime = `das2_prtime $ARGV[1]`; chop $begtime;
+$endtime = `das2_prtime $ARGV[2]`; chop $endtime;
+$xtitle  = "\'$begtime    SCET    $endtime\'";
+
+$current_path = "`pwd`";
+
+$axis = "ephemeris/cephemS.dsdf";
+$zlow  = '1.e-18';
+$zhigh = '1.e-15';
+if ($ARGV[0] eq "SAT" ) {
+  $axis  = "ephemeris/cephemS.dsdf";
+  $zlow  = '1.e-18';
+  $zhigh = '1.e-15';
+  
+  # Alter upper and lower range to account for saturn kilo-metric radiation
+  # for WBR 325 kHz data
+  if ( (exists $ARGV[5]) and (exists $ARGV[6]) and ($ARGV[5] eq '310')) {    
+    $zlow = '5.e-18';
+    $zhigh = '1.e-12';
+  } 
+}
+
+if ($ARGV[0] eq "EAR" ) {
+  $axis = "ephemeris/cephemE.dsdf";
+  $zlow  = '1.e-18';
+  $zhigh = '1.e-15';
+}
+if ($ARGV[0] eq "JUP" ) {
+  $axis = "ephemeris/cephemJ.dsdf";
+  $zlow  = '1.e-18';
+  $zhigh = '1.e-15';
+}
+if ($ARGV[0] eq "VEN" ) {
+  $axis = "ephemeris/cephemV.dsdf";
+  $zlow  = '1.e-18';
+  $zhigh = '1.e-15';
+}
+if ($ARGV[0] eq "SOL" ) {
+  $axis = "ephemeris/cephemSun.dsdf";
+  $zlow  = '1.e-18';
+  $zhigh = '1.e-15';
+}
+
+if ($ARGV[3]) {
+  $title  = $ARGV[3];
+} else {
+  $title  = 'Cassini HF/WBR';
+}
+
+if ($ARGV[4]) {
+  $orbit_string  = $ARGV[4];
+} else {
+  $orbit_string  = 'Cruise';
+}
+
+if ($ARGV[5]) {
+  $band_edge_lower  = $ARGV[5];
+} else {
+  $band_edge_lower  = '310';
+}
+
+if ($ARGV[6]) {
+  $band_edge_upper  = $ARGV[6];
+} else {
+  $band_edge_upper  = '340';
+}
+
+# send the time and title information to IDL
+
+
+print PROG <<EOH;
+
+ON_ERROR, 1
+RESTORE, '%(GIFER_PATH)s/giferator.sav'
+.RUN giferator.pro
+
+batch = 1
+batchgifname = 'batch.eps'
+;referer = "http://cassini.physics.uiowa.edu/~tfa/cas/das-wbr80hf_new.html"
+logfile = "das.128.255.33.90.log"
+  display.color.r=interpolate([000,000,000,000,000,255,255,255,255],(findgen(200)+1.)/25.)
+  display.color.g=interpolate([000,000,255,255,255,255,200,080,000],(findgen(200)+1.)/25.)
+  display.color.b=interpolate([127,255,255,127,000,000,000,000,000],(findgen(200)+1.)/25.)
+  display.color.b[0]=1
+rows = 5
+columns = 2
+colormaps = 2
+images = 2
+axes = 3
+labels = 2
+plots = 5
+sets = 2
+
+display.isize = 800
+display.jsize = 600
+
+colormap_i.klow = 0
+colormap_i.khigh = display.color.nz
+set_i.ticklen = -0.02
+axis_i.set = 0
+axis_i.method = 'plot'
+
+init
+
+column[0].ileft = fix( display.isize / 8 + 18 )
+column[0].iright = fix( display.isize * 6 / 8 + 18 )
+column[0].time = 1
+column[0].tleft = \'$ARGV[1]\'
+
+column[0].tright = \'$ARGV[2]\'
+
+column[1].ileft = fix( column[0].iright + display.isize / 8 )
+column[1].iright = fix( column[1].ileft + display.isize / 32 )
+
+
+row[0].jbottom = fix( 16L * display.jsize / 64L )
+; row[0].jtop = row[0].jbottom + 3*(column[0].iright-column[0].ileft)/4
+row[0].jtop = fix(26L * display.jsize / 32L)
+row[0].ybottom = $band_edge_lower
+row[0].ytop = $band_edge_upper
+
+row[1].ybottom = $zlow
+row[1].ytop = $zhigh
+row[1].log = 1
+row[1].jbottom = row[0].jtop + display.jsize / 32
+row[1].jtop = fix(29L * display.jsize / 32L)
+
+row[2] = row[0]
+
+row[4].jtop = row[0].jbottom
+row[4].jbottom = display.jsize*1/10
+row[4].ytop = 1
+row[4].ybottom = 0
+
+colormap[0].zlow = $zlow
+colormap[0].zhigh = $zhigh
+colormap[0].log = 1
+
+axis[0].row = 0
+axis[0].column = 0
+axis[0].timeaxis = 'x'
+axis[0].x.ticklen = -0.02
+axis[0].y.title = 'Frequency (kHz)'
+axis[0].set = 0
+axis[0].x.title = $xtitle
+axis[0].tca = \'$axis\'
+
+axis[2].row = 2
+axis[2].column = 1
+axis[2].x.style = supress
+axis[2].y.ticklen = -0.4
+axis[2].y.title = 'Spectral Density ( V!u2!n m!u-2!n Hz!u-1!n )'
+
+axis[1].row = 1
+axis[1].column = 0
+axis[1].timeaxis = 'x'
+axis[1].x.tickname = no_label
+axis[1].y.title = 'HFR SD'
+axis[1].y.ticks = 1
+axis[1].set = 1
+
+image[0].row = 0
+image[0].column = 0
+image[0].colormap = 0
+image[0].dataset = 'rpws/RPWSwb80_HF.dsdf'
+image[0].query = image[0].query
+
+image[1].row = 2
+image[1].column = 1
+image[1].colormap = 0
+image[1].dataset = 'color_wedge.dsdf'
+
+
+plot[1].enable = 1
+plot[1].row = 1
+plot[1].column = 0
+plot[1].set = 1
+plot[1].color = display.color.black
+plot[1].thick = 5
+plot[1].dataset = 'rpws/RPWShfrmsagc.dsdf'
+
+set[1].title = \'$title\'
+
+label[1].charsize = 1.5
+label[1].alignment = 0.5
+label[1].orientation = 0
+label[1].row = 4
+label[1].column = 1
+label[1].xp = 0.5
+label[1].yp = 0.0
+label[1].value = \'$orbit_string\'
+
+device_name = 'PS'
+
+gif_mime_header = 'image/gif'
+ps_mime_header = 'application/postscript'
+
+
+go
+
+EOH
+
+close(PROG);
+
+exit(0);

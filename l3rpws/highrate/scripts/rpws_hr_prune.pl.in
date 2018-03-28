@@ -1,0 +1,94 @@
+#!/usr/bin/env perl
+use Cwd;
+###
+###
+$script_version		= "V1.0";
+printf "\n$script_version\n\n";
+###
+###
+###	Argument 1
+###		Directory in which to work (i.e. volume name)
+###
+###	V1.0  3/2005       W. Robison 
+###		Initial release
+###
+
+###-----------------------------------------------------###
+###-----------------------------------------------------###
+###----------------	SUBs	-----------------------------###
+###-----------------------------------------------------###
+###-----------------------------------------------------###
+sub find_html{
+    opendir FILES_, "@_[0]";
+    $pos = rindex @_[0], "MA.HTM";
+    $result = 0;
+    if ($pos > 0){
+	$result = 1;
+    }
+    return $result;
+}
+sub find_png{
+    opendir FILES_, "@_[0]";
+    @files_ = readdir FILES_;
+    $file_count = 0;
+    $kindex=2;
+    while(@files_[$kindex]){
+	$pos = rindex @files_[$kindex], "PNG";
+        if ($pos > 0)  {
+	    $file_count++;
+	}
+	$kindex++;
+    }
+    return $file_count;
+}
+###
+sub day_dir{
+    opendir DIR_, @_[0];
+    @dir_ = readdir DIR_;
+    $jndex = 2;
+    while(@dir_[$jndex]){
+	if(find_png("@_[0]/@dir_[$jndex]")){
+		print "rm -f @_[0]/@dir_[$jndex]/INFO.TXT\n";
+	    #@cmd = "rm -f @_[0]/@dir_[$jndex]/INFO.TXT";
+	    system @cmd;
+	}
+	else{
+	    @cmd = "echo nothing to do";
+	    if(find_html("@_[0]/@dir_[$jndex]") == 0){
+		 print "rm -rf @_[0]/@dir_[$jndex]\n";
+		#@cmd = "rm -rf @_[0]/@dir_[$jndex]";
+		system @cmd;
+	    }
+	}
+	$jndex++;
+    }
+    closedir DIR_;
+}
+###
+###-----------------------------------------------------###
+###-----------------------------------------------------###
+###----------------	SUBs	------------------------###
+###-----------------------------------------------------###
+###-----------------------------------------------------###
+###
+sub wide{
+    opendir DIR_WIDE, @_[0];
+    @dir_wide = readdir DIR_WIDE;
+    $index = 2;
+    while(@dir_wide[$index]){
+	if(-d "@_[0]/@dir_wide[$index]"){
+	    day_dir "@_[0]/@dir_wide[$index]";
+	}
+	$index++;
+    }
+    closedir DIR_WIDE;
+}
+###
+###-----------------------------------------------------###
+###-----------------------------------------------------###
+###----------------	MAIN	------------------------###
+###-----------------------------------------------------###
+###-----------------------------------------------------###
+###
+wide("RPWS_WIDEBAND_FULL");
+wide("RPWS_WAVEFORM_FULL");

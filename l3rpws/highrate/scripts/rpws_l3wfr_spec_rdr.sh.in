@@ -1,0 +1,117 @@
+#!/bin/bash
+
+source %(SETUP_FILE)s
+
+##############################################################################
+function prnHelp {
+	echo "$1 - Generate power spectral density values from rpws_l3wfr_das2rdr" 1>&2
+	echo " "  1>&2
+	echo "Usage: $1 BEGIN END [7khz ] [Ex | Ew | Bx | By | Bz] [LENGTH] [SLIDE_FRACTION]"  1>&2
+	echo "       $1 [-h | --help]"  1>&2
+	echo "       $1 [-v | --version]"  1>&2
+	echo " "  1>&2
+	echo "Output power spectral density by essentially running the pipeline" 1>&2
+	echo " "  1>&2
+	echo "   rpws_l3wfr_das2rdr BEGIN END | das2_psd LENGTH SLIDE_FRACTION" 1>&2
+	echo " " 1>&2
+	echo "Other than BEGIN and END, arguments may be in any order.  The first" 1>&2
+	echo "integer argument is taken to the be fourier transform length, by " 1>&2
+	echo "default 512 points are transformed at a time.  The second argument " 1>&2
+	echo "is the denominator of the fraction of the length to slide over " 1>&2
+	echo "between subsequent transforms.  The default is 2, for a slide " 1>&2
+	echo "fraction of 1/2."
+	echo " " 1>&2
+	return 0
+}
+
+##############################################################################
+function main {
+
+	typeset sBand=""
+	typeset sAnt="--Ex"
+	typeset nLen="0"
+	typeset nDenom="0"
+	
+	for sArg in "$@"; do 
+		if [ "$sArg" = "-h" -o "$sArg" = "--help" ] ; then
+			prnHelp $(basename $0)
+			return 0
+		fi
+		if [ "$sArg" = "-v" -o "$sArg" = "--version" ] ; then
+			echo 'SVN Info: $Id: rpws_l3wfr_spec_rdr.sh.in 792 2017-09-14 07:16:10Z cwp $'
+			echo 'SVN URL: $URL: https://saturn.physics.uiowa.edu/svn/cassini/production/devel/l3rpws/highrate/scripts/rpws_l3wfr_spec_rdr.sh.in $'
+			return 0
+		fi
+	done
+	
+
+	if [[ "$#" < "2" ]] ; then
+		echo "Usage: " $(basename $0) " BEGIN END [7khz] [Ex | Ew | Bx | By | Bz] [LENGTH] [SLIDE_FRACTION]"  1>&2
+		echo "        or use -h for help" 1>&2
+		return 13
+	fi
+	
+	sBeg="$1"
+	sEnd="$2"
+	
+	#Treat last argument as just a string pile
+	
+	for sArg in $(echo ${@:3}); do 		
+		if [ "${sArg,,}" = "7khz" ] ; then 
+			sBand="--7khz"
+			continue
+		fi
+		if [ "${sArg,,}" = "ex" ] ; then
+			sAnt="--Ex"
+			continue
+		fi
+		if [ "${sArg,,}" = "ew" ] ; then
+			sAnt="--Ew"
+			continue
+		fi
+		if [ "${sArg,,}" = "bx" ] ; then
+			sAnt="--Bx"
+			continue
+		fi
+		if [ "${sArg,,}" = "by" ] ; then
+			sAnt="--By"
+			continue
+		fi
+		if [ "${sArg,,}" = "bz" ] ; then
+			sAnt="--Bz"
+			continue
+		fi
+
+		
+		if [ "$nLen" = "0" ] ; then
+			nLen=$sArg
+		else
+			if [ "$nDenom" = "0" ] ; then
+				nDenom=$sArg
+			else
+				echo "Unknown command line parameter: $sArg" 1>&2
+				return 13
+			fi
+		fi
+		
+	done
+	
+	if [ "$nLen" = "0" ] ; then
+		nLen=512
+	fi
+	if [ "$nDenom" = "0" ] ; then
+		nDenom=2
+	fi
+	
+	echo "exec: rpws_l3wfr_das2rdr -c -s $sBeg $sEnd $sBand $sAnt | das2_psd -c 360s $nLen $nDenom " 1>&2
+	rpws_l3wfr_das2rdr -c -s $sBeg $sEnd $sBand $sAnt | das2_psd -c 360s $nLen $nDenom
+	return $?
+}
+
+##############################################################################
+# Kicker Stub
+
+main "$@"
+nRet=$?
+exit $nRet
+	

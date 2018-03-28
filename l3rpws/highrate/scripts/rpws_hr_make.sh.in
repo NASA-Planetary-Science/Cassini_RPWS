@@ -1,0 +1,581 @@
+#!/usr/bin/env bash
+
+
+# This shell scripts runs all tools to make a 100-day chunk of wideband data
+# See the main section a the end of the file for information on command line
+# arguments.
+#
+# The default definitions for the tool locations assume one is running from
+# the SVN directory, this many need adjustment
+
+source %(SETUP_FILE)s
+
+##############################################################################
+# DEFINITIONS
+
+
+TEMPLATE="%(INST_ETC)s/vol_template"
+
+# Tools, assumes you're running this script for the svn download directory,
+# there are no sub dependencies the the current directory other than finding
+# these tools.  Switch the definitions as neccessary.
+
+RPWS_ARCHIVE="%(INST_NAT_BIN)s/rpws_archive"
+
+RPWS_HOUSEKEEPING="%(INST_NAT_BIN)s/rpws_housekeeping"
+
+HR_STATIC_HTML=%(INST_NAT_BIN)s/rpws_hr_static_html
+
+HR_BUILD_LABEL=%(INST_NAT_BIN)s/rpws_hr_build_lbl
+
+#PRUNE_BROWSE=%(INST_NAT_BIN)s/rpws_hr_prune
+
+BROWSE_HTML_LABLER=%(INST_NAT_BIN)s/rpws_hr_html_lbl
+
+
+# Value of the -debug argument to rpws_archive. OR one or more of these
+#
+#  0x0800000			Suppress Archive write
+#  0x0400000			Suppress STIM Write
+#  0x0200000			Suppress Raw Write
+#  0x0100000			HTML 4.01 (0 means HTML3.2)
+#  0x 080000			suppress data write
+#  0x 040000			VERBOSE label file debug
+#  0x 020000			STIM file debug
+#  0x 010000			master HTML debug
+#  0x  08000			Input file messages
+#  0x  04000			SC Event message
+#  0x  02000			Event message
+#  0x  01000			Output file messages
+#  0x   0800			write record message
+#  0x   0400			label file debug
+#  0x 	080			wbr file size calculations
+#  0x 	040			label file progress
+
+ARCH_DEBUG=0x8040
+
+
+##############################################################################
+# Setup directory structure and return output base
+#
+# args:     $1 - the base output directory
+#
+# globals:  none
+
+function mk_dirs
+{
+	base_dir=$1
+
+	echo "**** STEP 1  ---- ____ ---- ____ ---- ____ ---- ****"
+	echo "****         Make Directory Structure           ****"
+	echo "****************************************************"
+
+
+	umask 002
+	echo "mkdir $base_dir"
+	if mkdir $base_dir ; then
+		echo
+	else
+		echo "Error, $base_dir probably already exists, refusing to overwrite existing dir"
+		return 1
+	fi
+
+
+	if cd $base_dir; then 
+		echo "cd $base_dir"
+	else
+		return 1
+	fi
+	
+
+	if ! mkdir -p BROWSE/ANCILLARY ; then
+		return $?
+	fi
+	if ! mkdir BROWSE/RPWS_WIDEBAND_FULL ; then
+		return $?
+	fi
+	if ! mkdir BROWSE/RPWS_WAVEFORM_FULL ; then
+		return $?
+	fi
+	
+	if ! mkdir -p DATA/RPWS_WIDEBAND_FULL ; then
+		return $?
+	fi
+	if ! mkdir DATA/RPWS_WAVEFORM_FULL ; then
+		return $?
+	fi
+	if ! mkdir DATA/RPWS_RAW_COMPLETE ; then
+		return $?
+	fi
+	if ! mkdir DATA/ANCILLARY ; then
+		return $?
+	fi
+	
+	if ! mkdir EXTRAS ; then
+		return $?
+	fi
+	
+	#mkdir $base_dir/INDEX
+	
+	if ! mkdir script ; then
+		return $?
+	fi
+	
+	cd ../
+	
+	return 0
+}
+
+##############################################################################
+# args:    $1 - the base output directory 
+#
+# globals: TEMPLATE
+
+function cp_static
+{
+base_dir=$1
+
+echo "**** STEP 2  ---- ____ ---- ____ ---- ____ ---- ****"
+echo "****         Copy Static files into directory   ****"
+echo "****************************************************"
+
+#echo "cp ${TEMPLATE}/BROWSE/*.HTM $base_dir/BROWSE"
+
+#if ! cp ${TEMPLATE}/BROWSE/*.HTM $base_dir/BROWSE; then
+#	return $?
+#fi
+
+#echo "${TEMPLATE}/BROWSE/RPWS_WIDEBAND_FULL/*.HTM $base_dir/BROWSE/RPWS_WIDEBAND_FULL"
+
+#if ! cp ${TEMPLATE}/BROWSE/RPWS_WIDEBAND_FULL/*.HTM $base_dir/BROWSE/RPWS_WIDEBAND_FULL ; then
+#	return $?
+#fi
+
+#echo "cp ${TEMPLATE}/BROWSE/RPWS_WAVEFORM_FULL/*.HTM $base_dir/BROWSE/RPWS_WAVEFORM_FULL"
+#if ! cp ${TEMPLATE}/BROWSE/RPWS_WAVEFORM_FULL/*.HTM $base_dir/BROWSE/RPWS_WAVEFORM_FULL ; then
+#	return $?
+#fi
+
+#echo "cp ${TEMPLATE}/BROWSE/*.LBL $base_dir/BROWSE"
+#if ! cp ${TEMPLATE}/BROWSE/*.LBL $base_dir/BROWSE ; then
+#	return $?
+#fi
+
+#echo "cp ${TEMPLATE}/BROWSE/RPWS_WIDEBAND_FULL/*.LBL $base_dir/BROWSE/RPWS_WIDEBAND_FULL"
+#if ! cp ${TEMPLATE}/BROWSE/RPWS_WIDEBAND_FULL/*.LBL $base_dir/BROWSE/RPWS_WIDEBAND_FULL ; then
+#	return $?
+#fi
+
+#echo "cp ${TEMPLATE}/BROWSE/RPWS_WAVEFORM_FULL/*.LBL $base_dir/BROWSE/RPWS_WAVEFORM_FULL"
+
+#if ! cp ${TEMPLATE}/BROWSE/RPWS_WAVEFORM_FULL/*.LBL $base_dir/BROWSE/RPWS_WAVEFORM_FULL ; then
+#	return $?
+#fi
+
+echo "cp ${TEMPLATE}/BROWSE/ANCILLARY/*.LBL $base_dir/BROWSE/ANCILLARY"
+if ! cp ${TEMPLATE}/BROWSE/ANCILLARY/*.LBL $base_dir/BROWSE/ANCILLARY ; then
+	return $?
+fi
+
+echo "cp ${TEMPLATE}/BROWSE/ANCILLARY/*.PNG $base_dir/BROWSE/ANCILLARY"
+if ! cp ${TEMPLATE}/BROWSE/ANCILLARY/*.PNG $base_dir/BROWSE/ANCILLARY ; then
+	return $?
+fi
+
+return 0
+}
+
+
+##############################################################################
+# args:    $1 - The base output directory
+#          $2 - The start time
+#          $3 - The exclusive end time
+#          $4 through $9 - extra arguments for rpws_archive
+#
+# globals: RPWS_ARCHIVE
+
+function mk_archive
+{
+base_dir=$1
+begin_tm=$2
+end_tm=$3
+prod_ver_id=$4
+
+echo "**** STEP 3  ---- ____ ---- ____ ---- ____ ---- ****"
+echo "****         Data Archive                       ****"
+echo "****************************************************"
+
+echo "cd ${base_dir}"
+if ! cd ${base_dir}; then
+	return $?
+fi
+
+
+echo "${RPWS_ARCHIVE} -size 0 -debug ${ARCH_DEBUG} -database -splitstim100 -spice\
+ +ephem -pad -cd_fromat \"ISO9660\" -cd_index ${base_dir} -stsp -dbase_st ${begin_tm}\
+ -dbase_sp ${end_tm} -zero -timeflag 3 +mafi\
+ -prodverid ${prod_ver_id} $5 $6 $7 $8 $9"
+
+if ${RPWS_ARCHIVE} -size 0 -debug ${ARCH_DEBUG} -database -splitstim100 -spice\
+ +ephem -pad -cd_fromat "ISO9660" -cd_index ${base_dir} -stsp\
+ -dbase_st ${begin_tm} -dbase_sp ${end_tm} -zero -timeflag 3 +mafi\
+ -prodverid ${prod_ver_id} $5 $6 $7 $8 $9
+then
+	echo
+else
+	echo "Non-zero return value ($?) from rpws_archive!"
+	return 3
+fi
+}
+
+##############################################################################
+# args:    $1 - The base output directory
+#          $2 - The start time
+#          $3 - The exclusive end time
+#          $4 through $9 - extra arguments for rpws_archive
+#
+# globals: RPWS_HOUSEKEEPING
+
+function mk_housekeeping
+{
+base_dir=$1
+begin_tm=$2
+end_tm=$3
+prod_ver_id=$4
+
+echo "**** STEP 4  ---- ____ ---- ____ ---- ____ ---- ****"
+echo "****         Housekeeping Archive               ****"
+echo "****************************************************"
+
+echo "cd ${base_dir}"
+cd ${base_dir}
+
+echo "${RPWS_HOUSEKEEPING} -z -b -d -i -e -a -v ${prod_ver_id} ${begin_tm} ${end_tm}"
+if ${RPWS_HOUSEKEEPING} -z -b -d -i -e -a -v ${prod_ver_id} ${begin_tm} ${end_tm}; then
+	echo
+else
+	echo "Non-zero return from rpws_housekeeping!"
+	return 1
+fi
+}
+
+##############################################################################
+# args:    $1 - The base output directory
+#          $2 - Extenstion for renaming make_hr_browse.sh
+#
+# globals: none
+
+function mk_browse
+{
+base_dir=$1
+extend=$2
+
+echo "**** STEP 5  ---- ____ ---- ____ ---- ____ ---- ****"
+echo "****         Browse Images (takes forever)      ****"
+echo "****************************************************"
+cd ${base_dir}
+echo "cd ${base_dir}"
+
+#NOTE: This script was generated by rpws_archive
+
+if script/make_hr_browse.sh ; then
+	echo 
+else
+	echo "Non-zero return from make_hr_browse.sh!"
+	return 1
+fi
+
+find . -name "batch.*" -exec rm {} \;
+
+mv script/make_hr_browse.sh script/make_hr_browse.sh.${extend}
+
+echo "Browse Image creation script moved to script/make_hr_browse.sh.${extend}"
+
+return 0
+}
+
+##############################################################################
+# Steps 6 & 7
+# args:  $1 - The base output directory
+#        $2 - step number
+#        $3 - the string WBR or WFR
+#
+# globals: HR_STATIC_HTML, HR_BUILD_LABEL
+
+function mk_WBR_WFR_thumbs
+{
+base_dir=$1
+step_num=$2
+wbr_or_wfr=$3
+prod_ver_id=$4
+
+local_pwd=$(pwd)
+
+
+echo "**** STEP ${step_num}  ---- ____ ---- ____ ---- ____ ---- ****"
+echo "**** Make ${wbr_or_wfr} html & labels for browse images   ****"
+echo "**************************************************************"
+
+subDir="RPWS_WIDEBAND_FULL"
+if [ ${wbr_or_wfr} = "WFR" ]; then
+	subDir="RPWS_WAVEFORM_FULL"
+fi
+
+cd ${base_dir}/BROWSE/$subDir
+echo "cd ${base_dir}/BROWSE/$subDir"
+
+echo "${HR_STATIC_HTML} ${wbr_or_wfr} */*/*.PNG"
+if ${HR_STATIC_HTML} ${wbr_or_wfr} */*/*.PNG ; then
+	echo 
+else
+	echo "Non-zero return from ${HR_STATIC_HTML}!"
+	return 1
+fi
+
+cd "${local_pwd}"
+cd ${base_dir}/BROWSE/$subDir
+echo "cd ${base_dir}/BROWSE/$subDir"
+
+echo "${HR_BUILD_LABEL} ${wbr_or_wfr} ${prod_ver_id} */*/*"
+if ${HR_BUILD_LABEL} ${wbr_or_wfr} ${prod_ver_id} */*/* ; then
+	echo 
+else
+	echo "Non-zero return from ${HR_BUILD_LABEL}!"
+	return 1
+fi
+
+rm BROWSE_${wbr_or_wfr}FR*.HTM 2>/dev/null
+cd "${local_pwd}"
+return 0
+}
+
+
+
+##############################################################################
+# args:    $1 - The base output directory
+#
+# globals: BROWES_HTML_LABLER
+
+function prune_n_label
+{
+#	On the way back up, stop an prune the empty 
+#	directories left lying about and rebuild the
+#	labels for the Browse*.HTM
+#
+base_dir=$1
+prod_ver_id=$2
+
+local_pwd=$(pwd)
+
+echo "**** STEP 8  ---- ____ ---- ____ ---- ____ ---- ****"
+echo "****   Prune empty files, and extra EPS files   ****"
+echo "****************************************************"
+
+rmdir ${base_dir}/HTML
+
+cd ${base_dir}/BROWSE
+echo "cd ${base_dir}/BROWSE"
+
+#echo "${PRUNE_BROWSE}"
+#${PRUNE_BROWSE}
+
+echo "${BROWSE_HTML_LABLER} ${prod_ver_id}"
+${BROWSE_HTML_LABLER} ${prod_ver_id}
+
+cd ${local_pwd}
+cd ${base_dir}/BROWSE
+
+find . -name "*.eps" -exec rm -f {} \;
+return 0
+}
+
+
+##############################################################################
+function prn_help
+{	
+	echo 
+	echo "USAGE"
+	echo "   rpws_hr_make -h"
+	echo "   rpws_hr_make STEPS OUT_DIR BEGIN END [PROD_VER_ID] [rpws_archive_extra_args]"
+   echo 	
+	echo "PARAMETERS"
+	echo "   STEPS - a list of steps to preform, use \"12345678\" to do all"
+	echo "      8 processing steps in order.  The steps are:"
+	echo "         "
+	echo "         1 - make needed output directory tree"
+	echo "         2 - copy static files from:" 
+	echo "             ${TEMPLATE}"
+	echo "             to the output directory"
+	echo "         3 - run" $(basename ${RPWS_ARCHIVE}) "to generate data and browse gen script"
+	echo "         4 - run" $(basename $RPWS_HOUSEKEEPING)
+	echo "         5 - execute the browse script created in step 3"
+	echo "         6 - make Wideband thumbnails"
+	echo "         7 - make Waveform thumbnails"
+	echo "         8 - prune temporary output files and make browse labels"
+	echo
+	echo "   OUT_DIR - where to put the data, absolute path is recommended,"
+	echo "        the dir will be created if need be"
+	echo
+	echo "   BEGIN - inclusive start time in the format yyyy-dddThh:mm:ss"
+	echo
+	echo "   END - exclusive stop time in the format yyyy-dddThh:mm:ss"
+	echo 
+	echo "   PROD_VER_ID - The product version ID.  You should use '1' here "
+	echo "         unless regenerating data that has already been sent to PPI node."
+   echo "         If this field is not specified, the value 1 will be used."
+	echo
+	echo "   rpws_archive_extra_args - any extra arguments are passed to rpws_archive"
+	echo
+	echo "RETURN"
+	echo "If all requested stages finish sucessfully, 0 is returned to the calling"
+	echo "shell.  If processing fails on a particular step number, then that step "
+	echo "number is returned to the shell.  If some general problem occurs such as"
+	echo "bad user input, the script returns the value 13"
+	echo
+	echo "FILES"
+	echo "Complete paths are used in progarm and sub-script execution.  All programs"
+	echo "and scripts are expected to be in the directory:"
+	echo 
+	echo "   " %(INST_NAT_BIN)s
+	echo
+	echo "The output directory initialization files are copied from"
+	echo
+	echo "    %(INST_ETC)s/vol_template"
+	echo
+	echo "EXAMPLE"
+	echo "Usually high-rate PDS data are generated for an entire 100-day "
+	echo "sections at a time.  So a typical run would be:"
+	echo
+	echo "  rpws_mkhr 12345678 2008cwp_a 2008-100T00:00:00 2008-200T00:00:00"
+	echo
+	echo "This will generate all high rate data that begins with day 100 of"
+	echo "2008, and ends before day 200 of 2008."
+	
+}
+
+
+##############################################################################
+# "main"
+
+function main
+{
+
+	local opt
+
+	while getopts ":h" opt; do
+		case $opt in 
+			h ) prn_help
+			    return 0 ;;
+			
+			? ) echo "Unrecognize option.  Issue $0 -h for help information."
+			    return 1 ;;
+		esac
+	done
+	
+	#shift args back to thier default positions
+	shift $(($OPTIND - 1))
+
+	do_step=$1
+	if [ "$do_step" = "" ]; then
+	   echo "ERROR: Steps-to-do Missing, use -h for help."
+	   return 13
+	fi
+
+	base_out=$2
+	if [ "$base_out" = "" ]; then
+		echo "ERROR: Subdirectory name missing, use -h for help."
+		return 13
+	fi
+			
+	begin_tm=$3
+	if [ "$begin_tm" = "" ]; then
+		echo "ERROR: Beginning time missing, use -h for help."
+		return 13
+	fi
+	
+	end_tm=$4
+	if [ "$end_tm" = "" ]; then
+		echo "ERROR: Ending time missing, use -h for help."
+		return 13
+	fi	
+	
+	prod_ver_id=1
+	if [ "$5" = "" ]; then
+	  prod_ver_id=1
+	else
+	  prod_ver_id=$5
+	fi
+
+	sStartDir=$(pwd)
+	
+	while [ $do_step ]; do
+
+		case "$do_step" in
+			1* ) if ! mk_dirs $base_out; then
+			       return 1
+			     fi ;;
+				  
+			2* ) if ! cp_static $base_out; then
+			       return 2
+			     fi 
+				  ;;
+				  
+			3* ) if ! mk_archive $base_out $begin_tm $end_tm $prod_ver_id $6 $8 $9 ${10} ; then
+			       return 3
+			     fi
+				  ;;
+				  
+			4* ) if ! mk_housekeeping $base_out $begin_tm $end_tm $prod_ver_id; then
+			       return 4
+			     fi
+				  ;;
+				  
+			5* ) if ! mk_browse $base_out $end_tm; then
+			       return 5
+			     fi
+				  ;;
+				  
+			6* ) if ! mk_WBR_WFR_thumbs $base_out "6" "WBR" $prod_ver_id; then
+			       return 6
+			     fi
+				  ;;
+				  
+			7* ) if ! mk_WBR_WFR_thumbs $base_out "7" "WFR" $prod_ver_id; then
+			       return 7
+			     fi
+				  ;;
+				  
+			8* ) if ! prune_n_label $base_out $prod_ver_id; then 
+			       return 8
+			     fi
+				  ;;
+				  
+			?* ) echo "Usage:"
+				 echo "   mkdir_hr step_list output_dir begin end [archive_extra]"
+			    echo 
+				 echo "Use -h for more info"
+				 return 13
+				;;
+		esac
+		
+		# In between each step change back to the starting directory 
+		# in case something exited early.
+		echo "cd $sStartDir"
+		cd $sStartDir
+	
+		do_step=${do_step:1} # lop off the first character and continue
+	done
+
+	return 0
+}
+
+##############################################################################
+# main stub
+
+main "$@"
+exit $?
+
+
+
+
+

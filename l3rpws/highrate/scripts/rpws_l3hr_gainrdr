@@ -1,0 +1,289 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import sys
+import optparse
+import os
+import logging
+from os.path import join as pjoin
+
+import pspice
+import das2
+import rpws.highrate.l3
+
+##############################################################################
+# A generic version reporting block
+
+def stripSVNkey(s):
+	if s.find(':') == -1:
+		return s.strip(" $") + ": unknown"
+	else:
+		return s.strip(' $')
+
+g_sRev = stripSVNkey("$Rev: 788 $")
+g_sURL = stripSVNkey("$URL: https://saturn.physics.uiowa.edu/svn/cassini/production/devel/l3rpws/highrate/scripts/rpws_l3hr_gainrdr $")
+g_sWho = stripSVNkey("$LastChangedBy: cwp $")
+g_sWhen = stripSVNkey("$LastChangedDate: 2017-09-13 00:41:28 -0500 (Wed, 13 Sep 2017) $")
+
+
+##############################################################################
+
+g_dAntToSlot = {
+	'Ex':0, 'Ew':1, 'Bx':2, 'By':3, 'Bz':4, 'HF':None, 'LP':None, None:None 
+}
+
+def sendHeader(log, dtBeg, dtEnd, sReceiver):
+	
+	fOut = sys.stdout
+	
+	if sReceiver == 'wbr':
+		sTitle = "RPWS WBR Gain"
+	else:
+		sTitle = "RPWS WFR 5-Channel Gain"
+	
+	sHdr = '''<stream version="2.2">
+  <properties String:title="%s %%{xCacheResInfo}"
+              String:xLabel="SCET (UTC)"
+              Datum:xTagWidth=".15 s"
+              String:yScaleType="linear"
+              DatumRange:xCacheRange="%s to %s UTC"
+              double:yFill="-1.0"
+              String:xCacheResInfo = " (Intrinsic Resolution)"/>
+</stream>
+'''%(sTitle, str(dtBeg), str(dtEnd))
+
+	fOut.write("[00]%06d%s"%(len(sHdr), sHdr))
+	
+	if sReceiver == 'wbr':
+		sHdr = '''<packet>
+  <x type="time24" units="us2000"></x>
+  <y name="wbr_gain" type="ascii5" units="dB" >
+    <properties String:yLabel="WBR Gain (dB)" />
+  </y>        
+</packet>
+'''
+	
+	else:
+		sHdr = '''<packet>
+  <x type="time24" units="us2000"></x>
+  <y name="wfr_Ex_gain" type="ascii5" units="dB" >
+     <properties String:yLabel="WFR Ex Gain (dB)" 
+                 double:yFill="-1.0" />
+  </y>
+  <y name="wfr_Ew_gain" type="ascii5" units="dB" >
+     <properties String:yLabel="WFR Ew Gain (dB)"
+                 double:yFill="-1.0" />
+  </y>
+  <y name="wfr_Bx_gain" type="ascii5" units="dB" >
+     <properties String:yLabel="WFR Bx Gain (dB)"
+                 double:yFill="-1.0" />
+  </y>
+  <y name="wfr_By_gain" type="ascii5" units="dB" >
+     <properties String:yLabel="WFR By Gain (dB)"
+                 double:yFill="-1.0" />
+  </y>
+  <y name="wfr_Bz_gain" type="ascii5" units="dB" >
+     <properties String:yLabel="WFR Bz Gain (dB)"
+                 double:yFill="-1.0" />
+  </y>
+</packet>
+'''
+
+	fOut.write("[01]%06d%s"%(len(sHdr), sHdr))
+
+##############################################################################
+
+def main(argv):
+
+	fOut = sys.stdout
+		
+	psr = optparse.OptionParser(
+		usage="%prog [options] BEGIN END [WFR | WBR]",
+		prog="rpws_l3hr_gainrdr",
+		version=" \n".join( [g_sRev, g_sWho, g_sWhen, g_sURL] ),
+		description="""Reads WBR or WFR records and outputs gain values.  By
+default WBR gain values are output, but the last argument can be used to 
+set this explicitly."""
+	)
+	
+		
+	psr.add_option('-l', "--log-level", dest="sLevel", metavar="LOG_LEVEL",
+		help="Logging level one of [critical, error, warning, "+\
+		"info, debug].  The default is info.", type="string",
+		action="store", default="info")
+
+	
+	sDefKern = os.getenv("CAS_TIME_KERNELS")
+	psr.add_option('-k', '--kernel-list', dest="sKernels", default=sDefKern,
+		help="Specify an alternate SPICE kernel list file, the "+\
+		"default is: %s"%sDefKern, metavar="FILE")
+
+
+	sDefVolRoot = os.getenv('RPWS_SUPERVOL')
+	psr.add_option('-r', '--vol-root', dest="sVolRoot", type="string",
+		default=sDefVolRoot, help="Set the super volume directory, "+\
+		"defaults to '%s'."%sDefVolRoot)
+		
+	(opts, lArgs) = psr.parse_args(argv[1:])
+	
+	# Setup the logging level
+	log = rpws.highrate.l3.setupLogging(opts.sLevel)
+	log = logging.getLogger('')
+	
+	if len(lArgs) < 2:
+		log.error("Both a start time and an ending time must be specified")
+		return 13
+	
+	try:
+		dtBeg = das2.DasTime(lArgs[0])
+	except ValueError, e:
+		log.error("Error in time value %s"%lArgs[0])
+		return 13
+	try:
+		dtEnd = das2.DasTime(lArgs[1])
+	except ValueError, e:
+		log.error("Error in time value %s"%lArgs[1])
+		return 13				
+	
+	# Pad the begin and end time arguments so that off screen gain values
+	# can sill be seen as a line on the display, only matters when we are
+	# seeing less than a minutes worth of data.
+	if dtBeg - dtEnd >= 60.0:
+		dtBeg.adjust(0,0,0,0,0,-1.0)
+		dtEnd.adjust(0,0,0,0,0,1.0)
+		
+	# Secondary parsing of arguments, set stuff from the extra args, only
+	# worry about stuff that may come in from the das2 server
+	sReceiver = "wbr"
+	if len(lArgs) > 2:
+		if sReceiver not in ('wbr','wfr', 'WBR', "WFR"):
+			log.error("Unknown receiver argument, %s"%lArgs[2])
+			return 13
+		sReceiver = lArgs[2].lower()
+			
+	elif len(lArgs) > 3:
+		log.error("Unknown extra command line parameters %s"%lArgs[3:])
+		return 13
+	
+	
+	# The no-data message depends on a stream header being sent
+	sendHeader(log, dtBeg, dtEnd, sReceiver)
+	
+	sMsg = '<comment type="taskSize" value="100" source=""/>'
+	fOut.write("[xx]%06d%s"%(len(sMsg), sMsg))
+	
+	if opts.sKernels == None:
+		log.error("Spice Time Meta-Kernel not defined, either set the "+\
+		"CAS_TIME_KERNELS environment variable or use the -k "+\
+		"option")
+		return 13
+		
+	if opts.sVolRoot == None:
+		log.error("PDS Volume root not set.  Use -r or set the RPWS_SUPERVOL"
+		          " environment variable.")
+		return 13
+		
+	pspice.furnsh(opts.sKernels)
+	
+	if sReceiver == 'wfr':
+		# Not sure what to do with the WFR gains, it looks like there
+		# are 5 independent gain amps.  Guess output 5-channel time
+		# series
+		sDataDir = pjoin(opts.sVolRoot, 'DATA', 'RPWS_WAVEFORM_FULL')
+		lFiles = rpws.highrate.l3.findWfr(log, sDataDir, dtBeg, dtEnd, 
+		                                  True, True)
+	else:
+		# For WBR read all the gains from both high-band (~10 kHz, ~80 kHz, HFR)
+		# sort the values and just output a time series
+		sDataDir = pjoin(opts.sVolRoot, 'DATA', 'RPWS_WIDEBAND_FULL')
+		lFiles = rpws.highrate.l3.findWbr(log, sDataDir, dtBeg, dtEnd, 
+		                                  True, True, True)
+													 
+	if len(lFiles) == 0:
+		log.info("%d %s files found in range %s to %s"%(
+		          len(lFiles), sReceiver, dtBeg, dtEnd)
+		)
+	
+	# Filling records of data
+	lRecs = []
+	
+	for sFile in lFiles:
+		if sReceiver == 'wfr':
+			lRecs += rpws.highrate.l3.readWfr(log, sFile)
+		else:
+			lRecs += rpws.highrate.l3.readWbr(log, sFile)
+			
+		
+	if sReceiver == 'wfr':
+		log.info("Sorting and collapsing %d records"%len(lRecs))
+		# WFR is a little trickier.  Use a dictionary to acculate into 
+		# lists by antenna, one of: Ex, Ew, Bx, By, Bz
+		dRecs = {} 
+		for rec in lRecs:
+			if rec.begin() not in dRecs:
+				dRecs[rec.begin()] = [-1.0]*5
+			
+			idx = g_dAntToSlot[ rec.antenna() ]
+			if idx:
+				dRecs[rec.begin()][idx] = rec.gain()
+		
+		lKeys = dRecs.keys()
+		lKeys.sort()
+		nRecs = len(lKeys)
+	else:
+		log.info("Sorting %d records by time"%len(lRecs))
+		lRecs.sort(rpws.highrate.l3.hrRecSort)
+		nRecs = len(lRecs)
+
+	log.debug("Finished sorting")
+	
+	
+	sMsg = '<comment type="taskSize" value="%d" source="rpws_l3hr_gainrdr"/>'%(
+	        nRecs/100)
+	fOut.write("[xx]%06d%s"%(len(sMsg), sMsg))
+
+	if len(lRecs) == 0:
+		log.error("No records to look at for the rate specified")
+		return 2
+
+	log.info("Retrieving data from %d records..."%len(lRecs))
+	
+	nSent = 0
+	if sReceiver == 'wbr':
+		for rec in lRecs:
+			if (rec.begin() < dtBeg) or (rec.begin() >= dtEnd):
+				continue
+		
+			fOut.write(":01:%23s %4d\n"%(str(rec.begin())[:-3], rec.gain()))
+			nSent += 1
+			
+			if nSent % 100 == 0:
+				sMsg = '<comment type="taskProgress" value="%d" source="rpws_l3hr_gainrdr"/>\n'%(
+				        int(nSent / 100))
+				fOut.write("[xx]%06d%s"%(len(sMsg), sMsg))		
+	else:
+		for dt in lKeys:
+			fOut.write(":01:%23s %4d %4d %4d %4d %4d\n"%(
+			             str(dt)[:-3], dRecs[dt][0], dRecs[dt][1], dRecs[dt][2], 
+							 dRecs[dt][3], dRecs[dt][4] ))
+			nSent += 1
+
+			if nSent % 100 == 0:
+				sMsg = '<comment type="taskProgress" value="%d" source="rpws_l3hr_gainrdr"/>\n'%(
+				        int(nSent / 100))
+				fOut.write("[xx]%06d%s"%(len(sMsg), sMsg))		
+	
+	
+	if nSent == 0:
+		sMsg = "No %s data in the interval %s to %s"%(
+		        sReceiver.upper(), str(dtBeg)[:-3],str(dtEnd)[:-3] )
+		sMsg = '<comment type="NoDataInInterval", message="%s" />\n'%sMsg
+		fOut.write('[xx]%06d%s'%len(sMsg), sMsg)
+	else:
+		log.info("%d packets sent"%nSent)
+	
+	return 0
+
+##############################################################################
+# kicker stub
+if __name__ == "__main__":
+	sys.exit(main(sys.argv))

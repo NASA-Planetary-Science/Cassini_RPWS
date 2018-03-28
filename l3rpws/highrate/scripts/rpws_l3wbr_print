@@ -1,0 +1,270 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+""" specify a time range for WBR printing program,  Issue the command
+   cas_env in your environment before using this program to make sure the
+	pspice library is on your PYTHONPATH and to make sure that the
+	CAS_TIME_KERNELS environment variable is set.
+"""
+
+import sys
+import optparse
+import os
+import os.path
+from glob import glob
+import logging
+
+import das2 as D 
+
+from os.path import join as pjoin
+from struct import unpack
+from os.path import basename as bname
+
+from rpws.highrate.l3 import setupLogging, WbrRecord, readWbr, wbrTimeSort, findWbr
+
+# This should be on your python path
+import pspice as S
+
+##############################################################################
+# A record printer
+
+def prnRecs(log, lRecs, etRange, opts):
+	#print 'SCET  			 Period(sec) Antenna Gain(dB) Samples'
+	
+	pout = sys.stdout.write
+	
+	recLast = None
+	
+	for rec in lRecs:
+	
+		sSclk = "%d/%d:%d"%(rec.nSclkPart, rec.nSclkSec, rec.nSclkFine)
+		
+		et = S.scs2e(-82, sSclk)
+		
+		if (et < max(etRange)) & (et > min(etRange)):
+		
+			if recLast != None and rec.sRec == recLast.sRec:
+				recLast = rec
+				continue
+		
+			sScet = S.et2utc(et, "ISOC", 3)
+			
+			pout("%s  %.1e     %2s      %2d     "%(sScet, rec.period(), rec.antenna(), rec.gain()))
+			
+			# If user wants to print out data
+			if not opts.bNoData:
+				for nVal in rec.data():
+					pout(" %3d"%nVal)
+			pout("\n")
+			
+			recLast = rec
+	
+##############################################################################
+# Finds antenna in each record
+
+def prnAnt(log, lRecs, map_antennas, opts):
+	
+	for rec in lRecs:
+		if map_antennas.get(rec.antenna()) == None:
+			map_antennas[rec.antenna()] = 1
+		else:
+			map_antennas[rec.antenna()] += 1
+		
+	return map_antennas
+	
+		
+##############################################################################
+
+		
+_g_getAnt = ['Ex', 'Eu', 'Ev', 'Ew', 'Bx', 'By', 'Bz', None, 
+	          'HF', None, None, 'LP', None, None, None, 'UNK' ]
+
+def readWbr_ant(log, sFile):
+	"""Read all the WBR records in a file and return list of record objects.
+	The list is not necessarily sorted.
+	"""
+	
+	log.info("Reading %s for WBR records"%sFile)
+	fIn = file(sFile, 'rb')
+	
+	lRecs = []
+	
+	while True:
+	
+		sHdr = fIn.read(32)
+		if len(sHdr) != 32:
+			break
+		
+		(nLen,) = unpack(">H", sHdr[12:14])
+		
+		sBody = fIn.read(nLen - 32)
+		if len(sBody) != (nLen - 32):
+			break
+			
+		sRec = sHdr + sBody
+		
+		# Only append Wbr Records
+		uFlag = ord(sHdr[18])
+		if uFlag  & 0x40:
+			nAnt = ord(sRec[22])
+			
+			#sId = "Record %d"%(bname(sFile), len(lRecs))
+			lRecs.append( _g_getAnt[nAnt] )
+			
+	return lRecs
+	 
+##############################################################################
+# Main Routine
+
+def main(argv):
+	"""Reads and prints un-calibrated WBR data"""
+	
+	psr = optparse.OptionParser(
+		usage="%prog [options] BEGIN END",
+		prog="rpws_pds_wbrprn2",
+		version="0.1-all-in-one",
+		description="""
+Reads and prints uncalibrated WBR PDS data given a set of input files.  The 
+Input PDS files have names similar to:  T2013365_06_10KHZ2_WBRFR.DAT"""
+	)
+	
+	psr.add_option('-l', "--log-level", dest="sLevel", metavar="LOG_LEVEL",
+	               help="Logging level one of [critical, error, warning, "+\
+	               "info, debug].  The default is info.", type="string",
+	               action="store", default="info")
+
+	sDef = None
+	env = 'RPWS_SUPERVOL'
+	if os.getenv(env):
+		sDef = '%s/DATA/RPWS_WIDEBAND_FULL'%os.getenv(env)
+		
+	psr.add_option('-v', '--vol-root', dest="sVolRoot", type="string",
+	               default=sDef, help="Set the super volume directory, "+\
+	               "defaults to '%s'."%sDef)
+	
+	sDefault = os.getenv("CAS_TIME_KERNELS")
+	
+	psr.add_option('-k', '--kernel-list', dest="sKernels", default=sDefault,
+						help="Specify an alternate SPICE kernel list file, the "+\
+	               "default is: %s"%sDefault, metavar="FURNSH_FILE")
+						
+	psr.add_option('-s', '--sort', dest="bSort", action="store_true",
+	               default=False, help="Sort all records by time in memory "
+						"before writing the output.  Make sure you have enough "
+						"RAM for all the files you wish to sort")
+							
+	psr.add_option('-r', '--rm-dulicates', dest="bRmDup", action="store_true",
+	               default=False, help="Remove dublicate records from the"+\
+						"sorted output.  Implies -s.")
+	
+	psr.add_option('-n', '--no-data', dest="bNoData", action="store_true",
+	               default=False, help="Continue printing all of the meta data without the data values themselves")
+						
+	psr.add_option('-1', '--10khz-rate', dest="b10Rate",action="store_true",
+	               default=False, help="Set the rate to read only 10Khz data")
+
+	psr.add_option('-2', '--80khz-rate', dest="b80Rate",action="store_true",
+	               default=False, help="Set the rate to read only 80Khz data")
+
+	psr.add_option('-H', '--HF', dest="bHF",action="store_true",
+	               default=False, help="Read HF data")
+
+	psr.add_option('-B', '--both-rates', dest="bBothRates",action="store_true",
+	               default=False, help="Set the rate to read 80Khz data & 10Khz data")
+							
+	psr.add_option('-a', '--antennas', dest="bAnt",action="store_true",
+	               default=False, help="Sees which antennas are in records, "+\
+						"data values are not printed")
+	
+	psr.add_option('-L', '--Length', dest="bLen", action="store_true",
+	                default=False, help="Print the number of samples in each packet "+\
+						 "May be combined with -a, data values are not printed")
+	               
+	(opts, lTimes) = psr.parse_args(argv[1:])
+		
+	# Setup the logging level
+	log = setupLogging(opts.sLevel)
+	log = logging.getLogger('')
+
+	
+	# If user didn't specify time range for lTimes
+	if opts.bAnt or opts.bLen:
+		if opts.bSort:
+			log.error("Sorted output not available when -a or -L are in use")
+			return 3
+			
+		if opts.bRmDup:
+			log.error("Duplicate value removal not available when -a or -L "+\
+			           "are in use")
+			return 3
+			
+	
+	if len(lTimes) < 2:
+		log.error("Please enter a time range, (use -h for help)")
+		return 3
+				
+	# Check to see we have a vol-root
+	if opts.sVolRoot == None:
+		log.error("Volume root directory was not specified, try the -r option"
+		          "or source a Cassini environment setup file.")
+		return 3
+		
+	# If user changes the directory
+	if opts.sVolRoot != sDef:
+		sDef = opts.sVolRoot
+		
+	if opts.sKernels == None:
+		log.error("Spice Time Meta-Kernel not defined, either set the "+\
+		          "CAS_TIME_KERNELS environment variable or use the -k "+\
+		          "option")
+		return 3
+		
+	S.furnsh(opts.sKernels)
+	
+	if opts.bRmDup:
+		opts.bSort = True
+
+	etRange =[]
+	for sTime in lTimes:
+		etRange.append(S.utc2et(sTime))
+		
+	log.info("Finding files for time period...%s"%lTimes)
+	lFiles = findWbr(log, sDef, das2.DasTime(lTimes[0]), das2.DasTime(lTimes[1]), opts)
+	
+	# Handle the loop differently if sorting is used
+	if opts.bSort:
+		lRecs = []
+	
+		for sFile in lFiles:
+			lRecs += readWbr(log, sFile)
+		
+		# Removing any duplicates
+		if opts.bRmDup:
+			prev_len = len(lRecs)
+			unique = []
+			[unique.append(item) for item in lRecs if item not in unique]
+			lRecs = unique
+			log.info("Removing %d duplicates"%(int(prev_len)-len(lRecs)))
+		
+		log.info("Sorting %d records by time"%len(lRecs))
+		lRecs.sort(wbrTimeSort)
+		prnRecs(log, lRecs, etRange, opts)
+	else:
+		map_antennas={}
+		if opts.bAnt:
+			for sFile in lFiles:
+				lRecs = readWbr_ant(log, sFile)
+				map_antennas = prnAnt(log, lRecs, map_antennas, opts)
+			print(map_antennas)
+			print("For time range %s"%lTimes)
+		else:
+			for sFile in lFiles:
+				lRecs = readWbr(log, sFile)
+				prnRecs(log, lRecs, etRange, opts)
+			
+	return 0
+
+##############################################################################
+# kicker stub
+if __name__ == "__main__":
+	sys.exit(main(sys.argv))

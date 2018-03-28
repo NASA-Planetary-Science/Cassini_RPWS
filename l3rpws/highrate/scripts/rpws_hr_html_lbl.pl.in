@@ -1,0 +1,109 @@
+#!/usr/bin/env perl
+
+use File::Find;
+use Cwd;
+###
+###
+$script_version		= "hr_html_label.perl H1.0";
+###
+###
+### hr_hrml_label.perl -- an example perl script to scan all the HTML files making
+###			the LBL file for them
+###
+###
+###***************************************************
+### Variables that point to important things:
+###
+###	Archive directory, where we're building DVD images
+###
+sub write_label_strip{
+    $pos = rindex @_[0], "/";
+    $_ = substr @_[0], $pos+1;
+    printf LABEL_FILE $_;
+}
+sub write_label {
+    chomp @files[0];
+    if(length @files[0] == 0) {
+	return 0;
+    }
+    printf LABEL_FILE      "PDS_VERSION_ID          = PDS3\r\n";
+    printf LABEL_FILE      "RECORD_TYPE             = STREAM\r\n";
+    printf LABEL_FILE      "^HTML_DOCUMENT          = {\"";
+    write_label_strip(@files[0]);
+    printf LABEL_FILE      "\"";
+    $index = 1;
+    while(@files[$index]) {
+        printf LABEL_FILE  ",\r\n";
+        chomp @files[$index];
+        printf LABEL_FILE  "                           \"";
+	write_label_strip(@files[$index]);
+	printf LABEL_FILE      "\"";
+        $index++;
+    }
+    printf LABEL_FILE      "}\r\n";
+    printf LABEL_FILE      "SOFTWARE_VERSION_ID     = \"$script_version\"\r\n";
+    
+#	 if( $#ARGV > 0 ){
+#	 printf LABEL_FILE      "PRODUCT_VERSION_ID       = \"$ARGV[0]\"\r\n";
+#    }
+#	 else{
+#	 printf LABEL_FILE      "PRODUCT_VERSION_ID       = \"1\"\r\n";
+#	 }
+	 
+	 printf LABEL_FILE      "\r\n";
+    printf LABEL_FILE      "OBJECT                  = HTML_DOCUMENT\r\n";
+    printf LABEL_FILE      "  DOCUMENT_NAME           = \"GRAPHICAL DATA BROWSER\"\r\n";
+    printf LABEL_FILE      "  DOCUMENT_TOPIC_TYPE     = \"HTML NAVIGATION\"\r\n";
+    printf LABEL_FILE      "  PUBLICATION_DATE        = $date\r\n";
+    printf LABEL_FILE      "  INTERCHANGE_FORMAT      = ASCII\r\n";
+    printf LABEL_FILE      "  DOCUMENT_FORMAT         = HTML\r\n";
+    printf LABEL_FILE      "  DESCRIPTION             = \"BROWSE.HTM provides an access point for\r\n";
+    printf LABEL_FILE      "    HTML and web-browser-specific content.\"\r\n";
+    printf LABEL_FILE      "END_OBJECT              = HTML_DOCUMENT\r\n";
+    printf LABEL_FILE      "END\r\n";
+    return $index;
+}
+sub browse_label {
+    $labelname = "$pathname/BROWSE.LBL";
+    unlink $labelname;
+    $len = length @files[0];
+    if($len) {
+	open   LABEL_FILE, "> $labelname" or print "SHIT $labelname\n";
+	$n = write_label();
+	close LABEL_FILE;
+	print "file count $n $labelname\n";
+    }
+}
+###
+###	called for each file
+###
+$directory = "";
+sub wanted {
+    if(m/.HTM/){
+	if(m/BROWSE/){
+	    $d = $File::Find::dir;
+	    if($d ne $directory){
+		$pathname = "$cwd/$d";
+		@files = `ls -1 $pathname/BROWSE*.HTM`;
+		browse_label();
+	    }
+	    $directory = $d;
+	}
+    }
+}
+###-----------------------------------------------------###
+###-----------------------------------------------------###
+###----------------	MAIN	------------------------###
+###-----------------------------------------------------###
+###-----------------------------------------------------###
+###
+
+
+#
+@time_str = localtime time;
+$date = sprintf "%%04d-%%02d-%%02d", @time_str[5]+1900, @time_str[4]+1,@time_str[3];
+@dir[0] = "RPWS_WIDEBAND_FULL";
+@dir[1] = "RPWS_WAVEFORM_FULL";
+#
+$cwd = cwd();
+find(\&wanted, @dir);

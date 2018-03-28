@@ -1,0 +1,519 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import sys
+import optparse
+import os
+import os.path
+import logging
+import math
+
+import das2 as D 
+
+# Python path must be set to svn/cassini/production/stable/PDS/rpwCas/rpw_cas
+from rpws.highrate.l3 import setupLogging, WbrRecord, readWbr, wbrTimeSort, findWbr
+
+# This should be on your python path
+import pspice as S
+
+##############################################################################
+#  Table found in /opt/project/cassini/pds/DOCUMENT/RPWSUG/RPWSUG.PDF on pages 285-287
+#
+#  "In general, odd indicies indicate HFR/H1 is selected with frequency in 25 KHz steps, 
+#  and even indicies indicate HFR/H2 is selected with frequency in 50 Khz steps with an offset of 4.025 Mhz"
+#	- RPWS_WBR_WFR_ROW_PREFIX.FMT in /opt/project/cassini/pds/LABEL
+#
+#  Values below in units of Hz
+##############################################################################
+
+_g_HFtable = [4025000,None,4125000,None,4225000,125000,4225000,175000,4425000,225000,4525000,275000,4625000,325000,4725000,375000,4825000,425000,4925000,475000,5025000,525000,5125000,575000,5225000,625000,5325000,675000,5425000,725000,5525000,775000,  5625000,825000,5725000,875000,5825000,925000,5925000,975000,6025000,1025000,6125000,1075000,6225000,1125000,6325000,1175000,6425000,1225000,6525000,1275000,6625000,1325000,6725000,1375000,6825000,1425000,6925000,1475000,7025000,1525000,7125000,1575000,
+7225000,1625000,7325000,1675000,7425000,1725000,7525000,1775000,7625000,1825000,7725000,1875000,7825000,1925000,7925000,1975000,8025000,2025000,8125000,2075000,8225000,2125000,8325000,2175000,8425000,2225000,8525000,2275000,8625000,2325000,8725000,2375000,
+8825000,2425000,8925000,2475000,9025000,2525000,9125000,2575000,9225000,2625000,9325000,2675000,9425000,2725000,9525000,2775000,9625000,2825000,9725000,2875000,9825000,2925000,9925000,2975000,10025000,3025000,10125000,3075000,10225000,3125000,10325000,3175000,
+15225000,None,15325000,None,15425000,None,15525000,None,15625000,None,15725000,None,15825000,None,15925000,None,16025000,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None]
+
+##############################################################################
+# Reads in records, and groups time periods together if times are < 1 min. apart
+#
+# Returns: output_list - list of Strings in format of  start time, end time, frequency
+##############################################################################
+def groupRecs(log, lRecs):
+
+        output_list = []
+        groupFound = False
+        HFfreq = []             # Keep track of HF frequencies in one group
+        prev_freq = None
+        prev_yd = None
+        
+        # Going through records, checking to see if any times < 1 min. apart
+	for index, rec in enumerate(lRecs):
+             
+                # Time from record as string
+		sSclk = "%d/%d:%d"%(rec.nSclkPart, rec.nSclkSec, rec.nSclkFine)
+		et = S.scs2e(-82, sSclk)
+		sScet = S.et2utc(et, "ISOD", 6)
+                
+                # Parsing string to variables
+                y, m, md, yd, H, M, fS = D.parsetime(sScet)
+
+                if prev_yd == None:
+                    prev_yd = yd
+                
+                # Variables to ttime
+                cur_ttime = D.ttime(y, m, md, H, M, fS)
+                
+                if index==0:
+                    sTime = sScet
+                    prev_ttime = cur_ttime
+                  
+                if groupFound:
+                    sTime = pTime
+                    groupFound = False
+                    HFfreq=[]
+                    
+                # Calculating frequency for HF
+                if rec.antenna()=="HF":
+                    HF = rec.HFR()
+                    dHF = _g_HFtable[HF]
+                    # Hz -> MHz
+                    if dHF >1000000.0:
+                        sHF = str(int(dHF/1000000.0)) + "-MHz"
+                    # Hz -> KHz
+                    else:
+                        sHF = str(int(dHF/1000.0)) + "-KHz"
+                        
+                    # Add frequencies in a list
+                    HFfreq.append(sHF)
+                    # Remove duplicates
+                    HFfreq = list(set(HFfreq))
+                                
+                    freq=""
+                    # Formatting frequency as string
+                    for i in range(0,len(HFfreq)):
+                        freq += HFfreq[i]
+                        if i!= len(HFfreq)-1:
+                            freq +="/"
+                    freq += " HF"
+                    
+                # Frequency for not HF
+                else:
+                    if rec.period() == 3.6e-5:
+                        freq = "10-KHz"
+                    elif rec.period() == 4.5e-6:
+                        freq = "80-KHz"
+            
+                if prev_freq == None:
+                    prev_freq = freq
+                    
+                # If current time is more than 60 seconds ahead of the previous time 
+                if (cur_ttime - prev_ttime) >60 :
+                    output_list.append(storeGroup(log, sTime, prev_ttime, prev_freq, prev_yd))
+                    groupFound = True
+                    
+                # If at end of records & cur time > 60 seconds ahead of prev time
+                if index == len(lRecs)-1 and (cur_ttime - prev_ttime) >60:
+                    output_list.append(storeGroup(log, sScet, cur_ttime, freq, yd))
+                    groupFound = True
+                # If at end of records & cur time < 60 seconds ahead of prev time
+                elif (index == len(lRecs)-1) and (cur_ttime - prev_ttime) < 60:
+                    output_list.append(storeGroup(log, sTime, cur_ttime, freq, yd))
+                    groupFound = True
+                
+                # Keeping track of previous items
+                prev_freq = freq
+                prev_ttime = cur_ttime
+                pTime = sScet
+                prev_yd = yd
+                
+        return output_list
+
+##############################################################################
+# Stores output of Start Time, End Time, and Frequency of each group
+#
+#   sTime : start time string
+#   end_ttime: end time as ttime
+#   freq: frequency of group
+#   et_yd: day of year of end time
+#
+#   Returns: list of [start time, end time, frequency as a string]
+##############################################################################
+def storeGroup(log, sTime, end_ttime, freq, et_yd):
+	
+        # String start time -> ttime -> variables
+        y, m, md, yd, H, M, fS = D.parsetime(sTime)
+        start_ttime = D.ttime(y, m, md, H, M, fS)
+        
+        # variables - > String start time rounded down
+        sTime = "%04d-%03dT%02d:%02d:%02d"%(y, yd, H, M, math.floor(fS))
+        
+        # ttime (end time) -> variables
+	y, m, md, yd, H, M, fS = D.emitt(end_ttime)
+          
+        # -> String start time rounded up
+        eTime = "%04d-%03dT%02d:%02d:%02d"%(y, et_yd, H, M, math.ceil(fS))
+        
+        list = []
+        list.append(sTime)
+        list.append(eTime)
+        list.append(freq)
+        return list
+     
+##############################################################################
+# Postprocess: removes unnecessary indices in list in cases of:
+#
+#   1) If current list start time is smaller than prev list end time AND doesn't contain HF
+#   2) If current list start time is smaller than prev list end time AND contains HF
+##############################################################################
+def removeExtra(log , output_list):
+    
+        remove_index=[]
+        
+        groupFound = False
+        groupIndex=0
+        HFfreq=[]
+        prevIsHF = False
+        
+        # Finding out which indices aren't neccessary
+        for i in range(len(output_list)):
+            
+            curTime = output_list[i][0]
+            # String to ttime
+            cur_ttime = s_to_ttime(curTime)
+               
+            if "HF" in output_list[i][2]:
+                curIsHF = True
+            else:
+                curIsHF = False
+                HFfreq = []
+                
+            if i!=0:
+                # 1) If current list start time is smaller than prev list end time AND doesn't contain HF
+                if (cur_ttime - prev_ttime) < 60 and (not prevIsHF and not curIsHF) :
+                    
+                    # String to ttime
+                    curEnd_ttime = s_to_ttime(output_list[i][1])
+                    
+                    # Make previous end time the larger time
+                    if curEnd_ttime > prev_ttime:
+                        output_list[i-1][1] = output_list[i][1]
+                        remove_index.append(output_list[i])
+                    # Not neccessary, can remove
+                    else:
+                        remove_index.append(output_list[i])
+                
+                # 2) If current list start time is smaller than prev list end time AND contains HF
+                elif (cur_ttime - prev_ttime) <60 and (prevIsHF and curIsHF):
+                    if groupFound == False:
+                        groupIndex = i-1
+                        HFfreq.append(output_list[groupIndex][2][:-3])
+                    groupFound = True
+                    
+                    # Make group end time the larger time
+                    output_list[groupIndex][1] = output_list[i][1]
+                    remove_index.append(output_list[i])
+
+                    # Add frequencies in a list
+                    HFfreq.append(output_list[i][2][:-3])
+                    # Remove duplicates
+                    HFfreq = list(set(HFfreq))
+
+                    freq=""
+                    # Formatting frequency as string
+                    for j in range(0,len(HFfreq)):
+                        freq += HFfreq[j]
+                        if j!= len(HFfreq)-1:
+                            freq +="/"
+
+                    freq += " HF"
+
+                    output_list[groupIndex][2] = freq
+                        
+                else :
+                    groupFound = False
+                    HFfreq = []
+            
+            prevIsHF = curIsHF
+            prevTime=output_list[i][1]
+            # String to ttime
+            prev_ttime = s_to_ttime(prevTime)
+            
+            curIsHF = False
+            
+        # Deleting unneccessary elements
+        for k in range(len(remove_index)):
+            output_list.remove(remove_index[k])
+   
+        return output_list
+    
+##############################################################################
+# Converts time as string -> ttime, for convienience
+#
+##############################################################################
+def s_to_ttime(sTime):
+        # Parsing string to variables
+        y, m, md, yd, H, M, fS = D.parsetime(sTime)
+        # Variables to ttime
+        ttime = D.ttime(y, m, md, H, M, fS)
+        
+        return ttime
+    
+##############################################################################
+# Prints Start Time, End Time, and Frequency of each group as an HTM file
+#
+##############################################################################
+def prnGroupsHTM(log, output_list, lTimes, opts):
+        
+        sTime = lTimes[0]
+        eTime = lTimes[1]
+        # Time range given is the file name
+        if opts.bFullName:
+            htm_name = "WBR_AVAILABILITY_%s-%s.HTM"%(sTime,eTime)
+        # Name is the starting year
+        else:
+            sTime = output_list[0][0][:4]
+            htm_name = "WBR_AVAILABILITY_%s.HTM"%(sTime)
+        
+        # Putting HTM file in WBR_INFO
+        #f1 = os.path.join("/home/Web/htdocs/cassini/team/WBR_INFO")
+        f1=""
+        filepath = os.path.join(f1,htm_name)
+        log.info("Generating HTM page in %s"%filepath)
+        
+        # Creating htm file
+        f = open(filepath,'w')
+            
+        # Creating text to generate 
+        message = """
+        <!DOCTYPE html>
+<html>
+<head>
+<style>
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 40%;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 2px;
+    font-size:80%
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+</style>
+</head>
+<body>
+
+<table> 
+        
+  <tr>
+    <th>Start Time</th>
+    <th>End Time</th>
+    <th>Frequency</th>
+  </tr>
+  """
+        # Creating output as table in HTM (start time, end time, frequency)
+        for i in range(0,len(output_list)):
+            message += """<tr>
+            <td>%s</td>
+            <td>%s</td>
+            <td>%s WBR</td>
+          </tr>"""%(output_list[i][0], output_list[i][1], output_list[i][2])
+  
+        message +="""
+</table>
+</body>
+</html> """
+
+        f.write(message)
+        f.close()
+        
+##############################################################################
+# Prints Start Time, End Time, and Frequency of each group as standard out
+#
+##############################################################################
+def prnGroups(log, output_list, opts):
+	pout = sys.stdout.write
+        if opts.bPrint:
+            pout(('%s, %s')%("Time","Frequency"))
+        else:
+            pout(('%s, %s, %s')%("Start","End","Frequency"))
+        pout("\r\n")
+            
+        # Printing out table
+        for i in range(0,len(output_list)):
+            pout(('%s, %s, %s')%(output_list[i][0], output_list[i][1], output_list[i][2]))
+            pout("\r\n")
+            
+##############################################################################
+# Stores list of sorted times and also frequency without groupings (useful for debugging/ checking output)
+#
+##############################################################################
+def prnRecs(log, lRecs):
+        total_output=[]
+        output = []
+        
+	for rec in lRecs:
+		sSclk = "%d/%d:%d"%(rec.nSclkPart, rec.nSclkSec, rec.nSclkFine)
+		et = S.scs2e(-82, sSclk)
+		sScet = S.et2utc(et, "ISOD", 3)
+		
+                # Calculating frequency for HF
+                if rec.antenna()=="HF":
+                    HF = rec.HFR()
+                    dHF = _g_HFtable[HF]
+                    # Hz -> MHz
+                    if dHF >1000000.0:
+                        sHF = str(int(dHF/1000000.0)) + "-MHz"
+                    # Hz -> KHz
+                    else:
+                        sHF = str(int(dHF/1000.0)) + "-KHz"
+                        
+                    freq = sHF+ " HF"
+                    
+                # Frequency for not HF
+                else:
+                    if rec.period() == 3.6e-5:
+                        freq = "10-KHz"
+                    elif rec.period() == 4.5e-6:
+                        freq = "80-KHz"
+                        
+                output.append(sScet)
+                output.append(freq)
+                output.append("")
+                total_output.append(output)
+                output=[]
+                
+        return total_output
+    
+##############################################################################
+# Main Routine
+#
+##############################################################################
+def main(argv):
+    
+	"""Reads records, and prints out time ranges of available WBR data, listing the start time, end time, and frequencies of the time ranges"""
+	
+	psr = optparse.OptionParser(
+		usage="%prog [options] BEGIN END",
+		prog="rpws_pds_wbr_avail.py",
+		version="0.1-all-in-one",
+		description="""
+Reads records, and prints out time ranges of available WBR data, listing the start time, end time, and frequencies of the time ranges"""
+	)
+	
+	psr.add_option('-l', "--log-level", dest="sLevel", metavar="LOG_LEVEL",
+	               help="Logging level one of [critical, error, warning, "+\
+	               "info, debug].  The default is info.", type="string",
+	               action="store", default="info")
+
+	sDef = None
+	env = 'RPWS_SUPERVOL'
+	if os.getenv(env):
+		sDef = '%s/DATA/RPWS_WIDEBAND_FULL'%os.getenv(env)
+		
+	psr.add_option('-v', '--vol-root', dest="sVolRoot", type="string",
+	               default=sDef, help="Set the super volume directory, "+\
+	               "defaults to '%s'."%sDef)
+	
+	sDefault = os.getenv("CAS_TIME_KERNELS")
+	
+	psr.add_option('-k', '--kernel-list', dest="sKernels", default=sDefault,
+						help="Specify an alternate SPICE kernel list file, the "+\
+	               "default is: %s"%sDefault, metavar="FURNSH_FILE")
+				
+	psr.add_option('-1', '--10khz-rate', dest="b10Rate",action="store_true",
+	               default=False, help="Set the rate to read only 10Khz data")
+
+	psr.add_option('-2', '--80khz-rate', dest="b80Rate",action="store_true",
+	               default=False, help="Set the rate to read only 80Khz data")
+
+	psr.add_option('-H', '--HF-rate', dest="bHFRate",action="store_true",
+	               default=False, help="Set the rate to read HF data")
+
+	psr.add_option('-B', '--both-rates', dest="bBothRates",action="store_true",
+	               default=False, help="Set the rate to read 80Khz data & 10Khz data")
+                     
+        # By Default TRUE
+	psr.add_option('-f', '--HTM', dest="bHTM",action="store_true",
+	               default=True, help="Outputs groups (start time, end time, frequency) to HTM file. DEFAULT: TRUE")
+        
+	psr.add_option('-n', '--full_name', dest="bFullName",action="store_true",
+	               default=False, help="If bHTM = True, Creates HTM files with full name of the time range, rather than just the year. Default writes HTM files with only the year.")
+                       
+	psr.add_option('-p', '--print', dest="bPrint",action="store_true",
+	               default=False, help="Prints sorted time and also frequency without groupings. (Useful for checking output) Is able to output to csv file if user adds > file_name.csv")
+                
+	psr.add_option('-o', '--output', dest="bOut",action="store_true",
+	               default=False, help="Outputs groups (start time, end time, frequency) to stdout. Is able to output to csv file if user adds > file_name.csv")
+                
+	(opts, lTimes) = psr.parse_args(argv[1:])
+
+	# Setup the logging level
+	log = setupLogging(opts.sLevel)
+	log = logging.getLogger('')
+		
+	# Check to see we have a vol-root
+	if opts.sVolRoot == None:
+		log.error("Volume root directory was not specified, try the -r option"
+		          "or source a Cassini environment setup file.")
+		return 3
+	
+	if opts.sKernels == None:
+		log.error("Spice Time Meta-Kernel not defined, either set the "+\
+		          "CAS_TIME_KERNELS environment variable or use the -k "+\
+		          "option")
+		return 3
+		
+	S.furnsh(opts.sKernels)
+
+	# If full name enabled, HTM file generation must be enabled
+	if opts.bFullName:
+		opts.bHTM = True
+            
+	# If user wants stdout, no printing to HTM file
+	if opts.bOut:
+		opts.bHTM = False
+            
+	# Gets all files from time period
+	lFiles = findWbr(log, sDef, lTimes, opts)
+	
+	output_list = []       # Stores grouped data
+	output = []            # Stores non-grouped data
+        
+	# Getting records from files
+	for sFile in lFiles:
+		lRecs = readWbr(log, sFile)
+            
+		# Makes ungrouped list of [Times,Frequency] (useful for checking output)
+		if opts.bPrint:
+			output+=(prnRecs(log,lRecs))
+		else:
+			# Groups records together if times are within a minute
+			output_list+=groupRecs(log,lRecs)
+        
+		if not opts.bPrint:
+			output_list.sort()
+			# Taking out unncessary elements in list
+			output_list = removeExtra(log, output_list)
+            
+			# Prints out time range of each group when group is found to HTM file
+			if opts.bHTM:
+				prnGroupsHTM(log, output_list, lTimes, opts)
+			# Prints out time range of each group when group is found, to stdout
+			elif opts.bOut:
+				prnGroups(log, output_list, opts)
+		else:
+			# Prints ungrouped list of [Times,Frequency] (useful for checking output)
+			output.sort()
+			prnGroups(log, output, opts)
+        
+	return 0
+
+##############################################################################
+# kicker stub
+if __name__ == "__main__":
+	sys.exit(main(sys.argv))

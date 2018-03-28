@@ -1,0 +1,18 @@
+PDS_VERSION_ID          = PDS3
+RECORD_TYPE             = UNDEFINED
+^PNG_DOCUMENT           = {"KEY.PNG", "LRFC.PNG", "WBR.PNG", "WFR.PNG"}
+
+OBJECT                  = PNG_DOCUMENT
+  DOCUMENT_NAME           = "BROWSE.HTM"
+  DOCUMENT_TOPIC_TYPE     = "HTML NAVIGATION"
+  INTERCHANGE_FORMAT      = BINARY
+  DOCUMENT_FORMAT         = PNG
+  PUBLICATION_DATE        = 2003-07-31
+  FILES                   = 4
+  ENCODING_TYPE           = PNG
+  DESCRIPTION             = "
+    These files are Portable Network Graphics (PNG version 1.0, RFC 2083)
+    images of icons used in the BROWSE/BROWSE.HTM file."
+END_OBJECT              = PNG_DOCUMENT
+
+END

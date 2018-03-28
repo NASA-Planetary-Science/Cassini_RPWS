@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+import sys
+
+################################################################################
+def findduplicates(sfile):
+	print ("Looking for duplicates in %s"%sfile)
+	return 0
+################################################################################
+def main(lArgs):
+
+	print("Examining files: %s"%lArgs)
+	
+	for sfile in lArgs[1:]:
+		findduplicates(sfile) 
+		
+		
+	
+	return 0		
+################################################################################
+if __name__ == "__main__":
+	sys.exit(main(sys.argv))

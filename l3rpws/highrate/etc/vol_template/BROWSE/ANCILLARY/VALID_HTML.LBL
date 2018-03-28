@@ -1,0 +1,17 @@
+PDS_VERSION_ID          = PDS3
+RECORD_TYPE             = UNDEFINED
+^PNG_DOCUMENT           = "VALID_HTML32.PNG"
+OBJECT                  = PNG_DOCUMENT
+  DOCUMENT_NAME           = "W3C HTML VALIDATION SEAL"
+  DOCUMENT_TOPIC_TYPE     = "N/A"
+  INTERCHANGE_FORMAT      = BINARY
+  DOCUMENT_FORMAT         = PNG
+  PUBLICATION_DATE        = 2003-06-24
+  FILES                   = 1
+  ENCODING_TYPE           = PNG
+  DESCRIPTION             = "
+    This file is Portable Network Graphics (PNG version 1.0, RFC 2083).
+    This is the World Wide Web Consortium seal used to indicate
+    conformance with the HTML V3.2 specification."
+END_OBJECT              = PNG_DOCUMENT
+END

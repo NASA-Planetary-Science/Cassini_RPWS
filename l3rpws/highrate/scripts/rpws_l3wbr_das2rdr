@@ -1,0 +1,529 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import sys
+import optparse
+import os
+import os.path
+import logging
+import math
+
+import das2 as D
+import das2.reader as R
+import numpy as np
+
+from struct import unpack
+from os.path import basename as bname
+
+# Python path must be set to svn/cassini/production/stable/PDS/rpwCas
+from rpws.highrate.l3 import setupLogging, WbrRecord, readWbr, hrRecSort, findWbr
+
+# This should be on your python path
+import pspice as S
+
+_g_sFloatType = "little_endian_real4"	# Float type for yTags, and data from the antennas
+_g_s_xType  = "little_endian_real8"		# Float type for xType (time)
+
+g_rFill = -1e31
+
+
+##############################################################################
+# A generic version reporting block
+
+def stripSVNkey(s):
+	if s.find(':') == -1:
+		return s.strip(" $") + ": unknown"
+	else:
+		return s.strip(' $')
+
+g_sRev = stripSVNkey("$Rev: 788 $")
+g_sURL = stripSVNkey("$URL: https://saturn.physics.uiowa.edu/svn/cassini/production/devel/l3rpws/highrate/scripts/rpws_l3wbr_das2rdr $")
+g_sWho = stripSVNkey("$LastChangedBy: cwp $")
+g_sWhen = stripSVNkey("$LastChangedDate: 2017-09-13 00:41:28 -0500 (Wed, 13 Sep 2017) $")
+
+
+#	HF[] stores indexes of the _g_HFtable if HF antenna turned on
+
+#	Gain[] stores gain from each antenna
+		
+#	if rSampPeriod == 3.6e-5:
+#		float_fmt = 5
+#	elif rSampPeriod == 4.5e-6:
+#		float_fmt = 6
+
+#if opts.bHFR and opts.bCal:
+#	raise ValueError("For now HF mode is only uncalibrated")
+
+##############################################################################
+def sendStreamHdr(log, opts, dtBeg, dtEnd):
+	"""Send header information to das2 stream"""
+	
+	buf = R.daspkt.HdrBuf(0)
+			
+	sTitle="Cassini RPWS"	
+	if opts.bCal:
+		sTitle+= " Calibrated"
+	else:
+		sTitle+= " Uncalibrated"
+		
+	if opts.bDownMixed:
+		sTitle += " Downmixed"
+	elif opts.b80Rate:
+		sTitle+= " 222 ksps"
+	else:
+		sTitle+= " 27.8 ksps"
+		
+	sTitle+= " Waveforms"
+	
+	if opts.bExAnt:
+		sTitle+= " from Ex"
+	if opts.bEwAnt:
+		if opts.bExAnt:
+			sTitle += " and"
+		sTitle+= " Ew"
+		
+	buf.add(u'''<stream version=\"2.2\">
+  <properties String:title="%s %%{xCacheResInfo}"
+              String:xLabel="SCET (UTC)"
+              Datum:xTagWidth=".15 s"
+              String:yScaleType="linear"
+              String:yLabel="Electric Intensity (V m!a-1!n)"
+              DatumRange:xCacheRange="%s to %s UTC"
+              double:zFill="-1.0e+31"
+              String:renderer = "waveform"
+              String:xCacheResInfo = " (Intrinsic Resolution)"/>
+</stream>
+'''%(sTitle, str(dtBeg), str(dtEnd)))
+		
+	buf.send(sys.stdout)
+	
+	log.info("Sent Header Information for times %s - %s"%(dtBeg,dtEnd))
+
+##############################################################################
+def shouldSendRec(log, opts, dtBeg, dtEnd, rec):
+	"""Depending on the type of record read, decide if it's worthy of 
+		transmission to the big big world.
+	"""
+	if len(rec.data()) == 0:
+		return False
+	
+	if opts.bDownMixed: 
+		if rec.mixingFreq() == None:
+			return False
+	
+	else:
+		if rec.mixingFreq() != None:
+			return False
+	
+		if rec.period() == 3.6e-5 and not opts.b10Rate:
+			return False
+			
+		if rec.period() == 4.5e-6 and not opts.b80Rate:
+			return False
+			
+	
+	if rec.antenna() in ("LP", "UNK"):
+		return False
+	
+	if rec.antenna() not in ('Ex','Ew'):
+		return False
+	if rec.antenna() == 'Ex' and not opts.bExAnt:
+		return False
+	if rec.antenna() == 'Ew' and not opts.bEwAnt:
+		return False
+	
+	# This call invokes spice, leave it for the last check
+	if rec.begin() < dtBeg or rec.begin() >= dtEnd:
+		return False
+		
+	return True
+
+##############################################################################
+
+def paddedLen(rec):
+	"""Round up packet length to the nearest multiple of 1024"""
+	
+	# A check in shouldSendRec insures data length is not 0
+	nLen = len(rec.data())
+	nSegments =  nLen / 1024 # <--- Breaks in python 3
+	
+	if nLen % 1024 != 0:
+		nSegments += 1
+		
+	return nSegments*1024
+	
+##############################################################################
+_g_nNextPktId = 1
+
+def sendPktHdr(log, opts, rec):
+	global _g_nNextPktId
+	
+	if _g_nNextPktId > 99:
+		log.error("I've run outta packet ID's capt'n")
+		return -1
+	
+	buf = R.daspkt.HdrBuf(_g_nNextPktId)
+	_g_nNextPktId += 1
+	
+	if rec.period() == 10e-3:
+		sSummary = "27.8 kilosamples per second waveform from the "
+	else:
+		sSummary = "222 kilosamples per second waveform from the "
+	
+	
+	sZunits = "V m**-1"
+	sField = "Electric Intensity"
+	if rec.antenna() == 'Ex':
+		sSummary += "Eu and Ev electric dipole antennas, aligned along the "+\
+		            "x axis of the spacecraft."
+	else:
+		sSummary += " Ew electric monopole antenna"
+		
+	
+	# If input data were down-mixed in the HFR, send a Signal Definition
+	# property set to aid downstream processors
+	
+	# -62500 Hz is just a magic constant you have to know, it's not given in
+	# the PDS records.  Same is true of +/- 13,000 Hz (wow, really?)
+	
+	if rec.mixingFreq() != None:
+		sSummary += " Data were downmixed using local oscillator frequency "
+		sSummary += "%.5e Hz within the HFR prior to digitization"%rec.mixingFreq()
+		sSigDef = '''Datum:DFT_freqTagMin="%.5e Hz"
+                Datum:DFT_freqTrimMin="%.5e Hz"
+                Datum:DFT_freqTrimMax="%.5e Hz"'''%(rec.mixingFreq() - 62500, 
+                rec.mixingFreq() - 15000, rec.mixingFreq() + 15000)
+	else:
+		sSigDef = 'Datum:DFT_freqTagMin="0 Hz"'
+		
+		
+	nPadsTo = paddedLen(rec)
+	
+	# Autoplot needs to STOP using the name filed as a join key.  Sub cubes
+	# in a datset need to have a unique identifier.  If AP dev's want something
+	# that acts as a join key use "group_id" or something like that, not *name*.  
+	
+	#sNotTheAntennaWhichIsWhatMakesSense = rec.antenna()
+	sNotTheAntennaWhichIsWhatMakesSense = "WBR"
+	
+	buf.add(u'''<packet>
+  <x type="little_endian_real8" units="t2000"></x>
+  <yscan name="%s" type="little_endian_real4" yUnits="s" zUnits="%s" nitems="%d" yTagInterval="%.5e" >
+    <properties String:ySummary="%s" 
+                String:zLabel="%s (%s)"
+                %s />
+  </yscan>
+</packet>
+'''%(sNotTheAntennaWhichIsWhatMakesSense, sZunits, nPadsTo, rec.period(),
+     sSummary, sField, sZunits, sSigDef))
+
+	buf.send(sys.stdout)
+	
+	return _g_nNextPktId - 1
+	
+##############################################################################
+
+_g_lFill = [-1e31]*1024
+
+# ttime at year 2000, will subtract this from calcuated ttimes (from an older
+# date)
+ttime_2000 = D.ttime(2000,1,1)	 
+
+def sendRec(log, opts, dRecType2PktId, rec):
+	"""Send's data.  Packet headers are generated on demand.  Data are 
+	padded to a multiple of 1024 sample blocks.
+	
+	dRecType2PktId - The big packet ID tracker, described in main()
+	
+	(antenna, sample period, mixer frequency (or none), padded packet len)
+	"""
+	
+	nValues = len(rec.data())
+	nPadsTo = paddedLen(rec)
+	
+	tKey = (rec.antenna(), rec.period(), rec.mixingFreq(), nPadsTo)
+	
+	if tKey not in dRecType2PktId:
+		
+		nPktId = sendPktHdr(log, opts, rec)
+		if nPktId < 1:
+			return False
+		
+		dRecType2PktId[tKey] = nPktId
+	
+	nPktId = dRecType2PktId[ tKey ]
+		
+	dasPkt = R.daspkt.PktBuf(nPktId)
+	
+	dasPkt.addDoubles( rec.begin().t2000(), "<" )
+	
+	if opts.bCal:
+		dasPkt.addFloats(rec.calibrate(),"<")
+	else:
+		dasPkt.addFloats(rec.data(),"<")
+
+	# Maybe add fill
+	if nPadsTo > nValues:
+		dasPkt.addFloats(_g_lFill[:nPadsTo - nValues], "<")
+	
+	dasPkt.send(sys.stdout)
+	
+	return True
+	
+##############################################################################	
+
+def sendNoData(log, dtBeg, dtEnd):
+	"""Send error message if no data in range"""
+	
+	log.debug("in sendNoData")
+	
+	buf = D.DasHdrBuf(0)
+	buf.add('<stream version="2.2"></stream>\n')
+	buf.send(sys.stdout)
+	
+	sMsg = "No WBR data in the interval %s to %s"%(
+		str(dtBeg)[:-3],str(dtEnd)[:-3])
+	
+	log.warning(sMsg)
+	D.sendException(sys.stdout, "NoDataInInterval", sMsg)
+
+
+##############################################################################
+
+def main(argv):
+	"""Reads un-calibrated WBR data and produces das2 streams"""
+	
+	psr = optparse.OptionParser(
+		usage="%prog [options] BEGIN END",
+		prog="rpws_l3wbr_das2rdr",
+		version=" \n".join( [g_sRev, g_sWho, g_sWhen, g_sURL] ),
+		description="""
+			Reads and spits out to a das2 stream uncalibrated WBR PDS data given
+			a time period.  Input PDS files have names similar to:
+			T2013365_06_10KHZ2_WBRFR.DAT"""
+	)
+
+	sDef = None
+	env = 'RPWS_SUPERVOL'
+	if os.getenv(env):
+		sDef = '%s/DATA/RPWS_WIDEBAND_FULL'%os.getenv(env)
+
+	psr.add_option('-l', "--log-level", dest="sLevel", metavar="LOG_LEVEL",
+		help="Logging level one of [critical, error, warning, "+\
+		"info, debug].  The default is info.", type="string",
+		action="store", default="info")
+
+	sDefault = os.getenv("CAS_TIME_KERNELS")
+	
+	psr.add_option('-k', '--kernel-list', dest="sKernels", default=sDefault,
+		help="Specify an alternate SPICE kernel list file, the "+\
+		"default is: %s"%sDefault, metavar="FURNSH_FILE")
+
+	psr.add_option('-v', '--vol-root', dest="sVolRoot", type="string",
+		default=sDef, help="Set the super volume directory, "+\
+		"defaults to '%s'."%sDef)
+	
+	psr.add_option('-1', '--10khz', dest="b80Rate",action="store_false",
+		default=True, help="Only transmit 27.8 khz sample rate wavesforms,"+\
+		" by default both bands are sent")
+
+	psr.add_option('-8', '--80khz', dest="b10Rate",action="store_false",
+		default=True, help="Only transmit 222 kHz sample rate waveforms,  "+\
+		        "by default both bands are sent")
+
+	psr.add_option('-D', '--downmixed', dest="bDownMixed",action="store_true",
+		default=False, help="Transmit down mixed HFR waveforms, at present "+\
+		"there is no way to know which antenna was used for HFR waveforms "+\
+		"so it is assumed that Ex is in use for all HFR data.")
+		
+	psr.add_option('', '--Ex', dest="bEwAnt",action="store_false",
+		default=True, help="Send only Ex data")
+
+	psr.add_option('', '--Ew', dest="bExAnt",action="store_false",
+		default=True, help="Send only Ew data")
+		
+	psr.add_option('-c', '--calibrate', dest="bCal",action="store_true",
+		default=False, help="see calibrated data with waveforms")
+				
+	psr.add_option('-s', '--sort', dest="bSort",action="store_true",
+		default=False, help="Buffer data in memory then sort and remove "+\
+		"duplicates prior to output.  Make sure you have enough RAM for "+\
+		"all the data is the given time range")
+		
+	(opts, lTimes) = psr.parse_args(argv[1:])
+	
+		
+	# Setup the logging level
+	log = setupLogging(opts.sLevel)
+	log = logging.getLogger('')
+	
+	if len(lTimes) < 2:
+		log.error("Both a start time and an ending time must be specified")
+		return 13
+	
+	try:
+		dtBeg = D.DasTime(lTimes[0])
+	except ValueError, e:
+		log.error("Error in time value %s"%lTimes[0])
+		return 13
+	try:
+		dtEnd = D.DasTime(lTimes[1])
+	except ValueError, e:
+		log.error("Error in time value %s"%lTimes[1])
+		return 13
+
+	# Secondary parsing of arguments, set stuff from the extra args, only
+	# worry about stuff that may come in from the das2 server
+	lArgs = lTimes[2:]
+	if len(lArgs) > 0:
+		sArgs = " ".join(lArgs)
+		lArgs = sArgs.split()
+		
+		for sArg in lArgs:
+			if sArg.lower() == "80khz":
+				opts.b10Rate = False
+			elif sArg.lower() == '10khz':
+				opts.b80Rate = False
+			elif sArg.lower() == 'hfr':
+				opts.bDownMixed = True
+				opts.b10Rate = False
+				opts.b80Rate = False
+			elif sArg.lower() == 'ex':
+				opts.bEwAnt = False
+			elif sArg.lower() == 'ew':
+				opts.bExAnt == False
+	
+	# If user changes the directory
+	if opts.sVolRoot != sDef:
+		sDef = opts.sVolRoot
+			
+	log.info("User options: %s"%opts)
+	log.info("Das2 parameters: %s"%lArgs)
+	
+	if opts.sKernels == None:
+		log.error("Spice Time Meta-Kernel not defined, either set the "+\
+			"CAS_TIME_KERNELS environment variable or use the -k "+\
+			"option")
+		return 3
+				
+	# The no-data message depends on a stream header being sent, so always
+	# call this
+	sendStreamHdr(log, opts, dtBeg, dtEnd)
+		
+	S.furnsh(opts.sKernels)
+
+	log.debug("Converting times to files")
+	lFiles = findWbr(log, sDef, dtBeg, dtEnd, opts.b10Rate,
+	                       opts.b80Rate, opts.bDownMixed)
+
+	log.debug("lFiles = %d"%len(lFiles))
+	
+	# Sending comment packet on taskSize
+	commentTaskSize = '''<comment type="taskSize" value="%d" source=""/>\n'''%len(lFiles)
+	sys.stdout.write("[xx]%06d%s"%(len(commentTaskSize),commentTaskSize))
+	
+					
+	nSent = 0			# How many data packets were sent
+	dRecType2PktId = {}
+	
+	# If sorting, fill records and then send data
+	if opts.bSort:
+		# Filling records of data
+		lRecs = []
+		for sFile in lFiles:
+			lRecs += readWbr(log, sFile)
+		
+		log.info("Sorting %d records by time"%len(lRecs))
+		lRecs.sort(hrRecSort)
+		
+		log.info("Removing duplicates")
+		lSclks = []
+		_lRecs = []
+		for rec in lRecs:
+			if (rec.nSclkSec, rec.nSclkFine) not in lSclks:
+				lSclks.append( (rec.nSclkSec, rec.nSclkFine) )
+				_lRecs.append( rec )
+		
+		if len(lRecs) != len(_lRecs):
+			log.warning("Input data files contain %d duplicates, don't send "
+			            "them to the PDS!"%(len(lRecs) - len(_lRecs)))
+		lRecs = _lRecs
+
+		if len(lRecs) == 0:
+			log.error("No records to look at for the rate specified")
+			R.sendException(sys.stdout, R.EXCEPT_NODATA, 
+			                "No records for the interval %s to %s"%(lTimes[0], lTimes[1]))       
+			
+			return 0
+
+		log.info("Sending up to %d records, may be trimmed by time range"%len(lRecs))
+		
+		for rec in lRecs:
+			if shouldSendRec(log, opts, dtBeg, dtEnd, rec):
+				if not sendRec(log, opts, dRecType2PktId, rec):
+					return 14 # Something went wrong
+				nSent += 1
+					
+	# If not sorting, go through each record, and send data as fast as possible
+	else:
+		log.info("Skipping sort")
+		
+		fileNum = 0
+		
+		for sFile in lFiles:
+			
+			log.info("Reading %s for WBR records"%sFile)
+			fIn = file(sFile, 'rb')
+			
+			nCount = 0
+			while True:
+			
+				sHdr = fIn.read(32)
+				if len(sHdr) != 32:
+					break
+				
+				(nLen,) = unpack(">H", sHdr[12:14])
+				
+				sBody = fIn.read(nLen - 32)
+				if len(sBody) != (nLen - 32):
+					break
+					
+				sRec = sHdr + sBody
+				
+				# Only send WBR Records
+				uFlag = ord(sHdr[18])
+				if not (uFlag  & 0x40):
+					continue
+				
+				sId = "%s, record %d"%(bname(sFile), nCount)
+				rec =  WbrRecord(sRec, sId)
+				
+				# Send data for one record
+				if shouldSendRec(log, opts, dtBeg, dtEnd, rec):
+					if not sendRec(log, opts, dRecType2PktId, rec):
+						return 14 # Let shell know something is amiss
+					nCount += 1
+					
+					# Prints out every 250 records
+					if nCount % 250 ==0 and nCount != 0:
+						log.info("Sent records %d-%d"%(nCount - 250, nCount))
+					
+
+			# All data sent for this file
+			log.info("%d records sent for \t%s"%(nCount, bname(sFile)))
+			nSent+= nCount
+			
+			# Sending comment packet on taskProgress
+			fileNum +=1
+			
+			sMsg = '<comment type="taskProgress" value="%d" source=""/>\n'%fileNum
+			sys.stdout.write("[xx]%06d%s"%(len(sMsg),sMsg))
+			
+		# All data sent for all files
+		log.info("All %d records sent"%(nSent))
+	
+	return 0
+
+##############################################################################
+# kicker stub
+if __name__ == "__main__":
+	sys.exit(main(sys.argv))

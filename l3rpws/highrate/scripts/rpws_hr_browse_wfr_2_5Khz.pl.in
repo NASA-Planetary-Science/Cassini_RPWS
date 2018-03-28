@@ -1,0 +1,499 @@
+#!/usr/bin/env perl
+#
+# wfr_2_5Khz_browse.perl -- perl script to invoke das1 without going through
+# the web form cgi interface.
+# The statements in "PrintCommon" can be modified for any combinations
+# of readers and plot layouts.
+#
+#	Argument 0
+#		Coordinate System
+#
+#	Argument 1
+#		Start Time
+#
+#	Argument 2
+#		Stop Time
+#
+#	Argument 3
+#		Plot Title string
+#
+#	Argument 4
+#		Orbit number string
+#
+# usage:
+# das.batch 'begin time' 'end time' 'plot title' 'orbit number'> plot.gif
+#
+##
+
+if( ($ARGV[1] == "-h" ) or ($ARGV[1] == "--help")){
+	print STDOUT "rpws_hr_browse_wfr_2_5kHz - Generate 5-panel High Frequency WFR PLots\n";
+	print STDOUT "\n";
+	print STDOUT "Usage:\n";
+	print STDOUT "   rpws_hr_browse_wfr_2_5kHz COORDS BEGIN END [TITLE] [ORBIT]\n";
+	print STDOUT "\n";
+	print STDOUT "Description:\n";
+	print STDOUT "   Generate Das1 style plots for Cassini RPWS WFR data.  The command line\n";
+	print STDOUT "   parameters are:\n";
+	print STDOUT "\n";
+   print STDOUT "      COORDS - One of 'SUN', 'EAR', 'JUP', or 'SAT'.  This option\n";
+   print STDOUT "               sets amplitude axis ranges to values most useful for\n";
+   print STDOUT "               various mission targets.\n";
+	print STDOUT "\n";
+	print STDOUT "      BEGIN  - The starting spacecraft event time (SCET) for the plot.\n";
+	print STDOUT "\n";
+	print STDOUT "      END    - The ending SCET for the plot.\n";
+	print STDOUT "\n";
+   print STDOUT "      TITLE - Text to display along the plot title bar\n";
+   print STDOUT "\n";
+   print STDOUT "      ORBIT - Text to display below the bottom color bar\n";
+   print STDOUT "\n";
+	print STDOUT "   The output of the program is a single file name:\n";
+	print STDOUT "\n";
+	print STDOUT "      batch.eps\n";
+	print STDOUT "\n";
+	print STDOUT "   in the current directory.\n";
+	print STDOUT "\n";
+	print STDOUT "Environment:\n";
+	print STDOUT "   Basic operation of the script is to restores giferator.sav then runs\n";
+	print STDOUT "   giferator.pro.  These are assumed to be in the first component of the\n";
+	print STDOUT "   \$IDL_PATH.\n";
+	print STDOUT "\n";
+	print STDOUT "   Before restoring the giferator, \$DAS_DATASETROOT is set to\n";
+	print STDOUT "\n";
+	print STDOUT "      %(INST_ETC)s/datasetroot\n";
+	print STDOUT "\n";
+	print STDOUT "   which is exected to contain the Das 1 datasource definition files:\n";
+	print STDOUT "\n";
+	print STDOUT "       color_wedge.dsdf RPWShfwr[0-4].dsdf fce.dsdf\n";
+	print STDOUT "\n";
+	exit(0);
+}
+
+# Setup GIFERATOR environment
+$ENV{'DAS_DATASETROOT'} = "%(INST_ETC)s/datasetroot" ; 
+
+
+# Open pipe to IDL process
+print STDERR "INFO: Logging to %(RPWS_TEMP)s/das.batch.log\n";
+if (!open(PROG, "| %(IDL_BIN)s 2>> %(RPWS_TEMP)s/das.batch.log")) {
+  print STDERR "ERROR: Could not open pipe to IDL process\n";
+  exit(1);
+}
+
+# get begin time, end time, and optional title from command line
+
+if ($#ARGV < 4) {
+  print STDERR "       $#ARGV\n";
+  print STDERR "USAGE: $0 \'coordinate system\' \'begin-time\' \'end-time\' [\'title\'] \'orbit\'\n";
+  exit (1);
+}
+
+$begtime = `das2_prtime $ARGV[1]`; chop $begtime;
+$endtime = `das2_prtime $ARGV[2]`; chop $endtime;
+$xtitle  = "\'$begtime    SCET    $endtime\'";
+
+$zhigh_electric = '1.e-8';
+$zlow_electric  = '1.e-17';
+$zhigh_macnetic = '1.e-5';
+$zlow_magnetic  = '1.e-10';
+
+if ($ARGV[0] eq "SAT" ) {
+    $zhigh_electric = '1.e-8';
+    $zlow_electric  = '1.e-17';
+    $zhigh_macnetic = '1.e-5';
+    $zlow_magnetic  = '1.e-10';
+}
+if ($ARGV[0] eq "EAR" ) {
+    $zhigh_electric = '1.e-8';
+    $zlow_electric  = '1.e-17';
+    $zhigh_macnetic = '1.e-4';
+    $zlow_magnetic  = '1.e-10';
+}
+if ($ARGV[0] eq "JUP" ) {
+    $zhigh_electric = '1.e-8';
+    $zlow_electric  = '1.e-17';
+    $zhigh_macnetic = '1.e-4';
+    $zlow_magnetic  = '1.e-10';
+}
+if ($ARGV[0] eq "VEN" ) {
+    $zhigh_electric = '1.e-8';
+    $zlow_electric  = '1.e-17';
+    $zhigh_macnetic = '1.e-4';
+    $zlow_magnetic  = '1.e-10';
+}
+if ($ARGV[0] eq "SOL" ) {
+    $zhigh_electric = '1.e-12';
+    $zlow_electric  = '1.e-16';
+    $zhigh_macnetic = '1.e-7';
+    $zlow_magnetic  = '1.e-10';
+}
+
+
+if ($ARGV[3]) {
+  $title  = $ARGV[3];
+} else {
+  $title  = 'Cassini RPWS HR Archive';
+}
+
+if ($ARGV[4]) {
+  $orbit_string  = $ARGV[4];
+} else {  
+  $orbit_string  = 'Cruise';
+}
+
+# send the time and title information to IDL
+
+
+print PROG <<EOH;
+
+ON_ERROR, 1
+RESTORE, '%(GIFER_PATH)s/giferator.sav'
+.RUN giferator.pro
+
+batch = 1
+batchgifname = 'batch.eps'
+display.color.r=interpolate([000,000,000,000,000,255,255,255,255],(findgen(200)+1.)/25.)
+display.color.g=interpolate([000,000,255,255,255,255,200,080,000],(findgen(200)+1.)/25.)
+display.color.b=interpolate([127,255,255,127,000,000,000,000,000],(findgen(200)+1.)/25.)
+display.color.b[0]=1
+
+rows = 16
+columns = 2
+colormaps = 2
+images = 10
+axes = 10
+labels = 1
+plots = 5
+sets = 3
+
+display.isize = 1024
+display.jsize = 768
+
+colormap_i.klow = 0
+colormap_i.khigh = display.color.nz
+set_i.ticklen = -0.02
+set_i.thick=1
+axis_i.set = 0
+axis_i.method = 'plot'
+
+init
+
+image[0].query = image[0].query + ""
+
+display.isize = 1024
+display.jsize = 768
+
+column[0].ileft = fix( (display.isize * 6L) / 64L )
+column[0].iright = fix( (display.isize * 54L) / 64L )
+column[0].time = 1
+column[0].tleft = '1999-230T04:00'
+column[0].tright = '1999-230T05:00'
+
+column[1].ileft = fix( (display.isize * 61L) / 64L)
+column[1].iright = fix( (display.isize * 62L) / 64L )
+column[1].time = 0
+
+row[0].jbottom = display.jsize * 31 / 40
+row[0].jtop = fix(long(display.jsize) * long(37) / long(40))
+
+row[1].jbottom = display.jsize * 24 / 40
+row[1].jtop = display.jsize * 30 / 40
+
+row[2].jbottom = display.jsize * 17 / 40
+row[2].jtop = display.jsize * 23 / 40
+
+row[3].jbottom = display.jsize * 10 / 40
+row[3].jtop = display.jsize * 16 / 40
+
+row[4].jbottom = display.jsize * 3 / 40
+row[4].jtop = display.jsize * 9 / 40
+
+row[5].jbottom = row[0].jbottom
+row[5].jtop = row[0].jtop
+
+row[6].jbottom = row[1].jbottom
+row[6].jtop = row[1].jtop
+
+row[7].jbottom = row[2].jbottom
+row[7].jtop = row[2].jtop
+
+row[8].jbottom = row[3].jbottom
+row[8].jtop = row[3].jtop
+
+row[9].jbottom = row[4].jbottom
+row[9].jtop = row[4].jtop
+
+row[0].ybottom = 0.0
+row[0].ytop = 3.0
+
+row[1].ybottom = row[0].ybottom
+row[1].ytop = row[0].ytop
+row[1].log = row[0].log
+
+row[2].ybottom = row[0].ybottom
+row[2].ytop = row[0].ytop
+row[2].log = row[0].log
+
+row[3].ybottom = row[0].ybottom
+row[3].ytop = row[0].ytop
+row[3].log = row[0].log
+
+row[4].ybottom = row[0].ybottom
+row[4].ytop = row[0].ytop
+row[4].log = row[0].log
+
+colormap[0].zlow = $zlow_electric
+colormap[0].zhigh = $zhigh_electric
+colormap[0].log = 1
+
+colormap[1].zlow = $zlow_magnetic
+colormap[1].zhigh = $zhigh_macnetic
+colormap[1].log = 1
+
+row[5].ybottom = colormap[0].zlow
+row[5].ytop = colormap[0].zhigh
+row[5].log = colormap[0].log
+
+row[6].ybottom = colormap[0].zlow
+row[6].ytop = colormap[0].zhigh
+row[6].log = colormap[0].log
+
+row[7].ybottom = colormap[1].zlow
+row[7].ytop = colormap[1].zhigh
+row[7].log = colormap[1].log
+
+row[8].ybottom = colormap[1].zlow
+row[8].ytop = colormap[1].zhigh
+row[8].log = colormap[1].log
+
+row[9].ybottom = colormap[1].zlow
+row[9].ytop = colormap[1].zhigh
+row[9].log = colormap[1].log
+
+axis[0].row = 0
+axis[0].column = 0
+axis[0].timeaxis = 'x'
+axis[0].x.tickname = no_label
+axis[0].y.title = 'Ex freq (KHz)'
+axis[0].y.ticklen = -0.01
+axis[0].x.ticklen = -0.06
+axis[0].set = 1
+
+axis[1].row = 1
+axis[1].column = 0
+axis[1].timeaxis = 'x'
+axis[1].y.title = 'Ez freq (KHz)'
+axis[1].x.tickname = no_label
+axis[1].y.ticklen = -0.01
+axis[1].x.ticklen = -0.06
+
+axis[2].row = 2
+axis[2].column = 0
+axis[2].timeaxis = 'x'
+axis[2].y.title = 'Bx freq (KHz)'
+axis[2].x.tickname = no_label
+axis[2].y.ticklen = -0.01
+axis[2].x.ticklen = -0.06
+
+axis[3].row = 3
+axis[3].column = 0
+axis[3].timeaxis = 'x'
+axis[3].x.tickname = no_label
+axis[3].y.title = 'By freq (Kz)'
+axis[3].y.ticklen = -0.01
+axis[3].x.ticklen = -0.06
+
+axis[4].row = 4
+axis[4].column = 0
+axis[4].timeaxis = 'x'
+axis[4].y.title = 'Bz freq (Kz)'
+axis[4].y.ticklen = -0.01
+axis[4].x.ticklen = -0.06
+
+axis[5].row = 5
+axis[5].column = 1
+axis[5].x.style = supress
+axis[5].y.ticklen = -0.4
+axis[5].y.title = 'V!u 2!n m!u-2!n Hz!u-1!n'
+axis[5].set = 2
+
+axis[6].row = 6
+axis[6].column = 1
+axis[6].x.style = supress
+axis[6].y.ticklen = -0.4
+axis[6].y.title = 'V!u 2!n m!u-2!n Hz!u-1!n'
+
+axis[7].row = 7
+axis[7].column = 1
+axis[7].x.style = supress
+axis[7].y.ticklen = -0.4
+axis[7].y.title = 'nT!u 2!n Hz!u-1!n'
+
+axis[8].row = 8
+axis[8].column = 1
+axis[8].x.style = supress
+axis[8].y.ticklen = -0.4
+axis[8].y.title = 'nT!u 2!n Hz!u-1!n'
+
+axis[9].row = 9
+axis[9].column = 1
+axis[9].x.style = supress
+axis[9].y.ticklen = -0.4
+axis[9].y.title = 'nT!u 2!n Hz!u-1!n'
+
+image[0].row = 0
+image[0].column = 0
+image[0].colormap = 0
+image[0].dataset = 'rpws/RPWShfwr0.dsdf'
+
+image[1].row = 1
+image[1].column = 0
+image[1].colormap = 0
+image[1].dataset = 'rpws/RPWShfwr1.dsdf'
+
+image[2].row = 2
+image[2].column = 0
+image[2].colormap = 1
+image[2].dataset = 'rpws/RPWShfwr2.dsdf'
+
+image[3].row = 3
+image[3].column = 0
+image[3].colormap = 1
+image[3].dataset = 'rpws/RPWShfwr3.dsdf'
+
+image[4].row = 4
+image[4].column = 0
+image[4].colormap = 1
+image[4].dataset = 'rpws/RPWShfwr4.dsdf'
+
+image[5].row = 5
+image[5].column = 1
+image[5].colormap = 0
+image[5].dataset = 'color_wedge.dsdf'
+
+image[6].row = 6
+image[6].column = 1
+image[6].colormap = 0
+image[6].dataset = 'color_wedge.dsdf'
+
+image[7].row = 7
+image[7].column = 1
+image[7].colormap = 1
+image[7].dataset = 'color_wedge.dsdf'
+
+image[8].row = 8
+image[8].column = 1
+image[8].colormap = 1
+image[8].dataset = 'color_wedge.dsdf'
+
+image[9].row = 9
+image[9].column = 1
+image[9].colormap = 1
+image[9].dataset = 'color_wedge.dsdf'
+
+row[10].jtop = row[9].jbottom 
+row[10].jbottom = display.jsize*1/25
+row[10].ytop = 1
+row[10].ybottom = 0
+
+label[0].charsize = 1.5
+label[0].alignment = 0.5
+label[0].orientation = 0
+label[0].row = 10
+label[0].column = 1
+label[0].xp = 0.5
+label[0].yp = 0.0
+label[0].value = \'$orbit_string\'
+
+set[1].title = 'Cassini RPWS HFWR'
+set[2].title = ' '
+
+mfr3_hfrA_overlap = on
+hfrC_hfr1_overlap = on
+
+row[11] = row[0]
+row[12] = row[1]
+row[13] = row[2]
+row[14] = row[3]
+row[15] = row[4]
+
+row[11].ybottom = row[0].ybottom * 1000
+row[11].ytop = row[0].ytop * 1000
+
+row[12].ybottom = row[11].ybottom
+row[12].ytop = row[11].ytop
+
+row[13].ybottom = row[11].ybottom
+row[13].ytop = row[11].ytop
+
+row[14].ybottom = row[11].ybottom
+row[14].ytop = row[11].ytop
+
+row[15].ybottom = row[11].ybottom
+row[15].ytop = row[11].ytop
+
+plot[0].row = 11
+plot[0].column = 0
+plot[0].set = 0
+plot[0].multi = 0
+plot[0].color = display.color.white
+plot[0].thick = 7
+plot[0].dataset = 'mag/fce.dsdf'
+plot[0].enable = 1
+
+plot[1].row = 12
+plot[1].column = 0
+plot[1].set = 0
+plot[1].multi = 0
+plot[1].color = display.color.white
+plot[1].thick = 7
+plot[1].dataset = 'mag/fce.dsdf'
+plot[1].enable = 1
+
+plot[2].row = 13
+plot[2].column = 0
+plot[2].set = 0
+plot[2].multi = 0
+plot[2].color = display.color.white
+plot[2].thick = 7
+plot[2].dataset = 'mag/fce.dsdf'
+plot[2].enable = 1
+
+plot[3].row = 14
+plot[3].column = 0
+plot[3].set = 0
+plot[3].multi = 0
+plot[3].color = display.color.white
+plot[3].thick = 7
+plot[3].dataset = 'mag/fce.dsdf'
+plot[3].enable = 1
+
+plot[4].row = 15
+plot[4].column = 0
+plot[4].set = 0
+plot[4].multi = 0
+plot[4].color = display.color.white
+plot[4].thick = 7
+plot[4].dataset = 'mag/fce.dsdf'
+plot[4].enable = 1
+
+device_name = 'PS'
+
+gif_mime_header = 'image/gif'
+ps_mime_header = 'application/postscript'
+
+set[1].title = \'$title\'
+
+column[0].tleft = \'$ARGV[1]\'
+
+column[0].tright = \'$ARGV[2]\'
+
+axis[4].x.title = $xtitle
+go
+
+EOH
+
+close(PROG);
+
+exit(0);
+

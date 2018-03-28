@@ -1,0 +1,16 @@
+PDS_VERSION_ID          = PDS3
+RECORD_TYPE             = STREAM
+^HTML_DOCUMENT          = {"BROWSE.HTM",
+                           "BROWSE_WFRFR_TIME.HTM",
+                           "BROWSE_WFRFR_FREQ.HTM"}
+OBJECT                  = HTML_DOCUMENT
+  DOCUMENT_NAME           = "GRAPHICAL DATA BROWSER"
+  DOCUMENT_TOPIC_TYPE     = "HTML NAVIGATION"
+  INTERCHANGE_FORMAT      = ASCII
+  DOCUMENT_FORMAT         = HTML
+  PUBLICATION_DATE        = 2004-01-01
+  FILES                   = 3
+  DESCRIPTION             = "BROWSE*.HTM provides access points for
+    HTML and web-browser-specific content."
+END_OBJECT              = HTML_DOCUMENT
+END

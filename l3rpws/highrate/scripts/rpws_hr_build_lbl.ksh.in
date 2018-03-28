@@ -1,0 +1,252 @@
+#!/bin/ksh
+#
+# Version 2.2
+#  Add PRODUCT_VERSION_ID field
+# Version 2.1
+#	misc fix
+# Version 2.0
+#	added PPI fields to PNG labels
+#		LBLVer is the version string from the data labels (V1/V1.0)
+#		product_type is the PRODUCT_TYPRE string
+# Version 1.5
+#       enabled all the label generateion
+#	does NOT generate HTML.LBL in the
+#	  to level directory (BROWSE.LBL)
+# Version 1.4
+#	new directory structure
+# Version 1.3
+#	Version string to label
+# Version 1.2
+#	Version 1.2 change () to {} around file list
+# Version 1.1
+#	Version 1.1 get the "FILES=" row to actually count files...
+#
+# Purpose:
+#	Make label file for PNG files 
+#
+# Format:
+#	cd to top of directory structure...
+#	rpws_hr_build_lbl.ksh WBR/WFR */*/*
+# 
+#
+Version="rpws_hr_build_label V2.3"
+#
+#	Variables used in the label (that seem to change every
+#	 time we talk to someone at JPL/PDS/PPI/PDQ/WTF)
+#
+product_type="BROWSE"
+LBLVer="V1"
+
+echo $Version
+count=0
+
+###############################################################################
+InfoFile(){
+  print -u3 "PDS_VERSION_ID          = PDS3\r"
+  print -u3 "RECORD_TYPE             = STREAM\r"
+  print -u3 "OBJECT                  = TEXT\r"
+  print -u3 "  DOCUMENT_NAME           = \"INFO.TXT\"\r"
+  print -u3 "  PUBLICATION_DATE        = $(date +%%Y-%%m-%%d)\r"
+  print -u3 "  DESCRIPTION             = \"Processing produced\r"
+  print -u3 "    no spectrograms for the time interval covered\r"
+  print -u3 "    by this directory..\"\r"
+  print -u3 "  END_OBJECT              = TEXT\r"
+  print -u3 "END\r"
+}
+
+###############################################################################
+
+LabelFile(){
+  print -u3 "PDS_VERSION_ID          = PDS3\r"
+  print -u3 "RECORD_TYPE             = UNDEFINED\r"
+  jcount=0
+  for f in $(ls -m *.PNG); do
+    file=${f%%,}
+    jcount=$((jcount+1))
+#    echo "$dire0 $count  $jcount $file"
+
+    if [ jcount -eq 1 ]; then
+        print -u3 "^PNG_DOCUMENT           = {\r";
+    fi
+
+    if [ jcount -lt icount ]; then
+        print -u3 "                            \"$file\",\r";
+    else
+        print -u3 "                            \"$file\"\r";
+    fi
+
+  done
+
+  product_id=$dire2"_"$inst"_"$type"_"$LBLVer
+
+  print -u3 "                           }\r"
+#
+#	Version 8 additions that are visible in the labels are here
+#
+  if [ "$type" = "PNG" ]; then
+    print -u3 "DATA_SET_ID             = \"$data_set_id\"\r"
+    print -u3 "PRODUCT_ID              = \"$product_id\"\r"
+	 print -u3 "PRODUCT_VERSION_ID      = \"$product_ver_id\"\r"
+    print -u3 "PRODUCT_TYPE            = \"$product_type\"\r"
+    print -u3 "INSTRUMENT_HOST_NAME    = \"CASSINI ORBITER\"\r"
+    print -u3 "INSTRUMENT_HOST_ID      = CO\r"
+    print -u3 "INSTRUMENT_NAME         = \"RADIO AND PLASMA WAVE SCIENCE\"\r"
+    print -u3 "INSTRUMENT_ID           = RPWS\r"
+  fi 
+#
+#  print -u3 "SOFTWARE_VERSION_ID     = \"$Version\"\r"
+  print -u3 "\r"
+  print -u3 "/* Associated standard data product is version \"$product_ver_id\" */\r"
+  print -u3 "\r"
+  print -u3 "OBJECT                  = PNG_DOCUMENT\r"
+  print -u3 "  DOCUMENT_NAME           = \"CASSINI/RPWS FULL RESOLUTION SPECTROGRAM PLOTS\"\r"
+  print -u3 "  DOCUMENT_TOPIC_TYPE     = \"BROWSE IMAGES\"\r"
+  print -u3 "  INTERCHANGE_FORMAT      = BINARY\r"
+  print -u3 "  DOCUMENT_FORMAT         = PNG\r"
+  print -u3 "  PUBLICATION_DATE        = $(date +%%Y-%%m-%%d)\r"
+  print -u3 "  FILES                   = $jcount\r"
+  print -u3 "  ENCODING_TYPE           = PNG\r"
+  print -u3 "  DESCRIPTION             = \"\r"
+  print -u3 "    These files are Portable Network Graphics (PNG version 1.0, RFC 2083)\r"
+  print -u3 "    images of CASSINI/RPWS full resolution WBR and WFR Spectrograms\r"
+  print -u3 "    (Both full screen and thumbnail images).\r"
+  print -u3 "                            \"\r"
+  print -u3 "END_OBJECT              = PNG_DOCUMENT\r"
+  print -u3 "END\r"
+}
+
+###############################################################################
+HtmlFile(){
+  print -u3 "PDS_VERSION_ID          = PDS3\r"
+  print -u3 "RECORD_TYPE             = STREAM\r"
+  jcount=0
+  for f in $(ls -m *.HTM 2>/dev/null); do
+    file=${f%%,}
+    jcount=$((jcount+1))
+#    echo "$dire0 $count  $jcount $file"
+
+    if [ jcount -eq 1 ]; then
+        print -u3 "^HTML_DOCUMENT          = {\r";
+    fi
+
+    if [ jcount -lt icount ]; then
+        print -u3 "                            \"$file\",\r";
+    else
+        print -u3 "                            \"$file\"\r";
+    fi
+
+  done
+
+  print -u3 "                           }\r"
+  #print -u3 "SOFTWARE_VERSION_ID     = \"$Version\"\r"
+  print -u3 "OBJECT                  = HTML_DOCUMENT\r"
+  print -u3 "  DOCUMENT_NAME           = \"GRAPHICAL DATA BROWSER\"\r"
+  print -u3 "  DOCUMENT_TOPIC_TYPE     = \"HTML NAVIGATION\"\r"
+  print -u3 "  INTERCHANGE_FORMAT      = ASCII\r"
+  print -u3 "  DOCUMENT_FORMAT         = HTML\r"
+  print -u3 "  PUBLICATION_DATE        = $(date +%%Y-%%m-%%d)\r"
+  print -u3 "  FILES                   = $jcount\r"
+  print -u3 "  DESCRIPTION             = \"These HTML files are used to\r"
+  print -u3 "    view full size wideband and waveform spectrogram images.\r"
+  print -u3 "    The html page provides hyperlinks to the labels and data\r"
+  print -u3 "    used to produce the displayed spectrogram.\"\r"
+  print -u3 "  END_OBJECT              = HTML_DOCUMENT\r"
+  print -u3 "END\r"
+}
+
+###############################################################################
+LabelProc(){
+  cd $dire1
+  cd $dire2
+
+  icount=0
+  type="PNG"
+  for f in $(ls -m *.PNG); do
+    icount=$((icount+1))
+  done
+  if [ icount -gt 0 ]; then
+    LabelFile=PNGPLOT.LBL
+    exec 3>$LabelFile
+    LabelFile
+  else
+    InfoFile=INFO.TXT
+    exec 3>$InfoFile
+    InfoFile
+  fi
+#
+#	2/2005 New directory structure, catch
+#	labels for HTML in this directory
+#
+  icount=0
+  for f in $(ls -m *.HTM 2>/dev/null); do
+    icount=$((icount+1))
+  done
+  if [ icount -gt 0 ]; then
+    LabelFile=HTML.LBL
+    exec 3>$LabelFile
+    HtmlFile
+  fi
+#
+#	Now do the HTML directory
+#
+  cd HTML
+  type="TNPNG"
+  icount=0
+  for f in $(ls -m *.PNG); do
+    icount=$((icount+1))
+  done
+  if [ icount -gt 0 ]; then
+    LabelFile=PNGPLOT.LBL
+    exec 3>$LabelFile
+    LabelFile
+  else
+    InfoFile=INFO.TXT
+    exec 3>$InfoFile
+    InfoFile
+  fi
+
+
+  icount=0
+  for f in $(ls -m *.HTM); do
+    icount=$((icount+1))
+  done
+  if [ icount -gt 0 ]; then
+    LabelFile=HTML.LBL
+    exec 3>$LabelFile
+    HtmlFile
+  fi
+  cd ..
+  cd ..
+  cd ..
+}
+
+###############################################################################
+
+inst=$1
+product_ver_id=$2
+
+files=$@
+data_set_id="CO-V/E/J/S/SS-RPWS-2-REFDR-"$inst"FULL-"$LBLVer".0"
+nPos="1"
+
+for f in $files; do
+	if [ "$nPos" = "1" ]; then
+		echo "working on $f"
+		nPos="2"
+	else
+		if [ "$nPos" = "2" ]; then
+			echo "PRODUCT_VERSION_ID = $f"
+			nPos="3"
+		else
+			count=$((count+1))
+			dire0=$f
+			dire1=${f%%%%/*}  		  # day directory
+			dire2=${f#$dire1/}
+			dire2=${dire2%%%%/*}
+			png_file=${f##*/} 		  # file name used by RollOutHtml
+			LabelProc
+		fi
+	fi
+done
+
+exit 0

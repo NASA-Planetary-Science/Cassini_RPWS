@@ -1,0 +1,202 @@
+#!/usr/bin/env python
+
+import sys
+import os
+from os.path import join as pjoin
+from os.path import basename
+import shutil
+
+##############################################################################
+def getOrbits(sOrbFile='/opt/project/cassini/data/orbit/OrbitNames.list'):
+	fIn = file(sOrbFile, 'rb')
+	
+	lOrbits = []
+	
+	for sLine in fIn:
+		lOrb = [s.strip() for s in sLine.split() ]
+		if len(lOrb) != 3:
+			sys.stderr.write('ERROR: Odd line in %s: "%s"\n'%(sOrbFile, sLine))  
+			sys.exit(1)
+		
+		lOrbits.append( lOrb )
+	
+	fIn.close()
+	return lOrbits
+	
+##############################################################################
+def getOrbit(lOrbits, sTime, sFile):
+	perr = sys.stderr.write
+
+	if sTime == None:
+		perr("ERROR: %s, Can't get orbit name don't have start time\n"%sFile)
+		return None
+	
+	sNewOrb = None
+	for (sOrb, sStart, sStop) in lOrbits:
+		if sTime >= sStart and sTime < sStop:
+			sNewOrb = '{"%s"}'%sOrb
+			break
+	
+	if sNewOrb == None:
+		perr("ERROR: %s, Can't find the ORBIT_NAME for time %s\n"%(sFile, sTime))
+		return None
+		
+	return sNewOrb
+
+##############################################################################
+def fix_orb_name(sPath, sNewOrb):
+	perr = sys.stderr.write
+	
+	fIn = file(sPath, 'rb')
+	sOut = pjoin('/tmp', basename(sPath))
+	fOut = file(sOut, 'wb')
+	
+	sTime = None
+	for sLine in fIn:
+		
+		lWords = sLine.split()
+		if len(lWords) < 3:
+			fOut.write(sLine)
+			continue
+		
+		
+		if lWords[0] == "START_TIME" and lWords[1] == '=':
+			sTime = lWords[2] 
+			fOut.write(sLine)
+			continue
+			
+			
+		if lWords[0] == "ORBIT_NAME" and lWords[1] == '=':
+			sOrbit = lWords[2]
+					
+			# Fixup for oddly spaced single digit items:
+			if sOrbit == '{"' and len(lWords) > 3:
+				sOrbit += lWords[3]
+											
+			if not sOrbit.endswith('}'):
+				perr("ERROR: Can't change the orbit info in %s, list spans lines\n"%
+				     sFile)
+				fOut.close()
+				os.remove(sOut)
+					
+			fOut.write("ORBIT_NAME                   = %s\r\n"%sNewOrb)
+			continue
+		
+		fOut.write(sLine)
+	
+	
+	fOut.close()
+	fIn.close()
+	
+	print "INFO: Label fixed, old version is at %s.bak"%sPath
+	os.rename(sPath, sPath + ".bak")
+	shutil.copyfile(sOut, sPath)
+	os.remove(sOut)
+	
+
+##############################################################################
+def main(argv):
+	perr = sys.stderr.write
+	
+	if len(argv) < 2:
+		perr("ERROR: Missing directory to process, use -h for usage info\n")
+		return 1
+		
+	if argv[1] == '-h' or argv[1] == '--help':
+		perr("fix-orb-names.py - Adjust the orbit name in cassini pds labels\n")
+		perr("based on the orbit name list in: \n")
+		perr("/opt/project/cassini/data/orbit/OrbitNames.list\n")
+		perr("\n")
+		perr("usage:\n")
+		perr("      fix-orb-names.py [--fix] DIR_NAME\n")
+		perr("\n")
+		perr("OPTIONS:\n")
+		perr("   --fix Try to fix incorrect labels.  By default the program\n")
+		perr("      only prints the labels it thinks are in error\n")
+		perr("\n") 
+		return 0
+	
+	lOrbits = getOrbits()
+	
+	sTop = argv[1]
+	bChange = False 
+	if argv[1] == '--fix':
+		bChange = True
+		
+		if len(argv) < 3:
+			perr("ERROR: Missing directory to process, use -h for usage info\n")
+			return 1
+		sTop = argv[2]
+		
+	# walk the given directory tree looking for files named *.LBL
+	nTotal = 0
+	nErrors = 0
+	lFix = []
+	for sPath, lDirs, lFiles in os.walk( sTop ):
+		
+		for sFile in lFiles:
+			if not sFile.endswith(".LBL"):
+				continue
+				
+			nTotal += 1
+			fIn = file( pjoin(sPath, sFile), 'rb')
+		
+			sTime = None
+			sOrbit = None
+			for sLine in fIn:
+				
+				lWords = sLine.split()
+				if len(lWords) < 3:
+					continue
+				
+				if lWords[0] == "START_TIME" and lWords[1] == '=':
+					sTime = lWords[2] 
+				
+					#print "INFO: %s, time %s"%(pjoin(sPath, sFile), sTime)
+					#print sTime
+		
+				if lWords[0] == "ORBIT_NAME" and lWords[1] == '=':
+					sOrbit = lWords[2]
+					
+					# Fixup for oddly spaced single digit items:
+					if sOrbit == '{"' and len(lWords) > 3:
+						sOrbit += lWords[3]
+						
+					# Can't handle multi-line lists
+					if not sOrbit.endswith('}'):
+						perr("ERROR: Can't check %s, ORBIT_NAME list spans lines\n"%
+						     pjoin(sPath, sFile))
+						nErrors += 1
+						break
+											
+					sNewOrbit = getOrbit(lOrbits, sTime, sFile)
+					if sNewOrbit == None:
+						nErrors += 1
+						break
+					
+					if sNewOrbit[:4] != sOrbit[:4]:
+						print "%s, START_TIME is %s so ORBIT_NAME %s should be %s, adding to fix list"%(
+						       sFile, sTime, sOrbit, sNewOrbit)
+						lFix.append(  (pjoin(sPath, sFile), sNewOrbit)  )
+					break
+				
+		
+			fIn.close()
+
+		#Finished with file
+	#Finished with all files
+	print "Under %s, %d of %d labels require changes"%(sTop, len(lFix), nTotal)
+	print "Error count:", nErrors
+	
+	if not bChange:
+		return 0
+	
+	# Make changes (just change one for now)
+	for (sPath, sNewOrb) in lFix:
+		fix_orb_name(sPath, sNewOrb)
+	
+	return 0		
+
+##############################################################################
+if __name__ == "__main__":
+	sys.exit( main(sys.argv) )
