@@ -1,0 +1,43 @@
+#!/bin/ksh
+# takes a bunch of htm files and makes a pds label out of them
+
+# specifics to the label file 
+htm_lbl="KPB_HTML.LBL"      # output label file name
+document_name="CASSINI RPWS KEY PARAMETER SPECTROGRAM PLOTS"
+
+echo "rpws_kp_htmlbl() -> $(pwd)/$htm_lbl" 1>&2
+
+#exec 1>$htm_lbl
+
+set -A htm_files `ls *.HTM`
+num_of_files=${#htm_files[*]}
+
+echo "PDS_VERSION_ID          = PDS3" > $htm_lbl
+echo "RECORD_TYPE             = STREAM" >> $htm_lbl
+
+sTmp="{"
+for f in ${htm_files[*]}
+do
+  sTmp=$sTmp"\"$f\""
+  if [[ $f != ${htm_files[$((num_of_files-1))]} ]]; then
+    sTmp=$sTmp","
+  fi
+done
+sTmp=$sTmp"}"        # last file of list
+if [[ $num_of_files -eq 1 ]]; then
+  sTmp="\"$f\""
+fi
+
+echo "^HTML_DOCUMENT           = ${sTmp}"  >> $htm_lbl
+echo "OBJECT                  = HTML_DOCUMENT" >> $htm_lbl
+echo "  DOCUMENT_NAME           = \"$document_name\"" >> $htm_lbl
+echo "  DOCUMENT_TOPIC_TYPE     = \"BROWSE HTML\"" >> $htm_lbl
+echo "  INTERCHANGE_FORMAT      = ASCII" >> $htm_lbl
+echo "  DOCUMENT_FORMAT         = HTML" >> $htm_lbl
+echo "  PUBLICATION_DATE        = $(date +"%%Y-%%m-%%d") " >> $htm_lbl
+echo "  FILES                   = $num_of_files"  >> $htm_lbl
+echo "  DESCRIPTION             = \"These files are HyperText Markup Language" >> $htm_lbl
+echo "    Version 3.2 aka Wilber (-//W3C//DTD HTML 3.2//EN) for the Cassini" >> $htm_lbl
+echo "    RPWS Key Parameter Spectrograms PNG files.\"" >> $htm_lbl
+echo "END_OBJECT              = HTML_DOCUMENT" >> $htm_lbl
+echo "END" >> $htm_lbl

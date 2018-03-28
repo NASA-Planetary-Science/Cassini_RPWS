@@ -1,0 +1,64 @@
+Original locations for the Key Parameters programs and scripts placed in to
+SVN.  All Key parameters programs and scripts were given the prefix "rpws_kp_".
+C source file names have been retained to make it easier to track back to
+programs in Terry's directories.
+
+
+maker (rpws_key)
+----------------
+Source copied from:  /home/tfa/cassini/pds
+Date: 2012-11-05
+Name Change:  rpws_key -> rpws_kp_make
+
+
+labeler (read_key)
+------------------
+Source copied from:  /home/tfa/cassini/pds
+Date:  2012-11-05
+Name Change:
+  read_key -> rpws_kp_label
+
+
+das1rdr (rpws_reader)
+--------------------
+Source copied from:
+   /home/tfa/cassini/pds
+   /opt/project/das/datasetroot/cassini/rpws/tfa
+Date:  2012-11-05
+Name change:
+   rpws_reader -> rpws_kp_read
+	RPWSkey     -> rpws_kp.dsdf
+
+
+das2rdr (cassiniKp.c)
+---------------------
+Source copied from: /opt/project/das2/readers/cassini/pws/
+Date: 2016-03-22
+Name change: 
+    cassiniKp  -> rpws_kp_das2rdr
+
+scripts
+-------
+Source code copied from:
+   /home/tfa/cassini/pds
+   /opt/project/cassini/archive/script (key_static_html.ksh)
+
+Date: 2012-11-05
+
+Name Changes:
+  dat2png.ksh         -> rpws_kp_dat2png.sh
+  key_png.bat         -> rpws_kp_dat2png.pl
+  pnglbl.ksh          -> rpws_kp_pnglbl.ksh
+  key_static_html.ksh -> rpws_kp_static_html.ksh
+  htm2brws.ksh        -> rpws_kp_htm2brws.ksh
+  htmlbl.ksh          -> rpws_kp_htmlbl.ksh
+
+
+
+All programs have been altered to remove absolute paths.  This enables testing
+the software in a temporary location before "going live".
+
+    
+
+
+

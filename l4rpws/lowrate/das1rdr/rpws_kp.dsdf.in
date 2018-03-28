@@ -1,0 +1,16 @@
+description	= 'Cassini RPWS Key Parameter Calibrated spectra'
+form		= x_y_z; time, frequency, and amplitude
+reader		= '%(INST_NAT_BIN)s/rpws_kp_reader.sh'
+spacecraft	= 'Cassini'
+spacecraft_id	= 'CA'
+instrument	= 'Radio Plasma Wave Subsystem'
+instrument_id	= 'RPWS'
+instrument_id2  = 'E'
+x_parameter	= 'time'
+x_unit		= 's'
+x_sample_width	= 128.0 ; typical seconds between spectra
+y_parameter	= 'frequency'
+y_unit		= 'Hz'
+z_parameter	= 'amplitude'
+z_unit		= '(V/M)^2/Hz'
+z_fill		= 0.0 ; substitute this in place of missing data

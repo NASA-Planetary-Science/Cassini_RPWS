@@ -1,0 +1,115 @@
+#!/bin/ksh
+#
+# Purpose:
+# 
+#	$@ wildcard *.PNG
+#
+# Format:
+# 
+#
+
+# relative path names 
+# assume starting in BROWSE->RPWS_KEY_PARAMETERS->TYYYYDXX
+
+Title="key_static_html.ksh"
+Version="V1.1"
+
+base_dir="../../../.."			       #
+png_dir="$base_dir/BROWSE/RPWS_KEY_PARAMETERS"  # CHANGE SOMEHOW
+dat_dir="$base_dir/DATA/RPWS_KEY_PARAMETERS"    # CHANGE SOMEHOW
+title="Key Parameter Data Directory"
+valid_html="$base_dir/BROWSE/ANCILLARY"
+
+
+##############################################################################
+RollOutHtml(){
+
+	year=${png_file%%%%_*};  year=${year#T} 
+	doy=${year#[0-9][0-9][0-9][0-9]};  year=${year%%$doy}
+	sub_dir=$year$doy                    # T1999230    Tyyyydoy
+	sub_dir=T${sub_dir%%%%[0-9][0-9]}XX    # T19992XX    TyyyydXX
+
+	print '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">'
+	print "<HTML>"
+	print "<HEAD>"
+	print '<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">'
+	print '<META NAME=\"Producer\" CONTENT=\"$Title\">'
+	print '<META NAME=\"Version\" CONTENT=\"$Version\">'
+	print "<TITLE> $title </TITLE>"	# CHANGE
+	print "<!-- IS0-8859-1 character set -->"
+	print "</HEAD>"
+	print "<BODY>"
+
+	print "<DIV ALIGN=CENTER>"
+	print "<IMG SRC=\"$png_dir/$sub_dir/$png_file\""
+	print ' ALT="rpws key parameters">'
+	print "</DIV>"
+
+	print "<HR>"
+
+	print "<DIV ALIGN=CENTER>"
+	print "<TABLE>"
+	print " <CAPTION><A HREF=\"$dat_dir/$sub_dir\">"      # CHANGEd
+	print " $title </A></CAPTION>"		 	# CHANGEd
+	print " <TR ALIGN=CENTER>"
+	print "   <TH>DATA</TH>"
+	print "   <TH>LABEL</TH></TR>"
+	#print " <TR ALIGN=CENTER>"
+	#print " <TR>"
+
+	# the pngs should look like Tyyyydoy_E_KPB.PNG or *_B_KPB.PNG
+	# year=${png_file%%%%_*};  year=${year#T} 
+	#doy=${year#[0-9][0-9][0-9][0-9]};  year=${year%%$doy}
+	#sub_dir=$year$doy                    # T1999230    Tyyyydoy
+	#sub_dir=T${sub_dir%%%%[0-9][0-9]}XX    # T19992XX    TyyyydXX
+
+	pat0=${png_file#T}      # should have 1999230_*.PNG
+	pat0=${pat0%%%%_*}        # should have 1999230
+
+	dat_file=""
+
+	#
+	#	select day & band
+	#
+	#   dat0=`ls $dat_dir/${png_file%%%%_*}*.TAB`  old version
+	dat0=`ls $dat_dir/$sub_dir/*$pat0*.TAB`       # ls T19992XX/*1999230*.TAB
+	dat_file=$dat0
+	
+	for d in $dat_file; do
+	  print "   <TR><TD><A HREF=\"$d\">${d##*/}</A></TD>"
+	  l=${d%%.TAB}.LBL                                    
+	  print "   <TD><A HREF=\"$l\">${l##*/}</A></TD></TR>"
+	done
+	print " "
+	print "</TABLE>"
+	print "</DIV>"
+	
+	# w3c html3.2 png
+	print "<!--"
+	print "Produced by $Title $Version -->" 
+	print "<p>"
+	print '<A HREF="http://validator.w3.org/check/referer">'
+	print "<IMG BORDER=\"0\" SRC=\"$valid_html/VALID_HTML32.PNG\""
+	print ' ALT="Valid HTML 3.2!" HEIGHT="31" WIDTH="88"></A>'
+	print "</p>"
+
+	print "</BODY>"
+	print "</HTML>"
+}
+
+
+##############################################################################
+# Main
+
+files=$@
+cd HTML
+for f in $files; do
+  png_file=$f               # file name used by RollOutHtml
+  hHtml=${f%%.PNG}.HTM
+  exec 1>$hHtml
+  RollOutHtml
+done
+cd ..
+
+
+exit 0

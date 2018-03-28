@@ -1,0 +1,46 @@
+#!/bin/ksh
+# takes a bunch of png files and makes a pds label out of them
+
+# specifics to the label file 
+png_lbl="KPB_PNG.LBL"      # output label file name
+document_name="CASSINI RPWS KEY PARAMETER SPECTROGRAM PLOTS"
+
+echo "rpws_kp_pnglbl() -> $(pwd)/$png_lbl" 1>&2
+
+cwd=`pwd`
+
+#exec 1>$png_lbl
+
+set -A png_files `ls *.PNG`     # create an array with png files
+num_of_files=${#png_files[*]}
+
+echo "PDS_VERSION_ID          = PDS3" > $png_lbl
+echo "RECORD_TYPE             = UNDEFINED" >> $png_lbl
+
+sTmp="{"
+for f in ${png_files[*]}
+do
+  sTmp=$sTmp"\"$f\""
+  if [[ $f != ${png_files[$((num_of_files-1))]} ]]; then
+    sTmp=$sTmp","
+  fi
+done
+sTmp=$sTmp"}"
+if [[ $num_of_files -eq 1 ]]; then
+  sTmp="\"$f\""
+fi
+
+echo "^PNG_DOCUMENT           = "$sTmp  >> $png_lbl 
+echo "OBJECT                  = PNG_DOCUMENT"  >> $png_lbl
+echo "  DOCUMENT_NAME           = \"$document_name\"" >> $png_lbl
+echo "  DOCUMENT_TOPIC_TYPE     = \"BROWSE IMAGES\"" >> $png_lbl
+echo "  INTERCHANGE_FORMAT      = BINARY" >> $png_lbl
+echo "  DOCUMENT_FORMAT         = PNG" >> $png_lbl
+echo "  PUBLICATION_DATE        = `date +"%%Y-%%m-%%d"` " >> $png_lbl
+echo "  FILES                   = $num_of_files" >> $png_lbl
+echo "  ENCODING_TYPE           = PNG" >> $png_lbl
+echo "  DESCRIPTION             = \"" >> $png_lbl
+echo "    These files are Portable Network Graphics (PNG version 1.0, RFC 2083)" >> $png_lbl
+echo "    images of Cassini RPWS Key Parameter Spectrograms.\"" >> $png_lbl
+echo "END_OBJECT              = PNG_DOCUMENT" >> $png_lbl
+echo "END" >> $png_lbl

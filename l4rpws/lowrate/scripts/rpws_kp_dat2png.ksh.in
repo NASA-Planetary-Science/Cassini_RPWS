@@ -1,0 +1,293 @@
+#!/bin/ksh
+
+# Initial Error Checking: dat2png.ksh 1999-227 1999-257
+#
+# Version 2012-11-05
+#   Removed absolute paths, added more error checking
+#
+
+# Source the cassini path setup file
+. %(INST_ETC)s/setup.sh
+
+PATH=%(KP_SCRIPT_PATH)s
+  export PATH
+
+umask 0002
+
+RASTER_RES=150     # Rasterized the vector data at 150 px/inch
+PLOT_SIZE=800x600
+
+# Thumbnail width and height
+#  nWidth=200;  nHeight=200
+THUMB_FRACTION="25%%"  # Used to get 200 px wide plots from 800x600 plots
+
+
+tBeg=${1:?"start time not defined"}
+tEnd=${2:?"end time not defined"}
+
+if [ "$RPWS_SUPERVOL" = "" ]; then
+	echo "rpws_kp_dat2png() Error Env. Var. RPWS_SUPERVOL not set"
+	exit 13
+fi
+
+pds_root_dir=${RPWS_SUPERVOL}
+key_data_dir=${RPWS_SUPERVOL}/DATA/RPWS_KEY_PARAMETERS
+key_plot_dir=${RPWS_SUPERVOL}/BROWSE/RPWS_KEY_PARAMETERS
+
+if [ ! -d "${key_plot_dir}" ]; then
+	if ! mkdir -p "${key_plot_dir}" ; then
+		echo "ERROR: Couldn't create ${RPWS_SUPERVOL}/BROWSE/RPWS_KEY_PARAMETERS" 1>&2
+		exit 13
+	fi
+fi
+
+if [[ ! -d $key_data_dir ]]; then
+  echo "rpws_kp_dat2png() pds data dir doesn't exist, $key_data_dir"
+  exit 1
+fi
+
+if [[ ! -d $key_plot_dir ]]; then
+  echo "rpws_kp_dat2png() creating directory $key_plot_dir"
+  mkdir -p $key_plot_dir 
+  chmod 775 $key_plot_dir
+fi
+
+if ! cd $key_plot_dir; then
+  echo "rpws_kp_dat2png() unable to cd to $key_plot_dir, error $?"
+  exit 1
+fi
+
+# should be in the directory */BROWSE/RPWS_KEY_PARAMETERS
+
+
+# Normalize begin and end time
+tYear=$(rpws_kp_fud.ksh -y $tBeg)
+tDoy=$(rpws_kp_fud.ksh -n $tBeg)
+
+echo "rpws_kp_dat2png() $tBeg $tEnd"
+typeset -Z3 tDoy
+typeset -Z3 tDoyEnd
+nRet=0
+
+while [[ $tBeg < $tEnd ]]  # tBeg and tEnd should look like YYYY-DOY
+do
+  sDateBeg=$(date '+%%Y-%%m-%%d')              # record the processing time
+  sDateBeg=$sDateBeg$(date '+  %%H:%%M:%%S')  # record the processing time
+
+  # Create/Check the directory structure
+  tYear=$(rpws_kp_fud.ksh -y $tBeg)
+  tDoy=$(rpws_kp_fud.ksh -n $tBeg)
+  sub_dir=T$tYear$tDoy
+  sub_dir=${sub_dir%%%%[0-9][0-9]}XX       # xform T1999230 to T19992XX
+
+  # Clear out the old stuff
+  if [[ -d $sub_dir ]]; then
+    sRmList=$( ls ${sub_dir}/T${tYear}${tDoy}_*.PNG 2>/dev/null | tr "\n" " ")
+	 if [ "${sRmList}" != "" ]; then
+	    echo "rpws_kp_dat2png() removing $sRmList"
+	    rm ${sub_dir}/T${tYear}${tDoy}_*.PNG
+	 fi
+  else
+    mkdir -p $sub_dir
+    chmod 775 $sub_dir
+  fi
+  
+  if ! cd $sub_dir; then
+    echo "rpws_kp_dat2png() cd $(pwd)/${sub_dir} failed"
+    exit 1
+  fi
+
+  # Check for the pds key parameter archive files 
+  pds_files=$(ls $key_data_dir/$sub_dir/*.TAB)
+
+  tmp="";  cnt=0
+  for f in $pds_files
+  do
+    tmp="$tmp$f "
+    cnt=$(($cnt+1))
+  done
+  pds_files=$tmp
+
+  tStart=$tYear-$tDoy        # should be normalized
+  tDoyEnd=$((tDoy+1))
+  tStop=$tYear-$tDoyEnd;  tStop=$(rpws_kp_fud.ksh -f 0 $tStop)
+
+  #echo "rpws_kp_dat2png() tStart=$tStart  tStop=$tStop"
+
+  # lookup the options here: orbit parameters, amplitude 
+  # EARTH       1997-001  1998-001  20dB   7%%
+  # VENUS       1998-116  1998-116  10dB  30%%  # venus-1
+  # HELIO       1998-364  1999-099  10dB  30%%  # ico-1
+  # VENUS       1999-175  1999-175  35dB   7%%  # venus-2
+  # EARTH       1999-227  1999-257  25dB  30%%
+  # HELIO       2000-001  2000-199   5dB   7%%
+  # HELIO       2000-200  2000-254  10dB   7%%
+  # JUPITER     2000-255  2000-339  20dB   7%%  
+  # JUPITER     2000-340  2001-035  25dB   7%%
+  # JUPITER     2001-036  2001-070  20dB   7%%
+  # JUPITER     2001-071  2001-119  10dB   7%%
+  # HELIO       2001-120  2001-199  10dB   7%%
+  # HELIO       2001-200  2002-074   5dB   7%%
+  # HELIO       2002-075  2004-008  10dB   7%% use mfdr replacement 2002-356
+  # SATURN      2004-009  2004-136  15db   7%%
+  # SATURN      2004-136  2004-274  use 25db
+  # SATURN      2004-274  2018-001  use 35db
+  zMin=0; zMax=5; nBgd=30;
+  if [[ $tStart > "1997-297" ]] && [[ $tStart < "1997-301" ]]; then
+    sOrbitParm=E;  zMin=0;  zMax=20;  nBgd=7;   # deployment
+  elif [[ $tStart > "1998-115" ]] && [[ $tStart < "1998-117" ]]; then
+    sOrbitParm=V;  zMin=0;  zMax=10;  nBgd=7;   # Venus I
+  elif [[ $tStart > "1998-363" ]] && [[ $tStart < "1999-100" ]]; then
+    sOrbitParm=H;  zMin=0;  zMax=10;  nBgd=7;   # ic0-1 
+  elif [[ $tStart > "1999-174" ]] && [[ $tStart < "1999-176" ]]; then  
+    sOrbitParm=V;  zMin=0;  zMax=35;  nBgd=7;   # Venus II
+  elif [[ $tStart > "1999-226" ]] && [[ $tStart < "1999-258" ]]; then
+    sOrbitParm=E;  zMin=0;  zMax=25;  nBgd=7;   # Earth Encounter
+  elif [[ $tStart > "2000-000" ]] && [[ $tStart < "2000-200" ]]; then
+    sOrbitParm=H;  zMin=0;  zMax=5;   nBgd=7;   # Pre-Jupiter Cruise
+  elif [[ $tStart > "2000-199" ]] && [[ $tStart < "2000-255" ]]; then
+    sOrbitParm=H;  zMin=0;  zMax=10;  nBgd=7;   # Pre-Jupiter Cruse
+  elif [[ $tStart > "2000-254" ]] && [[ $tStart < "2000-340" ]]; then
+    sOrbitParm=J;  zMin=0;  zMax=20;  nBgd=7;   # 
+  elif [[ $tStart > "2000-339" ]] && [[ $tStart < "2001-036" ]]; then
+    sOrbitParm=J;  zMin=0;  zMax=25;  nBgd=7;   # 
+  elif [[ $tStart > "2001-035" ]] && [[ $tStart < "2001-071" ]]; then
+    sOrbitParm=J;  zMin=0;  zMax=20;  nBgd=7;   # 
+  elif [[ $tStart > "2001-070" ]] && [[ $tStart < "2001-120" ]]; then
+    sOrbitParm=J;  zMin=0;  zMax=10;  nBgd=7;   # Post-Jupiter Cruise
+  elif [[ $tStart > "2001-119" ]] && [[ $tStart < "2001-200" ]]; then
+    sOrbitParm=H;  zMin=0;  zMax=10;  nBgd=7;   # 
+  elif [[ $tStart > "2001-199" ]] && [[ $tStart < "2002-075" ]]; then
+    sOrbitParm=H;  zMin=0;  zMax=5;   nBgd=7;   # 
+  elif [[ $tStart > "2002-074" ]] && [[ $tStart < "2004-009" ]]; then
+    sOrbitParm=H;  zMin=0;  zMax=10;   nBgd=7;  # 
+  elif [[ $tStart > "2004-008" ]] && [[ $tStart < "2004-137" ]]; then 
+    sOrbitParm=S;  zMin=0;  zMax=15;  nBgd=7;
+  elif [[ $tStart > "2004-135" ]] && [[ $tStart < "2004-275" ]]; then 
+    sOrbitParm=S;  zMin=0;  zMax=25;  nBgd=7;
+  elif [[ $tStart > "2004-274" ]] && [[ $tStart < "2018-002" ]]; then 
+    sOrbitParm=S;  zMin=0;  zMax=35;  nBgd=7;
+  else
+    sOrbitParm=H;  zMin=0;  zMax=10;  nBgd=7;
+  fi
+
+
+# usage:
+# key_png.bat 'tBegin' 'tEnd' yMin yMax zMin zMax sOrbitParm bgd RcvAnt 'title' 
+#             0        1    2    3    4    5       6       7    8       9 
+# E: 1.95Hz - 16.1MHz     B: 1.95Hz - 12.6KHz 
+  # make the electric png
+  sOpts=" Ex "
+  sTitle="Cassini RPWS KEY Electric"
+  if [[ $pds_files != "" ]]; then
+    rpws_kp_dat2png.pl $tStart $tStop 1.95E0 16.1E6 $zMin $zMax $sOrbitParm $nBgd "$sOpts" "$sTitle" 2>&1 >/dev/null
+  fi
+  if [[ -r batch.eps ]]; then
+    #Switch to ImageMagic tools
+	 convert -density $RASTER_RES batch.eps -resize $PLOT_SIZE T$tYear$tDoy"_E_KPB.PNG"
+    rm batch.eps	 
+	 echo "rpws_kp_dat2png() -> $(pwd)/T${tYear}${tDoy}_E_KPB.PNG"
+  else
+    echo "rpws_kp_dat2png() no E plot for $tStart $tStop"
+	 nRet=$(expr $nRet + 1)
+  fi
+
+  # make the magnetic png 
+  sOpts=" Bx "
+  sTitle="Cassini RPWS KEY Magnetic"
+  if [[ $pds_files != "" ]]; then
+    rpws_kp_dat2png.pl $tStart $tStop 1.95E0 12.6E3 $zMin $zMax $sOrbitParm $nBgd "$sOpts" "$sTitle" 2>&1 >/dev/null
+  fi
+  
+  if [[ -r batch.eps ]]; then
+    #Switch to ImageMagic tools
+    convert -density $RASTER_RES batch.eps -resize $PLOT_SIZE T$tYear$tDoy"_B_KPB.PNG"
+    rm batch.eps
+	 echo "rpws_kp_dat2png() -> $(pwd)/T${tYear}${tDoy}_B_KPB.PNG"
+  else
+    echo "rpws_kp_dat2png() no B plot for $tStart $tStop"
+	 nRet=$(expr $nRet + 1)
+  fi
+
+  # Update the Label file for the PNGs
+  rpws_kp_pnglbl.ksh
+  pdspad -p 80 KPB_PNG.LBL
+
+  # Make thumbnails from png plots. Place them in the HTML subdirectory.
+
+
+  if [[ ! -d HTML ]]; then
+    mkdir HTML
+    chmod 775 HTML
+    #echo "making HTML subdirectory"
+  fi
+
+  file=T$tYear$tDoy"_B_KPB.PNG"
+  if [[ -r $file ]]; then
+    thumb=HTML/T$tYear$tDoy"_B_KPB_TN.PNG"
+	 
+	 # Switch to convert from ImageMagic, pnm switches black and white
+    #pngtopnm $file | pnmscale -xysize $nWidth $nHeight | pnmtopng > $thumb
+	 convert $file -resize $THUMB_FRACTION $thumb
+	 nTmp=$?
+	 if [ "$nTmp" != "0" ]; then
+	 	nRet=$(expr $nRet + 1)
+		echo "rpws_kp_dat2png() Error generating $(pwd)/${thumb}"
+    else
+      echo "rpws_kp_dat2png() -> $(pwd)/${thumb}"
+    fi
+  fi
+  
+  file=T$tYear$tDoy"_E_KPB.PNG"
+  if [[ -r $file ]]; then
+    thumb=HTML/T$tYear$tDoy"_E_KPB_TN.PNG"
+	 
+	 # Switch to convert from ImageMagic, pnm switches black and white
+    #pngtopnm $file | pnmscale -xysize $nWidth $nHeight | pnmtopng > $thumb
+	 convert $file -resize $THUMB_FRACTION $thumb
+	 nTmp=$?
+	 if [ "$nTmp" != "0" ]; then
+	 	nRet=$(expr $nRet + 1)
+		echo "rpws_kp_dat2png() Error generating $(pwd)/${thumb}"
+    else
+      echo "rpws_kp_dat2png() -> $(pwd)/${thumb}"
+    fi
+  fi
+
+# Update the Label file for the thumbnail PNGs
+  cd HTML
+  rpws_kp_pnglbl.ksh
+  pdspad -p 80 KPB_PNG.LBL
+  cd ..
+
+# Update the HTML file in the thumbnail directory
+  rpws_kp_static_html.ksh *.PNG
+
+# Update the overview html file
+  rpws_kp_htm2brws.ksh
+  
+# Update the Label file for the HTMLs
+  rpws_kp_htmlbl.ksh
+  pdspad -p 80 KPB_HTML.LBL
+
+# Update the Label file for the thumbnail HTMLs
+  cd HTML
+  rpws_kp_htmlbl.ksh
+  pdspad -p 80 KPB_HTML.LBL
+  cd ..
+
+  cd ..
+
+  # record processing time if there were files
+  if [[ cnt -gt 0 ]]; then        
+    sDateEnd=$(date '+%%H:%%M:%%S')
+    echo "rpws_kp_dat2png() $tBeg wall time: $sDateBeg to $sDateEnd"
+  fi
+
+  # Increment date and continue
+  tDoy=$(($tDoy+1))
+  tBeg=$(rpws_kp_fud.ksh -f 0 $tYear-$tDoy)
+
+done
+
+exit nRet

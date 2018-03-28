@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+#
+# usage: key_reader begin-scet end-scet receiver-options
+
+#if [ $# -lt 2 ]; then
+#  exit -1
+#fi
+
+source %(INST_ETC)s/setup.sh
+
+
+if [ "${RPWS_SUPERVOL}" = "" ]; then
+	echo "RPWS_SUPERVOL is not defined" 1>&2
+	exit 1
+fi
+
+cd	${RPWS_SUPERVOL}/DATA/RPWS_KEY_PARAMETERS
+
+exec %(INST_NAT_BIN)s/rpws_kp_reader "$1" "$2" "$3"
+
+exit $?

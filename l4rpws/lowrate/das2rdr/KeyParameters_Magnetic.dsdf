@@ -1,0 +1,16 @@
+description     = 'Reduced resolution magnetic spectral density'
+
+reader          = '/opt/project/cassini/bin/centos6.x86_64/rpws_kp_das2rdr /opt/project/cassini/pds/DATA/RPWS_KEY_PARAMETERS B'
+reducer	       = 'not_reducable'
+
+das2Stream      = 1
+
+techContact     = 'Chris Piker <chris-piker@uiowa.edu>'
+sciContact      = 'Bill Kurth <william-kurth@uiowa.edu>'
+
+exampleRange_00 = '2010-001 to 2010-002'
+testRange_00    = '2006-12-19T12:00 to 2006-12-20T18:00'
+
+item_00         = 'magnetic_specdens'
+
+readAccess      = 'AGE:1y | GROUP:cassiniTeam'

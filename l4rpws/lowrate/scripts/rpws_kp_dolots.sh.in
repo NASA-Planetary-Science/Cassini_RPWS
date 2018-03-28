@@ -1,0 +1,176 @@
+#!/usr/bin/env bash
+
+# Version 2012-11-05 cwp
+#   Removed absolute paths, and switched to a GDS wide environment variables.
+#
+
+# Source the cassini path setup file
+. %(INST_ETC)s/setup.sh
+
+PATH=%(KP_SCRIPT_PATH)s
+  export PATH
+
+if [ "$RPWS_MPDB" = "" ]; then
+	echo "ERROR: Env. Var. RPWS_MPDB not set"
+	exit 13
+fi
+  
+if [ "$RPWS_SUPERVOL" = "" ]; then
+	echo "ERROR: Env. Var. RPWS_SUPERVOL not set"
+	exit 13
+fi
+
+if [ "$CAS_TIME_KERNELS" = "" ]; then
+	echo "ERROR: Env. Var. CAS_TIME_KERNELS not set"
+	exit 13
+fi
+
+if [ "$RPWS_TEMP" = "" ]; then
+	echo "ERROR: Env. Var. RPWS_TEMP not set"
+	exit 13
+fi
+
+
+echo "rpws_kp_dolots() $1 $2"
+
+umask 0002
+
+tbeg=$(das1_inctime "$1" 0 | cut -c1-11,17-25)
+tend=$(das1_inctime "$2" 0 | cut -c1-11,17-25)
+tb=$(das1_inctime "$tbeg" 0 | cut -c1-11,17-25)
+tfin=$(das1_inctime "$tb" 86400 | cut -c1-11,17-25)
+tstop=$(das1_inctime "$tfin" 1200 | cut -c1-11,17-25)
+tfile=$(das1_inctime "$tbeg" 0 | cut -c1-4,13-15,)
+
+tyear=$(das1_inctime "$1" 0 | cut -c1-4,)
+tdoy=$(das1_inctime "$1" 0 | cut -c13-15,)
+tstart=$tyear-$tdoy
+tyear=$(das1_inctime "$2" 0 | cut -c1-4)
+tdoy=$(das1_inctime "$2" 0 | cut -c13-15)
+tdone=$tyear-$tdoy
+
+tchange="2002356"
+
+
+if [ ! -d "${RPWS_SUPERVOL}/DATA/RPWS_KEY_PARAMETERS" ]; then
+	if ! mkdir -p "${RPWS_SUPERVOL}/DATA/RPWS_KEY_PARAMETERS" ; then
+		echo "rpws_kp_dolots() Couldn't create ${RPWS_SUPERVOL}/DATA/RPWS_KEY_PARAMETERS" 1>&2
+		exit 13
+	fi
+fi
+
+if ! cd ${RPWS_SUPERVOL}/DATA/RPWS_KEY_PARAMETERS; then
+	echo "rpws_kp_dolots() Couldn't change to ${RPWS_SUPERVOL}/DATA/RPWS_KEY_PARAMETERS" 1>&2
+	exit 13
+fi
+	
+
+#printf "rpws_kp_dolots()"
+
+nRet=0
+while [ "$tb" != "$tend" ] ; do
+   #echo $tb
+   
+   # /home/raj/das/cassini/dasCasSpec -tStart "$tb" -tStop "$tstop" \
+   # -lfdr LExEz -mfr 123ExEz -hfr ABC12ExpExmExEz -filter lfdr mfr hfr \
+   # -Nix3 +NixC -PitchHF150KHz | \
+	
+	if [ ! -d ${RPWS_DATA}/browse ]; then
+		if ! mkdir -p ${RPWS_DATA}/browse ; then
+			echo "rpws_kp_dolots() Couldn't mkdir ${RPWS_DATA}/browse" 1>&2
+			exit 13
+		fi
+	fi
+	
+	# Might add return value checks for the reader
+	echo "rpws_kp_dolots() -> ${RPWS_DATA}/browse/t${tfile}0000.bro"
+	
+	
+	#echo "exec:    rpws_lr_cal -s -tStart \"$tb\" -tStop \"$tstop\" -o das -lfr ExEw -mfr 123ExEw \
+	#-hfr ABC12EuEvExEw  -n hfr_snd  2>/dev/null | \
+   #rpws_kp_rebin \"$tb\" \"$tfin\" >${RPWS_DATA}/browse/t${tfile}0000.bro \
+	#2>/dev/null"
+
+   rpws_lr_cal -s -tStart "$tb" -tStop "$tstop" -o das -lfr ExEw -mfr 123ExEw \
+	-hfr ABC12EuEvExEw  -n hfr_snd  2>/dev/null | \
+   rpws_kp_rebin "$tb" "$tfin" >${RPWS_DATA}/browse/t${tfile}0000.bro \
+	2>/dev/null
+   
+   tdir=$(das1_inctime "$tbeg" 0 | cut -c1-4,13,)
+   #printf " T${tdir}XX"
+   
+   test ! -d T${tdir}XX && mkdir T${tdir}XX && chmod 775 T${tdir}XX
+   cd T${tdir}XX ;
+   
+   ver=0
+   # Possibly increment the version number, depends on ls ordering it's output
+   for file in $(ls RPWS_KEY__${tfile}_?.TAB 2>/dev/null ); do
+	
+      ver=$(echo $file | cut -c19);
+      
+      sTabFile=RPWS_KEY__${tfile}_${ver}.TAB
+      sLblFile=RPWS_KEY__${tfile}_${ver}.LBL
+      
+      #echo "INFO: Removing $sTabFile"
+      if ! rm "$sTabFile" ; then
+         echo "rpws_kp_dolots() Error removing file: $sTabFile, you do it."
+         nRet=$(expr $nRet + 1)
+      fi
+      
+      #echo "INFO: Removing $sLblFile"
+      if ! rm "$sLblFile" ; then
+         echo "rpws_kp_dolots() Error removing file: $sLblFile, you do it."
+         nRet=$(expr $nRet + 1)
+      fi
+   
+      ver=$(echo $ver | tr "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ" "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZZ" )
+   done
+   
+   
+   if [ $(expr $tfile \< $tchange) = 1 ] ; then
+      elec_opts="-o das -lfr ExEw -mfr 123ExEw -hfr ABC12EuEvExEw -n hfr_snd" ;
+      mag_opts="-o das -lfr BxByBz -mfr 123BxBz -n hfr_snd" ;
+   else
+      elec_opts="-o das -lfr ExEw -mfr 13ExEw -mfdr ExEw -hfr ABC12EuEvExEw -n hfr_snd" ;
+      mag_opts="-o das -lfr BxByBz -mfr 13BxBz -mfdr BxByBz -n hfr_snd" ;
+   fi
+   
+	echo "rpws_kp_dolots() -> $(pwd)/RPWS_KEY__${tfile}_${ver}.TAB"
+	#echo "cwd: $(pwd)"
+	#echo "exec: rpws_kp_make \"$tb\" \"$tfin\" \"$elec_opts\" \"$mag_opts\" >  RPWS_KEY__${tfile}_${ver}.TAB"
+   rpws_kp_make "$tb" "$tfin" "$elec_opts" "$mag_opts" >  RPWS_KEY__${tfile}_${ver}.TAB 2>/dev/null
+   
+   if test -s RPWS_KEY__${tfile}_${ver}.TAB ; then
+		#echo "exec: rpws_kp_label RPWS_KEY__${tfile}_${ver}.TAB > RPWS_KEY__${tfile}_${ver}.LBL "
+       rpws_kp_label RPWS_KEY__${tfile}_${ver}.TAB > RPWS_KEY__${tfile}_${ver}.LBL ;
+       
+   elif test -f RPWS_KEY__${tfile}_${ver}.TAB ; then
+		#echo "exec: rm RPWS_KEY__${tfile}_${ver}.TAB "
+       rm RPWS_KEY__${tfile}_${ver}.TAB ;
+   fi
+   
+   cd ..
+   
+   tbeg=$(das1_inctime "$tb" 86400 | cut -c1-11,17-25)
+   tb=$(das1_inctime "$tbeg" 0 | cut -c1-11,17-25)
+   tfin=$(das1_inctime "$tb" 86400 | cut -c1-11,17-25)
+   tstop=$(das1_inctime "$tfin" 1200 | cut -c1-11,17-25)
+   tfile=$(das1_inctime "$tbeg" 0 | cut -c1-4,13-15,)
+
+done
+
+#printf "\n"
+
+echo "Processing data files, producing Browse images..."
+rpws_kp_dat2png.ksh "$tstart" "$tdone"
+nTmp=$?
+
+nRet=$(expr $nRet + $nTmp)
+
+if [ "$nRet" = "0" ]; then
+  echo "rpws_kp_dolots() KP processing done, no errors detected"
+else
+  echo "rpws_kp_dolots() Errors detected during KP processing"
+fi
+
+exit $nRet

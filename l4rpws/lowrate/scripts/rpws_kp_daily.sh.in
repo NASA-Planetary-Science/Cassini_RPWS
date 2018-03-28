@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+# Generate KP data daily from push data, these are over written when doing
+# a post-pass
+
+
+# Source the cassini path setup file
+. %(INST_ETC)s/setup.sh
+
+PATH=%(KP_SCRIPT_PATH)s
+  export PATH
+
+if [ "$RPWS_MPDB" = "" ]; then
+	echo "ERROR: Env. Var. RPWS_MPDB not set"
+	exit 13
+fi
+  
+if [ "$RPWS_SUPERVOL" = "" ]; then
+	echo "ERROR: Env. Var. RPWS_SUPERVOL not set"
+	exit 13
+fi
+
+if [ "$CAS_TIME_KERNELS" = "" ]; then
+	echo "ERROR: Env. Var. CAS_TIME_KERNELS not set"
+	exit 13
+fi
+
+if [ "$RPWS_TEMP" = "" ]; then
+	echo "ERROR: Env. Var. RPWS_TEMP not set"
+	exit 13
+fi
+
+umask 0002
+
+tBeg=$(das1_inctime $(date +%%Y-%%j) -172800 | cut -c1-10)
+tEnd=$(das1_inctime $(date +%%Y-%%j) 86400 | cut -c1-10)
+
+rpws_kp_dolots.sh $tBeg $tEnd > /dev/null
+
+exit $?

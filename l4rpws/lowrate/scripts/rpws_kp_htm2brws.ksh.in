@@ -1,0 +1,136 @@
+#!/bin/ksh
+# Purpose:
+#   Make browse html files from html files.
+
+# Source the cassini path setup file
+. %(INST_ETC)s/setup.sh
+
+PATH=%(KP_SCRIPT_PATH)s
+  export PATH
+
+if [ "$RPWS_MPDB" = "" ]; then
+	echo "rpws_kp_htm2brws() Error RPWS_MPDB not set" 1>&2
+	exit 13
+fi
+  
+if [ "$RPWS_SUPERVOL" = "" ]; then
+	echo "rpws_kp_htm2brws() Error RPWS_SUPERVOL not set" 1>&2
+	exit 13
+fi
+
+if [ "$CAS_TIME_KERNELS" = "" ]; then
+	echo "rpws_kp_htm2brws() Error CAS_TIME_KERNELS not set" 1>&2
+	exit 13
+fi
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+ # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+BrowseAll(){
+
+	local sFile
+	sFile=$1
+
+	nCnt=0
+	nCols=4
+	b_files=""
+
+	print '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">' > $sFile
+	echo "<HTML>" >> $sFile
+	echo "<HEAD>" >> $sFile
+	print '<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">' >> $sFile
+	print '<TITLE>Cassini Key Parameter Data</TITLE>' >> $sFile
+	echo "</HEAD>" >> $sFile
+	echo "<BODY>" >> $sFile
+
+	echo "<TABLE>" >> $sFile
+	for f in $e_files
+	do
+		if ! ((nCnt%%nCols)); then
+			echo "<TR ALIGN=\"CENTER\">" >> $sFile
+		fi
+		hHtml=${f%%.PNG}.HTM
+		echo " <TD><A HREF=\"HTML/$hHtml\" NAME=\"${f%%.PNG}\">" >> $sFile
+		thumb=HTML/${f%%.*}_TN.PNG
+		echo "  <IMG SRC=\"$thumb\" HEIGHT=150 WIDTH=200" >> $sFile
+		echo "   ALT=\"rpws key parameter data\"><BR>" >> $sFile
+		tmp=${f#T};  tmp=${tmp%%%%_*};  
+		tYear=${tmp%%[0-9][0-9][0-9]};  tDoy=${tmp#$tYear}
+		echo "  `rpws_kp_fud.ksh -f5 "$tYear-$tDoy"`</A>" >> $sFile
+		nCnt=$((nCnt+1))
+		b_files="$b_files $f"
+
+		if ! ((nCnt%%nCols)); then  # roll out the b portions
+			echo "<TR ALIGN=\"CENTER\">" >> $sFile
+			for f in $b_files
+			do
+				f=${f%%_E*}
+				f=$f"_B_KPB.PNG" >> $sFile
+				hHtml=${f%%.PNG}.HTM
+				echo " <TD><A HREF=\"HTML/$hHtml\" NAME=\"${f%%.PNG}\">" >> $sFile
+				thumb=HTML/${f%%.*}_TN.PNG
+				echo "  <IMG SRC=\"$thumb\" HEIGHT=150 WIDTH=200" >> $sFile
+				echo "   ALT=\"rpws key parameter data\"><BR>" >> $sFile
+				tmp=${f#T};  tmp=${tmp%%%%_*}
+				tYear=${tmp%%[0-9][0-9][0-9]};  tDoy=${tmp#$tYear}
+				echo "  `rpws_kp_fud.ksh -f5 "$tYear-$tDoy"`</A>" >> $sFile
+			done
+			b_files=""	
+			echo "<TR><TD COLSPAN=$nCols>&nbsp</TD>" >> $sFile
+			echo "<TR><TD COLSPAN=$nCols><HR></TD>" >> $sFile
+			echo "<TR><TD COLSPAN=$nCols>&nbsp</TD>" >> $sFile
+		fi  # magnetic files
+
+	done
+
+	if [[ $b_files != "" ]]; then # roll out the remaining b portions
+		echo "<TR ALIGN=\"CENTER\">" >> $sFile
+		for f in $b_files
+		do
+			f=${f%%_E*}
+			f=$f"_B_KPB.PNG" >> $sFile
+			hHtml=${f%%.PNG}.HTM
+			echo " <TD><A HREF=\"HTML/$hHtml\" NAME=\"${f%%.PNG}\">" >> $sFile
+			thumb=HTML/${f%%.*}_TN.PNG
+			echo "  <IMG SRC=\"$thumb\" HEIGHT=150 WIDTH=200" >> $sFile
+			echo "   ALT=\"rpws key parameter data\"><BR>" >> $sFile
+			tmp=${f#T};  tmp=${tmp%%%%_*}
+			tYear=${tmp%%[0-9][0-9][0-9]};  tDoy=${tmp#$tYear}
+			echo "  `rpws_kp_fud.ksh -f5 "$tYear-$tDoy"`</A>" >> $sFile
+		done
+
+		echo "<TR><TD COLSPAN=$nCols>&nbsp</TD>" >> $sFile
+		echo "<TR><TD COLSPAN=$nCols><HR></TD>" >> $sFile
+		echo "<TR><TD COLSPAN=$nCols>&nbsp</TD>" >> $sFile	
+	fi  # magnetic files
+
+	echo "</TABLE>" >> $sFile
+
+	# w3c html3.2 png
+	print "<p>" >> $sFile
+	print '<A HREF="http://validator.w3.org/check/referer">' >> $sFile
+	print '<IMG BORDER="0" SRC="../../ANCILLARY/VALID_HTML32.PNG"' >> $sFile
+	print ' ALT="Valid HTML 3.2!" HEIGHT="31" WIDTH="88"></A>' >> $sFile
+	print "</p>" >> $sFile
+	
+	echo "</BODY>" >> $sFile
+	echo "</HTML>" >> $sFile
+}
+
+ # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+
+# should be in the directory */BROWSE/RPWS_KEY_PARAMETER/Tyyyyddd
+
+e_files=$(ls *E_KPB.PNG)
+if [[ $e_files != "" ]]; then
+	hHtml=$(pwd)
+	hHtml=$hHtml/BROWSE.HTM
+	echo "rpws_kp_htm2brws() -> ${hHtml}" 1>&2
+	BrowseAll $hHtml	
+else
+	echo "rpws_kp_htm2brws() No *E_KPB.PNG"	1>&2 
+fi 
+
+exit 0
