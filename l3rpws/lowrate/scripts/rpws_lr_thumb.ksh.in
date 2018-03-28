@@ -1,0 +1,77 @@
+#!/bin/ksh
+#
+# Purpose:
+#   Make thumbnails from png plots.
+
+# Thumbnail with and height, thumbs come out 200 x 150 (w by h)
+#nWidth=200;  nHeight=200
+THUMB_FRACTION="19.53125%%"  # Used to get 200 px wide plots from 1024x768 plots
+
+# Source the cassini path setup file
+. %(INST_ETC)s/setup.sh
+
+# But over-ride the path
+PATH=%(LRFC_SCRIPT_PATH)s
+export PATH
+
+if [ "$RPWS_SUPERVOL" = "" ]; then
+	echo "Set RPWS_SUPERVOL"
+	exit 13
+fi
+
+# Initial Error Checking: png2htm 1999-227 1999-257
+tBeg=${1:?"start time not defined"};  tBeg=$(das1_fxtime "$tBeg" -f "%%Y-%%j")
+tEnd=${2:?"end time not defined"};    tEnd=$(das1_fxtime "$tEnd" -f "%%Y-%%j")
+
+printf "rpws_lr_thumb() %%s %%s\n" $tBeg $tEnd
+printf "rpws_lr_thumb() <- %%s\n" "${RPWS_SUPERVOL}/BROWSE/RPWS_LOW_RATE_FULL/"
+printf "rpws_lr_thumb() -> %%s\n" "${RPWS_SUPERVOL}/BROWSE/RPWS_LOW_RATE_FULL/"
+
+
+lrf_plot_dir=$RPWS_SUPERVOL/BROWSE/RPWS_LOW_RATE_FULL
+if [[ ! -d $lrf_plot_dir ]]; then
+  echo "pds plot dir doesn't exist, $lrf_plot_dir"
+  exit 1
+else
+  cd $lrf_plot_dir
+fi
+# should be in the directory */BROWSE/RPWS_LOW_RATE_FULL
+
+while [[ $tBeg < $tEnd ]]; do  # tBeg and tEnd should look like YYYY-DOY
+ printf "rpws_lr_thumb() %%s :: " $tBeg
+
+  # Create/Check the directory structure
+  tYear=$(das1_fxtime $tBeg -f "%%Y")
+  tDoy=$(das1_fxtime $tBeg -f "%%j")
+  brws_dir=T$tYear$tDoy
+  brws_dir=${brws_dir%%%%[0-9][0-9]}XX       # xform T1999230 to T19992XX
+  if [[ ! -d $brws_dir/HTML ]]; then
+    mkdir $brws_dir/HTML
+  fi
+
+  file=$brws_dir/T$tYear$tDoy"_B_LRB.PNG"
+  if [[ -r $file ]]; then
+    printf "making B thumbnail..." 
+    thumb=$brws_dir/HTML/T$tYear$tDoy"_B_LRB_TN.PNG"
+	 #Switch to convert for ImageMagic
+    #pngtopnm $file | pnmscale -xysize $nWidth $nHeight | pnmtopng > $thumb
+	 convert $file -resize $THUMB_FRACTION $thumb
+  else
+    printf "no B plot..." 
+  fi
+  file=$brws_dir/T$tYear$tDoy"_E_LRB.PNG"
+  if [[ -r $file ]]; then
+    printf "making E thumbnail..." 
+    thumb=$brws_dir/HTML/T$tYear$tDoy"_E_LRB_TN.PNG"
+	 #Switch to convert for ImageMagic
+    #pngtopnm $file | pnmscale -xysize $nWidth $nHeight | pnmtopng > $thumb
+	 convert $file -resize $THUMB_FRACTION $thumb
+  else
+    printf "no E plot..." 
+  fi
+
+  printf "done\n"
+  tBeg=$(das1_fxtime $tBeg +j 1 -f "%%Y-%%j")
+done
+
+exit 0

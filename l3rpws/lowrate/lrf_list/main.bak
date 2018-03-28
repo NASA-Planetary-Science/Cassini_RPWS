@@ -1,0 +1,104 @@
+#include <stdio.h>
+
+#ifndef _Uchar
+#define _Uchar
+typedef unsigned char Uchar  /* char is assumed to be 8 bits */ 
+#endif 
+
+#ifndef _Uint
+#define _Uint
+typedef unsigned int Uint    /* int is assumed to be 32 bits, msb first */ 
+#endif
+
+/* 
+#define MSB_FIRST 1
+  If MSB_FIRST is one, the assume the data is stored most significant byte
+first.
+  If MSB_FIRST is zero, then swap the byte order of the data.  This is a 
+conditional compile for machines which store least significant byte first, 
+typically PCs running dos/windows. 
+*/
+
+Uint get_next_record(Uchar *pBuf,FILE *hFile);
+/*
+*pBuf   is a pointer to the buffer which will hold the next record read from 
+        the file.
+*hFile  is the handle to the file containing the records.
+Return Values:
+  returns the length of the record in octets (bytes).  A value of zero
+  implys an end of file condition (EOF); no more records in the file
+*/
+
+int main(int argc,char *argv[])
+{
+
+char *p,sBuf[1048],*sFiles[1024],*sTmpFile,sCmd[128];
+int nLine=0,nLineMax=80,nFiles=0,nFilesMax=0;
+int bVerbose=0;
+FILE *hIn=stdin,*hOut=stdout;
+
+Uchar *pBuf,sTmp[128];
+Uint nRecLen,nNumRec;
+
+  while(--argc){
+    ++argv;
+    if(!strcmp("-v",*argv))
+      bVerbose=1;
+    else if(!strcmp("-help",*argv)){
+      fprintf(stdout,"pdspad() version 1.0\n");
+      fprintf(stdout,"usage: pdspad -p NNN\n");
+      fprintf(stdout,"  p NNN   pad text file to NNN columns\n");
+      exit(0);
+    }
+    else if(!strcmp("-p",*argv)){
+      --argc;  ++argv;
+      if( (nLineMax=strtoul(*argv,NULL,0)) > 1024 ){
+        fprintf(stderr,"error, line length of %d exceeds 1024 limit\n",nLineMax);
+        exit(127);
+      }
+    }
+    else{  /* assume a file */
+      sFiles[nFilesMax++]=*argv;
+    }
+  }
+
+
+
+  if( (hFile=fopen(sFileName,"rb"))==NULL ){
+    fprintf(stderr,"Unable to open %s.\n",sFileName);
+    exit(1);
+  }
+
+  /* determine, the length and number of each record in the file */
+  if( fread(sTmp,sizeof(Uchar),16,hFile) != 16 ){
+    fprintf(stderr,"Error reading %s\n",sFileName);
+    exit(1);
+  }
+
+#if MSB_FIRST == 1  
+  nRecLen=sTmp[8];   nRecLen<<=24;
+  nRecLen|=((Uint)sTmp[9])<<16;  /* explicitly promote to an 32 bit unsigned */
+  nRecLen|=((Uint)sTmp[10])<<8;  /* quanity for non-ansi C compiliers. */
+  nRecLen|=((Uint)sTmp[11]);  
+  nNumRec=sTmp[12];   nNumRec<<=24;
+  nNumRec|=((Uint)sTmp[13])<<16;  /* explicitly promote to an 32 bit unsigned */
+  nNumRec|=((Uint)sTmp[14])<<8;   /* quanity for non-ansi C compiliers. */
+  nNumRec|=((Uint)sTmp[15]);  
+#else
+  nRecLen=sTmp[11];   nRecLen<<=24;
+  nRecLen|=((Uint)sTmp[10])<<16;  /* explicitly promote to an 32 bit unsigned */
+  nRecLen|=((Uint)sTmp[9])<<8;    /* quanity for non-ansi C compiliers. */
+  nRecLen|=((Uint)sTmp[8]);  
+  nNumRec=sTmp[15];   nNumRec<<=24;
+  nNumRec|=((Uint)sTmp[14])<<16;  /* explicitly promote to an 32 bit unsigned */
+  nNumRec|=((Uint)sTmp[13])<<8;   /* quanity for non-ansi C compiliers. */
+  nNumRec|=((Uint)sTmp[12]);  
+#endif
+
+
+/* sanity check */
+fprintf(stdout,"Record Length = %d (bytes) and Number of Records = %d\n",
+        nRecLen,nNumRec);
+
+return 0;
+}

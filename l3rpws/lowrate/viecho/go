@@ -1,0 +1,17 @@
+#!/bin/ksh
+
+if [ "$CAS_TIME_KERNELS" = "" ]; then
+	echo "Set CAS_TIME_KERNELS 1st" 
+	exit 13
+fi
+
+sBeg="1999-225"
+sEnd="1999-257"
+
+sBeg="1999-225"
+sEnd="1999-257"
+
+sBeg="1999-225"
+sEnd="1999-257"
+
+./casmis $sBeg $sEnd

@@ -1,0 +1,206 @@
+#!/bin/ksh
+#
+#  Version 1.0
+#    Feb. 1, 2005
+#    Tidy up script, enable inherited variables for shadow archive building
+#
+
+# Source the cassini path setup file
+. %(INST_ETC)s/setup.sh
+
+# But over-ride the path
+PATH=%(LRFC_SCRIPT_PATH)s
+export PATH
+
+if [ "$RPWS_MPDB" = "" ]; then
+	echo "Set RPWS_MPDB"
+	exit 13
+fi
+  
+if [ "$RPWS_SUPERVOL" = "" ]; then
+	echo "Set RPWS_SUPERVOL"
+	exit 13
+fi
+
+if [ "$CAS_TIME_KERNELS" = "" ]; then
+	echo "Set RPWS_SUPERVOL"
+	exit 13
+fi
+
+png_maker=rpws_lr_das_lrfc.pl
+
+RASTER_RES=150     # Rasterized the vector data at 150 px/inch
+PLOT_SIZE=1024x768
+
+# Initial Error Checking: dat2png 1999-227 1999-257
+tBeg=${1:?"start time not defined"}; tBeg=$(das1_fxtime "$tBeg" -f "%%Y-%%j")
+tEnd=${2:?"end time not defined"};   tEnd=$(das1_fxtime "$tEnd" -f "%%Y-%%j")
+
+echo "rpws_lr_dat2png() $tBeg to $tEnd" 
+printf "rpws_lr_dat2png() <- %%s/DATA\n" ${RPWS_SUPERVOL}
+printf "rpws_lr_dat2png() -> %%s/BROWSE\n" ${RPWS_SUPERVOL}
+
+# check for the existance of directories
+lrf_data_dir=${RPWS_SUPERVOL}/DATA/RPWS_LOW_RATE_FULL
+if [[ ! -d $lrf_data_dir ]]; then
+  echo "pds data dir doesn't exist, $lrf_data_dir"
+  exit 1
+fi
+lrf_plot_dir=${RPWS_SUPERVOL}/BROWSE/RPWS_LOW_RATE_FULL
+if mkdir -p $lrf_plot_dir; then 
+  cd $lrf_plot_dir 
+else
+  exit 1
+fi
+# should be in the directory */BROWSE/RPWS_LOW_RATE_FULL
+
+printf "Logging to: $RPWS_TEMP/pds/rpws_lr_das_lrfc.log\n"
+
+while [[ $tBeg < $tEnd ]]  # tBeg and tEnd should look like YYYY-DOY
+do
+  sDateBeg=$(date +"%%a %%b %%d %%Y %%H:%%M:%%S")  # record the processing time
+  printf "rpws_lr_dat2png() %%s :: %%s " "$tBeg" "$sDateBeg"
+
+  # Create/Check the directory structure
+  tYear=$(das1_fxtime $tBeg -f "%%Y")
+  tDoy=$(das1_fxtime $tBeg -f "%%j")
+  sub_dir=T$tYear$tDoy
+  sub_dir=${sub_dir%%%%[0-9][0-9]}XX       # xform T1999230 to T19992XX
+
+  if mkdir -p $sub_dir; then
+    cd $sub_dir 1>/dev/null
+    rm $sub_dir/T$tYear$tDoy"_"*.PNG 2>/dev/null
+  else
+    exit 1
+  fi
+
+  # Check for the pds lrfc archive files 
+  pds_files=$(ls $lrf_data_dir/$sub_dir/T$tYear$tDoy/*.DAT 2>/dev/null)
+
+  tmp="";  cnt=0
+  for f in $pds_files
+  do
+    tmp="$tmp$f "
+    cnt=$(($cnt+1))
+  done
+  pds_files=$tmp
+
+  tStart=$tBeg                           # should be normalized
+  tStop=$(das1_fxtime $tBeg +j 1 -f "%%Y-%%j") 
+
+  # lookup the options here: orbit parameters, amplitude 
+  # EARTH       1997-001  1998-001  20dB   7%%
+  # VENUS       1998-116  1998-116  10dB  30%%  # venus-1
+  # HELIO       1998-364  1999-099  10dB  30%%  # ico-1
+  # VENUS       1999-175  1999-175  35dB   7%%  # venus-2
+  # EARTH       1999-227  1999-257  25dB  30%%
+  # HELIO       2000-001  2000-199   5dB   7%%
+  # HELIO       2000-200  2000-254  10dB   7%%
+  # JUPITER     2000-255  2000-339  20dB   7%%  
+  # JUPITER     2000-340  2001-035  25dB   7%%
+  # JUPITER     2001-036  2001-070  20dB   7%%
+  # JUPITER     2001-071  2001-119  10dB   7%%
+  # HELIO       2001-120  2001-199  10dB   7%%
+  # HELIO       2001-200  2002-074   5dB   7%%
+  # HELIO       2002-075  2004-008  10dB   7%% use mfdr replacement 2002-356
+  # SATURN      2004-009  2004-136  15db   7%%
+  # SATURN      2004-136  2018-001  use 25db
+  # SATURN      2004-275  2018-001  use 35db
+  zMin=0; zMax=5; nBgd=30;
+  if [[ $tStart > "1997-297" ]] && [[ $tStart < "1997-301" ]]; then
+    sOrbitParm=E;  zMin=0;  zMax=20;  nBgd=7;   # deployment
+  elif [[ $tStart > "1998-115" ]] && [[ $tStart < "1998-117" ]]; then
+    sOrbitParm=V;  zMin=0;  zMax=10;  nBgd=7;   # Venus I
+  elif [[ $tStart > "1998-363" ]] && [[ $tStart < "1999-100" ]]; then
+    sOrbitParm=H;  zMin=0;  zMax=10;  nBgd=7;   # ic0-1 
+  elif [[ $tStart > "1999-174" ]] && [[ $tStart < "1999-176" ]]; then  
+    sOrbitParm=V;  zMin=0;  zMax=35;  nBgd=7;   # Venus II
+    tStart="1999-175T18:30";  tStop="1999-175T21:30";
+  elif [[ $tStart > "1999-226" ]] && [[ $tStart < "1999-258" ]]; then
+    sOrbitParm=E;  zMin=0;  zMax=25;  nBgd=7;   # Earth Encounter
+  elif [[ $tStart > "2000-000" ]] && [[ $tStart < "2000-200" ]]; then
+    sOrbitParm=H;  zMin=0;  zMax=5;   nBgd=7;   # Pre-Jupiter Cruise
+  elif [[ $tStart > "2000-199" ]] && [[ $tStart < "2000-255" ]]; then
+    sOrbitParm=H;  zMin=0;  zMax=10;  nBgd=7;   # Pre-Jupiter Cruse
+  elif [[ $tStart > "2000-254" ]] && [[ $tStart < "2000-340" ]]; then
+    sOrbitParm=J;  zMin=0;  zMax=20;  nBgd=7;   # 
+  elif [[ $tStart > "2000-339" ]] && [[ $tStart < "2001-036" ]]; then
+    sOrbitParm=J;  zMin=0;  zMax=25;  nBgd=7;   # 
+  elif [[ $tStart > "2001-035" ]] && [[ $tStart < "2001-071" ]]; then
+    sOrbitParm=J;  zMin=0;  zMax=20;  nBgd=7;   # 
+  elif [[ $tStart > "2001-070" ]] && [[ $tStart < "2001-120" ]]; then
+    sOrbitParm=J;  zMin=0;  zMax=10;  nBgd=7;   # Post-Jupiter Cruise
+  elif [[ $tStart > "2001-119" ]] && [[ $tStart < "2001-200" ]]; then
+    sOrbitParm=H;  zMin=0;  zMax=10;  nBgd=7;   # 
+  elif [[ $tStart > "2001-199" ]] && [[ $tStart < "2002-075" ]]; then
+    sOrbitParm=H;  zMin=0;  zMax=5;   nBgd=7;   # 
+  elif [[ $tStart > "2002-074" ]] && [[ $tStart < "2004-009" ]]; then
+    sOrbitParm=H;  zMin=0;  zMax=10;   nBgd=7;  # 
+  elif [[ $tStart > "2004-008" ]] && [[ $tStart < "2004-137" ]]; then 
+    sOrbitParm=S;  zMin=0;  zMax=15;  nBgd=7;
+  elif [[ $tStart > "2004-136" ]] && [[ $tStart < "2004-275" ]]; then 
+    sOrbitParm=S;  zMin=0;  zMax=25;  nBgd=7;
+  elif [[ $tStart > "2004-274" ]] && [[ $tStart < "2019-001" ]]; then 
+    sOrbitParm=S;  zMin=0;  zMax=35;  nBgd=7;
+  else
+    sOrbitParm=H;  zMin=0;  zMax=10;  nBgd=7;
+  fi
+
+
+# usage:
+# das_lrfc 'tBegin' 'tEnd' yMin yMax zMin zMax sOrbitParm bgd RcvAnt 'title' 
+#             0        1    2    3    4    5       6       7    8       9 
+# E: 2Hz - 16.1MHz     B: 2Hz - 12KHz 
+  # make the electric png
+  if [[ $tStart < "2002-356" ]]; then
+    sOpts="-lfdr ExEw -mfr 123ExEw -hfr ABC12EuEvEx"
+    sOpts="$sOpts -a -n hfr_snd -n lp_rswp -n mfr3_hfra -n hf1_hfrc "
+  else
+    sOpts="-lfdr ExEw -mfdr ExEw -mfr 13ExEw -hfr ABC12EuEvEx"
+    sOpts="$sOpts -a -n hfr_snd -n lp_rswp "
+    sOpts="$sOpts -n mfdr_mfr2 -n mfr3_hfra -n hf1_hfrc "
+  fi
+  sTitle="Cassini RPWS LRFC Electric"
+ 
+  if [[ $pds_files != "" ]]; then
+    $png_maker $tStart $tStop 2.0E0 16.1E6 $zMin $zMax $sOrbitParm $nBgd "$sOpts" "$sTitle" 1>/dev/null
+  fi
+ 
+  if [[ -r batch.eps ]]; then
+	 # Switch to ImageMagic's convert tool 
+	 convert -density $RASTER_RES batch.eps -resize $PLOT_SIZE T$tYear$tDoy"_E_LRB.PNG"	 
+    rm batch.eps #rpws_lr_das_lrfc.log
+    printf "E plot "
+  else
+    printf "no E plot "
+  fi
+  # make the magnetic png 
+  if [[ $tStart < "2002-356" ]]; then
+    sOpts="-lfdr BxByBz -mfr 123BxBz -n hfr_snd -n lp_rswp "
+  else
+    sOpts="-lfdr BxByBz -mfdr BxByBz -mfr 13BxBz "
+    sOpts="$sOpts -n mfdr_mfr2 -n hfr_snd -n lp_rswp "
+  fi
+  sTitle="Cassini RPWS LRFC Magnetic"
+  if [[ $pds_files != "" ]]; then
+    $png_maker $tStart $tStop 2.0E0 12.0E3 $zMin $zMax $sOrbitParm $nBgd "$sOpts" "$sTitle" 1>/dev/null
+  fi
+  if [[ -r batch.eps ]]; then
+	 # Switch to ImageMagic's convert tool 
+    convert -density $RASTER_RES batch.eps -resize $PLOT_SIZE T$tYear$tDoy"_B_LRB.PNG"	 
+	 rm batch.eps #rpws_lr_das_lrfc.log
+    printf "B plot "
+  else
+    printf "no B plot "
+  fi
+
+  cd ..
+
+  sDateEnd=$(date +"%%H:%%M:%%S")
+  printf "%%s\n" $sDateEnd
+
+  # Increament date and continue
+  tBeg=$(das1_fxtime $tBeg +j 1 -f "%%Y-%%j")
+done
+
+exit 0

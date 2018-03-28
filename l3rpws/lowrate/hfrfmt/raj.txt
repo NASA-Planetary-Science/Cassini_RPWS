@@ -1,0 +1,29 @@
+
+
+Trigger 5A Description
+
+3A, 3E, and 40.    This mode is defined by:
+
+          Correlations     Channels        Integ.                Size Frequency
+Band Ant. Auto-  Cross-    per Band   df   Period    Rep   Steps kHz  Start - Stop
+---- ---- -----  ------    --------   --   ------    ---   ----- ---- ------------
+ABC  2E   y         y        16       n    1000      1                3.6-319 kHz
+H1   2E             y         2       n    80        1     30    50   325k-1.8MHz
+H2   1E                       1       n    20        1     72    200  1.8M-16MHz
+
+Bands ABC require 3.16 sec to complete, H1 requires 2.524 sec, and H2 requires 1.461 sec
+RAJfor a total of 7.25 sec per sweep.
+
+
+
+Sequence: C23, C24
+Trigger 5A (High Rate Cyclic Mode)
+
+     This mode is designed to step through various RPWS high resolution observations
+over periods of order 1 hour or longer.  Eight different high resolution modes are sampled for
+periods of 3 to 9 minutes with one complete cycle taking 1 hour.  The cyclic repeats until it
+is stopped by the issuance of a new trigger command, typically Trigger 80.  The targeted
+average data rate (averaged over 1 hour) is 40 kbps, but the true, compressed data rate
+realized is closer to 30.5 kbps although this is somewhat data dependent.
+
+     Trigger 5A is essentially identical to Trigger 58, but with a higher targeted

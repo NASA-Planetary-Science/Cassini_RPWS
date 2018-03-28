@@ -1,0 +1,54 @@
+pdsmark() ver 1.0
+CasPdsMarkList = 49156 bytes
+using spice metakernel /opt/project/cassini/spice/kernels/cas_kernels.txt
+Plot Time: 2004-285T07:00:00, Sclk=57FC93D8.00B3, Scet=42BD.01808580
+           2004-285T08:00:00, Sclk=57FCA1E8.00B9, Scet=42BD.01B77400
+Lfdr=00000000, Mfdr=00000000, Mfr=1F000FFF, Hfr=00000000, Msc=00000000
+filtering options=00000000, Bad Packets=00000000
+pds root dir=/net/spica/export/data13/cassini/pds
+Number of Files=1
+/net/spica/export/data13/cassini/pds/DATA/RPWS_LOW_RATE_FULL/T20042XX/T2004285/T2004285_MFR0.DAT
+sorting file list...
+id= 1, 110FF04C,  912 :: 10 E2 00 8C 30 00 00 00 00 00 00 00 00 00 00 00 
+     00 00 00 00 00 00 00 00 00 
+     /net/spica/export/data13/cassini/pds/DATA/RPWS_LOW_RATE_FULL/T20042XX/T2004285/T2004285_MFR0.DAT
+done
+name=MFR sub=nrm sclk=568F6A93 rti=5300 mark=00808004
+name=MFR sub=nrm sclk=568F6AD3 rti=5500 mark=00808004
+name=MFR sub=nrm sclk=568F6B00 rti=5600 mark=00808004
+name=MFR sub=nrm sclk=568F6BB3 rti=5C00 mark=00808004
+name=MFR sub=nrm sclk=568F6BE0 rti=5D00 mark=00808004
+name=MFR sub=nrm sclk=568F6C93 rti=6300 mark=00808004
+name=MFR sub=nrm sclk=568F7B13 rti=D700 mark=00808004
+name=MFR sub=nrm sclk=568F7B6D rti=DA00 mark=00808004
+name=MFR sub=nrm sclk=568F7BB3 rti=DC00 mark=00808004
+name=MFR sub=nrm sclk=568F7C00 rti=DE00 mark=00808004
+name=MFR sub=nrm sclk=568F7C93 rti=E300 mark=00808004
+name=MFR sub=nrm sclk=568F7CB3 rti=E400 mark=00808004
+name=MFR sub=nrm sclk=568F7D73 rti=EA00 mark=00808004
+name=MFR sub=nrm sclk=568F7DA0 rti=EB00 mark=00808004
+name=MFR sub=nrm sclk=568F7EF3 rti=F600 mark=00808004
+name=MFR sub=nrm sclk=568F7F13 rti=F700 mark=00808004
+name=MFR sub=nrm sclk=568F7FF3 rti=FE00 mark=00808004
+name=MFR sub=nrm sclk=568F8073 rti=0200 mark=00808004
+name=MFR sub=nrm sclk=568F80B3 rti=0400 mark=00808004
+name=MFR sub=nrm sclk=568F8193 rti=0B00 mark=00808004
+name=MFR sub=nrm sclk=568F8EB3 rti=7400 mark=00808004
+name=MFR sub=nrm sclk=568F8F93 rti=7B00 mark=00808004
+name=MFR sub=nrm sclk=568F90D3 rti=8500 mark=00808004
+name=MFR sub=nrm sclk=568F9113 rti=8700 mark=00808004
+name=MFR sub=nrm sclk=568F91F3 rti=8E00 mark=00808004
+name=MFR sub=nrm sclk=568F92B3 rti=9400 mark=00808004
+name=MFR sub=nrm sclk=568F92D3 rti=9500 mark=00808004
+name=MFR sub=nrm sclk=568F9473 rti=A200 mark=00808004
+name=MFR sub=nrm sclk=568F6A93 rti=5300 mark=00808004
+name=MFR sub=nrm sclk=568F6AD3 rti=5500 mark=00808004
+name=MFR sub=nrm sclk=568F6B00 rti=5600 mark=00808004
+name=MFR sub=nrm sclk=568F6BB3 rti=5C00 mark=00808004
+name=MFR sub=nrm sclk=568F6BE0 rti=5D00 mark=00808004
+name=MFR sub=nrm sclk=568F6C93 rti=6300 mark=00808004
+nLineCnt=34
+  0 data read /net/spica/export/data13/cassini/pds/DATA/RPWS_LOW_RATE_FULL/T20042XX/T2004285/T2004285_MFR0.DAT
+Bytes Read 2449632 and Wrote 0 to idl
+Pds Reader Time (clock ticks) 0 to 190000, 0.190 seconds
+Elasped Time=1.000000 seconds (rounded to the nearest second)

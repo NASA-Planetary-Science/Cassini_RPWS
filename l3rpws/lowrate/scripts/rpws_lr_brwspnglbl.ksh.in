@@ -1,0 +1,77 @@
+#!/bin/ksh
+# make pds lables from browse png files 
+
+# Source the cassini setup file
+. %(INST_ETC)s/setup.sh
+
+# But over-ride the path
+PATH=%(LRFC_SCRIPT_PATH)s
+export PATH
+
+# specifics to the label file 
+document_name="CASSINI RPWS LRFC SPECTROGRAM PLOTS"
+
+echo "rpws_lr_brwspnglbl()" $*
+echo "rpws_lr_brwspnglbl() TODO: Generate Lookup table for Browse Label Version Numbers"
+
+sVersion="1"
+
+for f in $*; do
+
+  if [[ ! -r $f ]]; then
+    continue
+  fi
+  path=${f%%/*}
+  file=${f#$path/}
+  if [[ $path = $file ]]; then
+    path="."
+  fi
+  hLabel=$path/${file%%.PNG}.LBL
+
+  mon_day=$(ls -l $f | awk '{print $6" "$7}')
+  year=$(ls -l $f | awk '{print $8}')
+  if [[ ${year%%%%:*} != $year ]]; then
+    year=$(date +%%Y)
+  fi
+  sDate=$(das1_fxtime "$mon_day $year" -f %%Y-%%m-%%d)
+
+
+  exec 1>$hLabel
+
+echo "PDS_VERSION_ID          = PDS3"
+echo "RECORD_TYPE             = UNDEFINED"
+
+echo "^PNG_DOCUMENT           = \"$file\""
+
+echo "DATA_SET_ID             = \"CO-V/E/J/S/SS-RPWS-3-RDR-LRFULL-V1.0\""
+echo "PRODUCT_ID              = \"${file%%.PNG}\""
+echo "PRODUCT_TYPE            = BROWSE"
+echo "PRODUCT_VERSION_ID      = \"$sVersion\""
+
+echo "INSTRUMENT_HOST_NAME    = \"CASSINI ORBITER\""
+echo "INSTRUMENT_HOST_ID      = CO"
+echo "INSTRUMENT_NAME         = \"RADIO AND PLASMA WAVE SCIENCE\""
+echo "INSTRUMENT_ID           = RPWS"
+
+echo "OBJECT                  = PNG_DOCUMENT"
+echo "  DOCUMENT_NAME           = \"$document_name\""
+echo "  DOCUMENT_TOPIC_TYPE     = \"BROWSE IMAGES\""
+echo "  INTERCHANGE_FORMAT      = BINARY"
+echo "  DOCUMENT_FORMAT         = PNG"
+echo "  PUBLICATION_DATE        = $sDate"
+echo "  FILES                   = 1"
+echo "  ENCODING_TYPE           = PNG"
+echo "  DESCRIPTION             = \""
+echo "    These files are Portable Network Graphics (PNG Specification,"
+echo "    Second Edition, ISO/IEC 15948:2003 E) images of Cassini RPWS"
+echo "    Low Rate Full Resolution Spectrograms.\""
+echo "END_OBJECT              = PNG_DOCUMENT"
+echo "END"
+
+  exec 1>&2
+
+  pdspad -p 80 $hLabel
+
+done
+
+exit 0

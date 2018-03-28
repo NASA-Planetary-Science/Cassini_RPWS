@@ -1,0 +1,142 @@
+#!/bin/ksh
+#
+# Version 1.1
+#   make re-locatable on install - cwp 2012-10-04
+#
+# Version 1.0
+#   Updated Jan 31, 2005
+#   Clean up archiving process
+#   Build pds archives in shadow directory for copy to the archive dir
+#
+# This script used to be called mklrfc
+#
+# Programs: das1_fxtime()
+# Scripts: rpws_lr_u2dat.ksh rpws_lr_datlbl.ksh 
+#          dat2png png2htm png2thm htm2brws
+#
+
+# Source the cassini path setup file
+. %(INST_ETC)s/setup.sh
+
+# But over-ride the path
+PATH=%(LRFC_SCRIPT_PATH)s
+export PATH
+
+if [ "$RPWS_MPDB" = "" ]; then
+	echo "Set RPWS_MPDB"
+	exit 13
+fi
+  
+if [ "$RPWS_SUPERVOL" = "" ]; then
+	echo "Set RPWS_SUPERVOL"
+	exit 13
+fi
+
+if [ "$CAS_TIME_KERNELS" = "" ]; then
+	echo "Set CAS_TIME_KERNELS"
+	exit 13
+fi
+
+CAS_LRS_MARK_DIR=${RPWS_TEMP}/pds/lrsmrk
+  export CAS_LRS_MARK_DIR
+
+tBeg=${1:?"start time not defined"};  tBeg=$(das1_fxtime "$tBeg" -f "%%Y-%%j")
+tEnd=${2:?"end time not defined"};    tEnd=$(das1_fxtime "$tEnd" -f "%%Y-%%j")
+if [[ $# -ge 3 ]]; then
+  bData=$3
+else
+  bData="True"
+fi
+
+printf "rpws_lr_make() %%s %%s\n" $tBeg $tEnd
+
+#echo "  RPWS_SUPERVOL=$RPWS_SUPERVOL"
+#echo "  CAS_TIME_KERNELS=$CAS_TIME_KERNELS"
+#echo "  RPWS_MPDB=$RPWS_MPDB"
+#echo "  CAS_LRS_MARK_DIR=$CAS_LRS_MARK_DIR"
+#echo "  PATH=$PATH"
+#echo "  bData=$bData"
+
+
+umask 002 
+
+# assume the interference files have been produced
+if [[ $bData = "True" ]]; then
+  rpws_lr_u2dat.ksh $tBeg $tEnd    # make the data products 
+  rpws_lr_mrkinf.ksh $tBeg $tEnd   # mark data set for interference
+  rpws_lr_datlbl.ksh $tBeg $tEnd   # label all data products 
+fi
+
+rpws_lr_mkcalpds.ksh $tBeg $tEnd   
+rpws_lr_calmv.ksh $tBeg $tEnd      # move to pds super volume 
+
+rpws_lr_dat2png.ksh $tBeg $tEnd    # make spectrogram plots
+rpws_lr_png2htm.ksh $tBeg $tEnd    # make html for spectrogram plots
+
+rpws_lr_thumb.ksh $tBeg $tEnd        # make overview thumbnails
+rpws_lr_htm2brws.ksh $tBeg $tEnd
+
+
+if ! cd $RPWS_SUPERVOL/BROWSE/RPWS_LOW_RATE_FULL; then
+	if ! mkdir -p $RPWS_SUPERVOL/BROWSE/RPWS_LOW_RATE_FULL; then
+		echo "can't mkdir $RPWS_SUPERVOL/BROWSE/RPWS_LOW_RATE_FULL"
+		exit 1
+	fi
+fi   
+
+while [[ $tBeg < $tEnd ]]; do  # tBeg and tEnd should look like YYYY-DOY
+  echo "rpws_lr_make() labeling png and html products $tBeg to $tEnd"
+
+  # Create/Check the directory structure
+  tYear=$(das1_fxtime $tBeg -f "%%Y")
+  tDoy=$(das1_fxtime $tBeg -f "%%j")
+  nQtr=${tDoy%%%%[0-9][0-9]}      # tYear and tDoy should be normalized by now 
+  sub_dir=T$tYear$nQtr"XX"        # xform T1999230 to T19992XX
+  
+  if [[ -d $sub_dir ]]; then
+    #echo "$sub_dir"
+    cd $sub_dir
+    files=""
+    files=$(ls *.PNG)
+    if [[ files != "" ]]; then
+      #pnglbl $files        # creates a label file called "LRB_PNG.LBL"
+      #pdspad -p 80 LRB_PNG.LBL
+      rpws_lr_brwspnglbl.ksh $files # label files for the pngs, includes padding
+    fi
+
+    files=""
+    files=$(ls *.HTM)
+    if [[ files != "" ]]; then
+      rpws_lr_htmlbl.ksh $files    # creates a label file called "LRB_HTML.LBL"
+      mv LRB_HTML.LBL BROWSE.LBL   # rename to match BROWSE.HTM
+      pdspad -p 80 BROWSE.LBL
+      pdspad -t $files             # terminate line with <CR><LF>
+    fi
+
+    if [[ -d HTML ]]; then
+    cd HTML
+      files=""
+      files=$(ls *.PNG)
+      if [[ files != "" ]]; then
+        rpws_lr_pnglbl.ksh $files  # creates a label file called "LRB_PNG.LBL"
+        pdspad -p 80 LRB_PNG.LBL
+      fi
+
+      files=""
+      files=$(ls *.HTM)
+      if [[ files != "" ]]; then
+        rpws_lr_htmlbl.ksh $files  # creates a label file called "LRB_HTML.LBL"
+        pdspad -p 80 LRB_HTML.LBL
+        pdspad -t $files     # terminate line with <CR><LF>
+      fi
+      cd ..
+    fi # html subdirectory
+
+    cd ..
+  fi
+
+  tDoy=$nQtr"00"
+  tBeg=$(das1_fxtime $tYear-$tDoy +j 100 -f "%%Y-%%j")
+done
+
+exit 0

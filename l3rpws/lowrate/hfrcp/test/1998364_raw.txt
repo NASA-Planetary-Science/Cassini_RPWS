@@ -1,0 +1,727 @@
+Band A:
+AGCs  5_on  4_on  3_on  2_on  1_on  0_on  7_off 6_off 5_off 4_off 3_off 2_off
+      ----  ----  ----  ----  ----  ----  ----- ----- ----- ----- ----- ----- 
+  Eu   6F    5D    4A    36    1F    02    B5    AC    A5    95    83    71    
+  Ev   77    64    52    3E    29    0F    BD    B2    AA    9C    8B    79    
+  Ew   6F    5D    4A    35    1F    01    B5    AC    A5    95    84    72    
+  Ez   71    5E    4B    37    21    04    B7    AE    A6    97    85    73    
+
+AUTOs Eu     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      B0  B0  AF  AC  AA  A9  A8  A9  A6  A6  A3  A4  A3  A3  A2  9F  
+  4_on      B0  AF  AD  AC  AA  A9  AA  A7  A6  A3  A5  A5  A4  A3  A3  A0  
+  3_on      AF  AE  AE  AD  AC  A9  A8  A8  A8  A5  A4  A4  A4  A4  A2  9E  
+  2_on      B1  B0  AE  AC  AA  AA  A8  A7  A5  A5  A4  A3  A4  A4  A3  9B  
+  1_on      B1  AE  AD  AA  AA  A9  A8  A8  A6  A5  A5  A2  A2  A3  A4  A0  
+  0_on      B1  AE  AD  AD  AC  AA  A9  A8  A5  A3  A3  A3  A5  A5  A2  9E  
+  7_off     B3  B2  AE  AC  AA  A9  A9  A9  A8  A6  A2  A3  A2  A2  A5  A1  
+  6_off     B2  AF  AB  AA  A9  A9  A8  A8  A4  A2  A4  A3  A2  A2  A4  A1  
+  5_off     B1  B0  AE  AD  AA  A9  A9  A9  A7  A6  A4  A4  A3  A4  A4  A0  
+  4_off     B0  B0  AD  AC  AC  AA  A8  A8  A7  A6  A5  A5  A4  A4  A3  9F  
+  3_off     B0  AF  B0  AE  AB  AB  A8  A6  A5  A5  A4  A4  A4  A3  A2  9E  
+  2_off     AF  AF  AE  AB  AB  AA  A8  A8  A8  A5  A5  A4  A4  A3  A2  9E  
+
+AUTOs Ev     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      B0  B1  B1  AD  AC  AB  A9  A9  A8  A7  A7  A5  A3  A3  A1  9E  
+  4_on      B2  B0  AE  AD  AC  AA  AA  A8  A7  A7  A4  A4  A5  A6  A4  9E  
+  3_on      B0  B0  B0  AC  AB  AB  A9  A8  A6  A6  A4  A3  A4  A3  A2  9F  
+  2_on      B1  B0  AF  AE  AB  AB  A9  A9  A6  A6  A6  A3  A4  A5  A1  9C  
+  1_on      B1  B1  AF  AD  AB  AA  A8  A7  A7  A6  A4  A3  A3  A4  A1  9F  
+  0_on      B1  AF  B0  AE  AC  AA  A9  A8  A7  A5  A3  A4  A3  A2  A1  9C  
+  7_off     B1  B0  B0  AE  AE  AC  A8  A5  A6  A9  A8  A8  A7  A6  A2  9A  
+  6_off     B2  B0  B1  B0  AD  AB  A9  A6  A8  A8  A8  A7  A6  A4  A0  9A  
+  5_off     B0  AF  AF  AD  AC  AC  A9  A8  A7  A6  A5  A7  A7  A5  A1  9D  
+  4_off     B1  AF  AE  AC  AC  AB  AA  A9  A7  A6  A7  A5  A4  A5  A2  9C  
+  3_off     B0  B0  AE  AC  AD  A9  A9  A9  A7  A6  A5  A5  A5  A3  A3  9F  
+  2_off     B0  B0  B0  AE  AC  AA  A8  A8  A8  A6  A5  A4  A3  A4  A2  9D  
+
+AUTOs Ew     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      B0  B0  AF  AC  AB  A9  A9  A9  A7  A6  A3  A4  A3  A2  A2  9F  
+  4_on      B0  B0  AD  AC  AA  A9  AA  A8  A6  A4  A5  A5  A4  A2  A3  A0  
+  3_on      AF  AF  AF  AD  AC  AA  A8  A8  A8  A5  A4  A4  A4  A3  A1  9E  
+  2_on      B1  B0  AF  AD  AB  AA  A8  A8  A5  A5  A4  A3  A4  A4  A2  9B  
+  1_on      B2  AF  AE  AB  AA  AA  A8  A9  A7  A5  A5  A2  A2  A3  A3  A0  
+  0_on      B1  B0  AE  AE  AD  AB  A9  A8  A5  A3  A3  A3  A4  A5  A2  9E  
+  7_off     B4  B2  AF  AC  AA  A9  A9  AA  A8  A6  A3  A3  A2  A2  A4  A0  
+  6_off     B2  AF  AC  AB  AA  AA  A9  A8  A5  A2  A4  A3  A2  A2  A3  A0  
+  5_off     B1  B0  AF  AD  AB  AA  AA  A9  A8  A6  A4  A4  A3  A3  A3  A0  
+  4_off     B0  B0  AE  AD  AC  AB  A8  A9  A8  A6  A6  A5  A3  A3  A3  9E  
+  3_off     B1  B0  B0  AE  AC  AB  A9  A7  A6  A6  A4  A4  A4  A3  A1  9E  
+  2_off     AF  B0  AE  AB  AB  AA  A8  A8  A8  A5  A5  A4  A4  A3  A2  9D  
+
+AUTOs Ez     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      B1  B1  B0  AD  AB  AA  A9  A9  A8  A6  A6  A5  A3  A3  A1  9E  
+  4_on      B2  B0  AE  AC  AC  A9  A9  A8  A6  A6  A4  A4  A5  A6  A4  9F  
+  3_on      B0  B0  AF  AC  AB  AA  A9  A8  A6  A6  A4  A3  A4  A3  A2  9F  
+  2_on      B1  B0  AE  AD  AB  AB  A9  A8  A5  A5  A5  A3  A3  A5  A1  9D  
+  1_on      B1  B0  AD  AB  AA  AA  A8  A6  A6  A5  A3  A3  A3  A3  A1  9E  
+  0_on      B0  AE  AD  AC  AB  AB  AA  A8  A6  A5  A3  A4  A3  A2  A1  9C  
+  7_off     B3  B1  AE  AB  AC  AB  AA  AA  A6  A3  A1  A2  A2  A3  A3  9F  
+  6_off     B2  AE  AD  AC  AB  A9  A9  A8  A7  A4  A3  A3  A2  A2  A4  9F  
+  5_off     B0  AF  AC  AC  AA  AB  A9  A8  A7  A4  A2  A4  A5  A4  A3  A0  
+  4_off     B1  AF  AD  AC  AA  AA  A9  A9  A7  A6  A6  A4  A4  A5  A2  9D  
+  3_off     B0  B0  AD  AC  AD  A9  A9  A8  A7  A6  A5  A5  A5  A3  A2  9F  
+  2_off     B0  B0  AF  AE  AC  AA  A8  A8  A8  A6  A5  A4  A3  A4  A2  9D  
+
+Rcross EuEw  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      B0  B0  AF  AC  AB  A9  A8  A9  A6  A6  A3  A4  A3  A3  A2  9F  
+  4_on      B0  B0  AD  AC  AA  A9  AA  A8  A6  A4  A5  A5  A4  A3  A3  A0  
+  3_on      AF  AE  AF  AD  AC  AA  A8  A8  A8  A5  A4  A4  A4  A4  A1  9E  
+  2_on      B1  B0  AE  AD  AA  AA  A8  A7  A5  A5  A4  A3  A4  A4  A2  9B  
+  1_on      B1  AE  AD  AB  AA  A9  A8  A8  A7  A5  A5  A2  A2  A3  A3  A0  
+  0_on      B1  AF  AD  AE  AC  AA  A9  A8  A5  A3  A3  A3  A4  A5  A2  9E  
+  7_off     B3  B2  AF  AC  AA  A9  A9  AA  A8  A6  A3  A3  A2  A2  A5  A1  
+  6_off     B2  AF  AB  AA  AA  AA  A8  A8  A5  A2  A4  A3  A2  A2  A3  A0  
+  5_off     B1  B0  AE  AD  AB  A9  A9  A9  A7  A6  A4  A4  A3  A3  A3  A0  
+  4_off     B0  B0  AE  AC  AC  AA  A8  A9  A7  A6  A5  A5  A3  A3  A3  9F  
+  3_off     B1  AF  B0  AE  AC  AB  A8  A7  A5  A6  A4  A4  A4  A3  A2  9E  
+  2_off     AF  AF  AE  AB  AB  AA  A8  A8  A8  A5  A5  A4  A4  A3  A2  9D  
+
+Rcross EvEz  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      B0  B1  B0  AD  AC  AB  A9  A9  A8  A7  A6  A5  A3  A3  A1  9E  
+  4_on      B2  B0  AE  AC  AC  A9  A9  A8  A7  A6  A4  A4  A5  A6  A4  9E  
+  3_on      B0  B0  AF  AC  AB  AB  A9  A8  A6  A6  A4  A3  A4  A3  A2  9F  
+  2_on      B1  B0  AF  AD  AB  AB  A9  A9  A6  A6  A5  A3  A3  A5  A1  9C  
+  1_on      B0  B0  AE  AC  AB  A9  A8  A7  A7  A5  A4  A3  A3  A3  A1  9E  
+  0_on      AE  AD  AD  AD  AB  AA  A9  A8  A6  A5  A3  A4  A3  A2  A0  9C  
+  7_off     AC  AA  A8  A6  A9  A7  A2  A2  9F  9F  9D  9E  9F  9D  9B  95  
+  6_off     B0  AB  AC  AB  A9  A8  A6  A3  A4  A3  A2  A2  A1  A0  9F  99  
+  5_off     B0  AF  AD  AC  AA  AB  A9  A8  A7  A4  A3  A5  A5  A4  A1  9E  
+  4_off     B1  AF  AD  AC  AB  AB  AA  A9  A7  A6  A7  A5  A4  A5  A2  9D  
+  3_off     AF  B0  AE  AC  AD  A9  A9  A8  A7  A6  A5  A5  A5  A3  A2  9F  
+  2_off     B0  B0  AF  AE  AC  AA  A8  A8  A8  A6  A5  A4  A3  A4  A2  9D  
+
+Icross EuEw  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      8B  89  87  83  7F  7B  78  75  6A  67  66  68  6E  78  7E  7F  
+  4_on      8B  89  86  83  7F  7A  78  71  6E  67  63  67  70  78  80  80  
+  3_on      8A  89  87  83  81  7C  77  73  6F  68  61  69  72  79  7D  7F  
+  2_on      8D  8B  89  86  80  7A  7A  77  70  70  6A  6A  74  7B  80  7C  
+  1_on      8E  8A  8A  82  83  7C  75  77  70  71  76  6A  72  79  81  80  
+  0_on      92  8C  80  7E  78  69  80  65  3D  6A  62  61  68  7F  82  7F  
+  7_off     92  8F  8B  88  83  80  7B  78  6F  65  51  63  6F  77  80  80  
+  6_off     90  8A  87  84  81  7F  7A  75  6E  5F  60  65  6B  76  7E  80  
+  5_off     8C  89  87  84  80  7B  77  70  67  5C  5F  62  6B  76  7E  7F  
+  4_off     8B  89  87  83  81  7C  77  74  6D  66  62  64  6E  78  7F  7E  
+  3_off     8C  89  88  85  81  7D  78  73  6F  6B  69  69  71  78  7E  7F  
+  2_off     8A  89  87  82  81  7D  76  74  71  69  66  6A  72  78  7F  7E  
+
+Icross EvEz  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      9A  99  96  90  8A  84  78  68  78  7E  82  84  86  89  89  88  
+  4_on      9B  98  93  90  8C  84  79  65  77  7D  80  83  88  8B  8B  88  
+  3_on      9A  98  93  8D  87  82  7B  60  76  7F  80  83  86  88  8B  89  
+  2_on      9C  97  94  8E  83  7A  78  61  72  7E  81  82  86  8A  89  88  
+  1_on      9F  99  90  87  7E  7A  71  70  58  7F  80  80  86  89  89  88  
+  0_on      9D  98  93  5D  8A  85  6B  7B  7B  82  7E  7D  85  89  8A  88  
+  7_off     93  8F  91  95  98  99  98  8E  89  89  7B  8B  8A  93  8A  7A  
+  6_off     97  8E  8A  60  60  90  91  6C  8A  8C  83  8C  88  8E  8D  63  
+  5_off     95  91  8D  83  74  8E  88  6E  7F  7D  6A  85  8A  8C  8B  7D  
+  4_off     9A  95  92  8D  87  71  70  6C  65  6F  80  83  87  8B  89  84  
+  3_off     99  97  92  8F  8C  85  7F  70  78  7E  81  84  87  88  8A  89  
+  2_off     99  98  94  90  8A  83  7B  63  78  7E  81  83  86  89  8A  88  
+
+Band B:
+AGCs  5_on  4_on  3_on  2_on  1_on  0_on  7_off 6_off 5_off 4_off 3_off 2_off
+      ----  ----  ----  ----  ----  ----  ----- ----- ----- ----- ----- ----- 
+  Eu   80    6A    54    3E    27    00    D4    CB    C0    AC    98    84    
+  Ev   86    70    5B    44    2D    09    DA    CE    C4    B2    9E    89    
+  Ew   80    6B    55    40    2B    00    D4    CB    C0    AC    98    84    
+  Ez   81    6C    56    41    2C    02    D5    CC    C1    AD    99    85    
+
+AUTOs Eu     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      B1  B1  B2  B2  B1  B0  AE  AB  AA  A8  A5  A2  A0  9E  9A  94  
+  4_on      B1  B1  B1  B1  B2  B0  AD  AC  A9  A8  A5  A2  A1  9F  9A  95  
+  3_on      B0  B2  B4  B3  B1  B0  AE  AC  AA  A8  A5  A3  A1  9D  9A  95  
+  2_on      B0  B1  B2  B1  B0  AF  AD  AB  A9  A9  A7  A5  A2  A0  9B  93  
+  1_on      AD  AF  AF  AE  AC  AD  AB  AA  A9  A9  A8  A9  A6  A1  9A  94  
+  0_on      B0  B3  B2  B1  B1  B0  AA  AB  A7  A7  A1  A2  9C  9D  9B  97  
+  7_off     B3  B5  B7  B4  B0  B0  B0  AC  AE  AA  A6  A3  A2  A1  9A  95  
+  6_off     B2  B3  B3  B2  AF  AE  AC  AB  AB  A9  A6  A2  A1  A0  9B  96  
+  5_off     B1  B1  B2  B1  B0  AF  AD  AB  AB  A8  A5  A2  A0  9E  9B  95  
+  4_off     B1  B2  B3  B2  B1  B0  AE  AC  AA  A8  A6  A2  A1  9E  9A  93  
+  3_off     B1  B2  B2  B2  B1  B0  AE  AC  AA  A8  A6  A3  A1  9E  9A  95  
+  2_off     B0  B0  B1  B1  B0  AF  AC  AA  A9  A8  A8  A5  A3  9F  9B  94  
+
+AUTOs Ev     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      B3  B4  B4  B4  B2  B1  AF  AC  AA  A7  A4  A2  9F  9C  99  92  
+  4_on      B2  B4  B3  B4  B2  B1  AF  AB  A9  A8  A5  A2  9F  9C  98  92  
+  3_on      B4  B4  B4  B3  B2  B1  AF  AD  AA  A7  A3  A2  9F  9C  98  92  
+  2_on      B2  B4  B4  B1  B1  B0  AC  AB  AA  A8  A6  A2  A1  9D  99  93  
+  1_on      B1  B1  B1  B0  B1  AF  AC  AB  A9  A9  A8  A8  A3  9F  98  91  
+  0_on      B3  B4  B5  B3  B2  B2  AE  AC  A9  A7  A2  A0  9D  9E  9A  94  
+  7_off     B5  B8  B5  B3  B6  B5  B0  AF  AB  A9  A6  A4  9E  9B  9A  93  
+  6_off     B4  B5  B2  B2  B3  B2  B0  AE  A9  A7  A6  A3  A0  9B  9A  95  
+  5_off     B1  B4  B3  B2  B2  B0  AE  AD  A9  A8  A5  A3  9F  9C  9A  94  
+  4_off     B2  B4  B3  B3  B2  B1  B0  AC  AA  A8  A4  A2  9E  9C  98  93  
+  3_off     B3  B4  B4  B4  B2  B1  AE  AB  AA  A7  A4  A2  A0  9C  99  92  
+  2_off     B2  B3  B3  B3  B2  B0  AE  AC  AA  A8  A6  A4  A0  9D  98  91  
+
+AUTOs Ew     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      B0  B1  B2  B2  B1  B0  AE  AB  AA  A8  A5  A2  A0  9E  9A  95  
+  4_on      B1  B1  B1  B1  B2  B0  AD  AC  A9  A8  A5  A2  A1  9F  9A  96  
+  3_on      B0  B2  B3  B3  B1  B0  AE  AD  AA  A8  A5  A3  A1  9D  9A  95  
+  2_on      AF  B1  B1  B0  B0  AE  AC  AB  A9  A9  A7  A7  A3  A1  9B  94  
+  1_on      AB  AD  AD  AC  AB  AB  AA  A9  A8  A9  A9  AA  A8  A2  9A  94  
+  0_on      B0  B3  B3  B1  B2  B0  AA  AC  A7  A8  A2  A5  9D  9E  9C  98  
+  7_off     B3  B4  B7  B4  B0  B0  B0  AC  AE  AA  A6  A2  A2  A1  9A  95  
+  6_off     B1  B2  B3  B2  AF  AE  AC  AB  AB  A9  A6  A2  A1  A0  9B  96  
+  5_off     B1  B1  B2  B1  B0  AF  AD  AB  AB  A8  A5  A2  A0  9E  9B  96  
+  4_off     B1  B2  B3  B2  B1  AF  AE  AC  AA  A8  A6  A2  A1  9F  9A  94  
+  3_off     B0  B2  B2  B2  B1  B0  AE  AC  AA  A9  A6  A3  A1  9E  9A  95  
+  2_off     B0  B0  B1  B1  B0  AF  AC  AA  A9  A8  A8  A5  A3  9F  9B  95  
+
+AUTOs Ez     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      B1  B3  B3  B3  B1  B0  AE  AC  AA  A8  A5  A3  A0  9E  9A  94  
+  4_on      B1  B2  B2  B3  B1  B1  AE  AB  A9  A8  A5  A2  A0  9D  99  94  
+  3_on      B2  B3  B3  B2  B1  B1  AF  AD  AA  A8  A4  A2  A0  9D  9A  94  
+  2_on      B0  B2  B2  B0  B0  AF  AB  AB  A9  A9  A7  A5  A3  A0  9A  95  
+  1_on      AC  AD  AE  AD  AD  AC  AA  AA  A9  A9  A9  AA  A6  A1  9A  92  
+  0_on      B1  B3  B4  B1  B2  B2  AC  AD  A8  A9  A2  A3  9F  A0  9B  96  
+  7_off     B4  B6  B9  B7  B1  B0  B0  AD  AF  AA  A6  A2  A0  9E  99  95  
+  6_off     B3  B3  B4  B3  B0  AE  AE  AC  AC  A9  A6  A1  A2  A0  9A  96  
+  5_off     B1  B3  B3  B2  B0  AF  AE  AD  AB  A9  A5  A2  9F  9D  9A  95  
+  4_off     B1  B2  B3  B2  B1  B0  AF  AC  AB  A8  A4  A2  9F  9D  9A  95  
+  3_off     B1  B2  B3  B3  B2  B1  AE  AB  A9  A7  A5  A3  A0  9D  9A  94  
+  2_off     B1  B2  B2  B2  B1  B0  AD  AC  AA  A8  A7  A5  A1  9E  99  93  
+
+Rcross EuEw  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      B0  B1  B2  B2  B1  B0  AE  AB  AA  A8  A5  A2  A0  9E  9A  95  
+  4_on      B1  B1  B1  B1  B2  B0  AD  AC  A9  A8  A5  A2  A1  9F  9A  96  
+  3_on      B0  B2  B3  B3  B1  B0  AE  AC  AA  A8  A5  A3  A1  9D  9A  95  
+  2_on      B0  B1  B2  B1  B0  AF  AC  AB  A9  A9  A7  A6  A2  A0  9B  93  
+  1_on      AC  AE  AE  AD  AB  AC  AB  A9  A8  A9  A9  A9  A7  A1  9A  94  
+  0_on      B0  B3  B2  B1  B1  B0  AA  AB  A7  A8  A1  A3  9B  9D  9B  97  
+  7_off     B3  B5  B7  B4  B0  B0  B0  AC  AE  AA  A6  A2  A2  A1  9A  95  
+  6_off     B1  B2  B3  B2  AF  AE  AC  AB  AB  A9  A6  A2  A1  A0  9B  96  
+  5_off     B1  B1  B2  B1  B0  AF  AD  AB  AB  A8  A5  A2  A0  9E  9B  96  
+  4_off     B1  B2  B3  B2  B1  AF  AE  AC  AA  A8  A6  A2  A1  9E  9A  93  
+  3_off     B1  B2  B2  B2  B1  B0  AE  AC  AA  A8  A6  A3  A1  9E  9A  95  
+  2_off     B0  B0  B1  B1  B0  AF  AC  AA  A9  A8  A8  A5  A3  9F  9B  94  
+
+Rcross EvEz  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      B2  B4  B3  B3  B2  B1  AF  AC  AA  A7  A5  A3  9F  9D  99  93  
+  4_on      B1  B3  B2  B3  B1  B1  AE  AB  A9  A8  A5  A2  9F  9D  99  93  
+  3_on      B3  B4  B3  B3  B2  B1  AF  AD  AA  A7  A3  A2  A0  9D  99  92  
+  2_on      B1  B3  B3  B0  B0  B0  AB  AB  A9  A8  A6  A3  A2  9E  99  94  
+  1_on      AF  AF  B0  AE  AF  AD  AB  AA  A9  A9  A8  A8  A4  A0  99  91  
+  0_on      B2  B3  B4  B1  B2  B2  AD  AC  A8  A8  A1  A0  9C  9D  9A  94  
+  7_off     AE  B0  AD  AB  AB  A9  A7  A6  A3  9F  98  94  92  8F  88  83  
+  6_off     B1  B1  B0  B0  AE  AD  AB  AA  A7  A4  A1  9E  9C  99  95  91  
+  5_off     B1  B3  B2  B2  B0  AF  AE  AC  AA  A8  A4  A2  9E  9C  99  94  
+  4_off     B1  B3  B3  B2  B1  B0  AF  AC  AB  A8  A4  A2  9E  9C  99  94  
+  3_off     B2  B3  B4  B3  B2  B1  AE  AB  A9  A7  A4  A3  A0  9C  99  93  
+  2_off     B1  B2  B2  B3  B2  B0  AD  AC  AA  A8  A6  A5  A0  9D  99  91  
+
+Icross EuEw  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      89  8A  8A  89  88  87  84  83  81  81  7E  7E  7D  7D  7B  78  
+  4_on      8A  8A  89  88  89  87  85  84  81  81  80  7E  7E  7D  7B  78  
+  3_on      88  8B  8D  8B  89  88  85  83  83  81  80  7F  7E  7B  7B  78  
+  2_on      8C  8F  91  90  8D  8D  8C  8A  8A  8A  89  85  7D  78  74  70  
+  1_on      8E  91  92  91  90  92  91  8E  90  8E  8F  8B  82  73  58  61  
+  0_on      74  87  93  88  85  84  71  78  7A  7F  79  74  7D  86  84  80  
+  7_off     8B  8E  90  8B  88  88  86  83  86  83  81  80  80  80  7C  79  
+  6_off     8A  8B  8C  8A  86  85  83  82  84  82  81  7F  7F  7E  7C  79  
+  5_off     89  8A  8B  89  86  86  84  83  83  81  80  7E  7D  7C  7B  78  
+  4_off     8A  8B  8B  8A  88  85  85  84  82  81  80  7E  7E  7D  7B  76  
+  3_off     89  8A  8A  89  88  87  85  83  82  81  80  7F  7E  7C  7A  78  
+  2_off     88  89  8A  88  87  85  83  82  81  81  81  80  80  7D  7B  77  
+
+Icross EvEz  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      9A  9C  9B  9C  9A  99  98  95  94  91  90  8F  8B  8A  88  82  
+  4_on      99  9B  9B  9C  9A  9A  98  95  93  93  91  8E  8C  8A  87  82  
+  3_on      9A  9B  9C  9B  9A  9A  98  97  95  91  8F  8E  8C  8A  88  82  
+  2_on      9A  9C  9E  9B  9A  9B  98  98  98  96  94  91  8E  89  85  80  
+  1_on      9A  9B  9E  9D  9C  9C  9A  9A  9A  99  99  97  91  89  81  79  
+  0_on      91  95  A0  9A  90  9B  91  90  92  8A  8C  8E  8F  91  8D  87  
+  7_off     7F  A2  AA  A0  90  A1  97  90  97  98  95  89  7C  81  78  6A  
+  6_off     84  9E  A5  9A  9A  9F  91  93  94  94  93  8C  81  89  86  7F  
+  5_off     8A  99  9E  99  97  99  8F  91  90  90  8D  8A  83  85  86  7E  
+  4_off     98  9B  9C  9B  99  99  98  95  94  92  8F  8D  89  89  87  82  
+  3_off     9A  9B  9B  9C  9A  99  97  95  93  91  90  8F  8C  89  88  82  
+  2_off     99  9A  9B  9B  9A  99  97  96  95  93  92  91  8D  8A  87  81  
+
+Band C:
+AGCs  5_on  4_on  3_on  2_on  1_on  0_on  7_off 6_off 5_off 4_off 3_off 2_off
+      ----  ----  ----  ----  ----  ----  ----- ----- ----- ----- ----- ----- 
+  Eu   41    29    0D    00    00    00    A7    97    84    6F    5B    48    
+  Ev   43    2B    11    00    00    00    AC    9A    86    71    5D    4A    
+  Ew   42    2A    0E    00    00    00    A8    98    84    70    5C    49    
+  Ez   42    2A    0E    00    00    00    A8    98    84    70    5C    49    
+
+AUTOs Eu     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      BA  B9  B7  B5  B3  B0  AE  AB  AA  A9  A7  A6  A4  A2  9F  99  
+  4_on      BB  B9  B7  B4  B2  B0  AE  AB  AA  A8  A7  A4  A3  A2  A0  99  
+  3_on      BA  B9  B8  B6  B2  B0  AD  AA  A9  A9  A7  A5  A4  A2  9F  9A  
+  2_on      B1  B0  AC  A8  A5  A1  9E  9C  9A  99  98  98  96  93  90  8A  
+  1_on      AB  A8  A3  9F  99  96  91  8E  8B  89  88  88  88  85  82  7D  
+  0_on      AB  A7  A2  9C  98  93  90  8B  88  84  82  84  84  81  80  7A  
+  7_off     B9  B7  B5  B3  B0  AD  AC  AA  A9  A8  A6  A6  A6  A4  A2  9D  
+  6_off     BA  B8  B7  B4  B2  B0  AD  AB  A9  A9  A7  A6  A5  A2  A0  9A  
+  5_off     B9  B9  B8  B5  B2  B0  AE  AB  AA  A8  A7  A5  A4  A2  9E  99  
+  4_off     BA  BA  B8  B4  B2  B0  AF  AC  A9  A8  A6  A5  A3  A2  A0  99  
+  3_off     BB  B9  B7  B5  B3  B1  AE  AB  AA  A8  A7  A5  A4  A2  9F  98  
+  2_off     BF  BD  B9  B6  B2  B0  AB  A9  A8  A5  A4  A2  A1  A0  9B  95  
+
+AUTOs Ev     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      BC  BB  B8  B5  B2  B0  AE  AC  A9  A8  A5  A4  A3  A1  9E  98  
+  4_on      BC  BA  B8  B5  B2  B0  AD  AB  A9  A7  A5  A3  A2  A1  9E  99  
+  3_on      BA  B9  B6  B4  B1  AF  AB  A9  A7  A6  A4  A2  A1  A0  9D  98  
+  2_on      B6  B2  AF  AB  A8  A4  A1  A0  9C  9A  98  97  97  97  94  90  
+  1_on      B1  AC  A7  A1  9C  99  93  91  8F  8D  8B  89  89  88  88  86  
+  0_on      B0  AA  A6  A0  9A  96  92  8E  8B  8A  88  85  84  85  84  83  
+  7_off     BC  BA  B8  B6  B3  B0  AD  AC  AA  A8  A7  A5  A3  A1  9D  98  
+  6_off     BB  BB  B8  B6  B2  B1  AF  AC  A9  A6  A6  A4  A2  A1  9C  97  
+  5_off     BC  BB  B8  B6  B3  B0  AF  AB  AA  A8  A6  A5  A3  A0  9E  98  
+  4_off     BD  BB  B9  B6  B3  B1  AD  AB  A9  A7  A6  A4  A3  A1  9D  98  
+  3_off     BD  BB  B9  B6  B3  B0  AE  AB  A9  A7  A6  A5  A3  A1  9E  98  
+  2_off     C0  BC  BA  B5  B2  B0  AB  A9  A6  A4  A2  A1  A0  9E  9A  95  
+
+AUTOs Ew     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      BA  B9  B7  B5  B3  B0  AE  AB  AA  A9  A8  A6  A5  A2  A0  99  
+  4_on      BA  B9  B7  B4  B2  B0  AE  AB  AA  A9  A7  A5  A3  A2  A0  9A  
+  3_on      BA  B9  B8  B6  B2  B0  AE  AA  AA  A9  A7  A6  A4  A2  A0  99  
+  2_on      B2  B1  AD  AA  A6  A2  A0  9E  9B  9A  99  98  96  94  91  8B  
+  1_on      AC  A9  A5  A0  9B  98  92  90  8C  8A  88  85  85  83  80  7B  
+  0_on      AB  A8  A3  9D  99  94  90  8C  89  84  82  81  81  7F  7C  77  
+  7_off     B8  B7  B5  B3  B0  AD  AC  AB  A9  A8  A7  A7  A7  A4  A2  9D  
+  6_off     BA  B8  B7  B4  B2  B0  AD  AB  AA  A9  A8  A6  A5  A2  A0  9A  
+  5_off     B9  B9  B8  B4  B2  B0  AF  AB  AA  A8  A7  A5  A4  A2  9F  99  
+  4_off     BA  B9  B8  B4  B2  B0  AF  AC  A9  A9  A7  A5  A4  A2  A0  99  
+  3_off     BA  B9  B7  B5  B3  B1  AE  AB  AA  A8  A7  A5  A4  A2  9F  98  
+  2_off     BF  BC  B9  B6  B3  B0  AC  A9  A8  A5  A4  A3  A1  A0  9B  95  
+
+AUTOs Ez     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      BA  B9  B8  B4  B2  B0  AF  AC  A9  A8  A6  A5  A4  A2  A0  99  
+  4_on      BA  B8  B8  B5  B2  B0  AE  AB  AA  A8  A7  A4  A3  A2  A0  9A  
+  3_on      B9  B9  B7  B5  B2  B0  AD  AB  A9  A8  A7  A5  A3  A2  A0  9A  
+  2_on      B1  B0  AC  A9  A6  A3  A0  9E  9B  9A  98  96  95  94  91  8C  
+  1_on      AC  A9  A4  A0  9A  97  92  8F  8D  8A  88  87  86  83  81  7B  
+  0_on      AC  A8  A3  9F  98  94  90  8B  89  85  83  81  80  7F  7C  78  
+  7_off     B7  B6  B4  B2  B1  AE  AC  AB  AA  A8  A8  A7  A6  A4  A3  9D  
+  6_off     B9  B9  B6  B4  B1  B0  AF  AC  AA  A7  A7  A5  A4  A2  A0  99  
+  5_off     BA  B9  B7  B5  B3  B0  AF  AC  AA  A9  A7  A6  A4  A1  A0  9A  
+  4_off     BA  B9  B8  B5  B2  B1  AD  AB  A9  A8  A7  A5  A4  A2  9F  99  
+  3_off     BB  BA  B8  B5  B3  B0  AF  AC  AA  A8  A7  A7  A4  A2  9F  99  
+  2_off     BE  BC  B9  B6  B2  B0  AC  AA  A7  A5  A3  A3  A1  9F  9B  96  
+
+Rcross EuEw  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      BA  B9  B7  B5  B3  B0  AE  AB  AA  A9  A7  A6  A5  A2  9F  99  
+  4_on      BA  B9  B7  B4  B2  B0  AE  AB  AA  A8  A7  A4  A3  A2  A0  9A  
+  3_on      BA  B9  B8  B6  B2  B0  AD  AA  A9  A9  A7  A5  A4  A2  9F  99  
+  2_on      B1  B0  AC  A9  A5  A1  9E  9C  9A  99  98  96  94  92  8F  89  
+  1_on      AB  A8  A3  9E  99  95  90  8C  89  84  83  80  7C  7A  77  71  
+  0_on      AB  A7  A2  9B  98  92  8D  88  83  7C  79  77  70  70  70  65  
+  7_off     B8  B7  B5  B3  B0  AD  AC  AB  A9  A8  A6  A7  A6  A4  A2  9D  
+  6_off     BA  B8  B7  B4  B2  B0  AD  AB  A9  A9  A7  A6  A5  A2  A0  9A  
+  5_off     B9  B9  B8  B4  B2  B0  AE  AB  AA  A8  A7  A5  A4  A2  9F  99  
+  4_off     BA  BA  B8  B4  B2  B0  AF  AC  A9  A9  A6  A5  A4  A2  A0  99  
+  3_off     BA  B9  B7  B5  B3  B1  AE  AB  AA  A8  A7  A5  A4  A2  9F  98  
+  2_off     BF  BC  B9  B6  B2  B0  AC  A9  A8  A5  A4  A2  A1  A0  9B  95  
+
+Rcross EvEz  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      BA  BA  B8  B5  B2  B0  AE  AC  A9  A8  A6  A5  A3  A2  9F  99  
+  4_on      BA  B9  B8  B5  B2  B0  AE  AB  AA  A8  A6  A4  A2  A2  9F  99  
+  3_on      BA  B9  B6  B5  B2  AF  AC  AA  A8  A7  A5  A3  A2  A0  9E  98  
+  2_on      B3  B1  AD  AA  A6  A3  A0  9E  9B  99  96  95  94  93  90  89  
+  1_on      AE  AA  A5  A0  9A  96  91  8D  8B  87  83  82  80  7B  78  6D  
+  0_on      AE  A8  A4  9F  98  93  8E  89  85  80  7C  76  71  6F  62  4B  
+  7_off     B8  B6  B4  B2  B0  AC  AA  A9  A8  A5  A4  A3  A2  A0  9E  98  
+  6_off     BA  B9  B7  B4  B1  B0  AE  AB  A9  A6  A6  A4  A3  A1  9D  98  
+  5_off     BB  BA  B8  B5  B3  B0  AF  AB  AA  A9  A6  A5  A4  A1  9F  99  
+  4_off     BB  BA  B8  B5  B2  B1  AD  AB  A9  A8  A6  A5  A3  A1  9E  98  
+  3_off     BC  BA  B8  B5  B3  B0  AE  AB  A9  A8  A6  A6  A4  A1  9E  98  
+  2_off     BF  BC  B9  B5  B2  B0  AB  A9  A6  A4  A3  A2  A0  9E  9B  96  
+
+Icross EuEw  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      95  93  90  8D  8B  87  84  80  7B  77  71  6B  5B  58  58  5F  
+  4_on      96  94  91  8D  89  87  82  7F  7C  7B  75  65  5B  6D  63  32  
+  3_on      98  95  94  92  8C  88  84  7E  7B  7A  70  71  72  4E  45  53  
+  2_on      94  93  8D  86  82  81  7A  78  70  70  61  35  6B  6B  53  58  
+  1_on      92  8F  89  84  7E  79  74  6B  66  6E  69  56  69  65  5C  3F  
+  0_on      92  8F  8A  83  80  7A  72  73  70  5F  58  5D  63  58  59  5C  
+  7_off     95  93  91  8F  8B  88  86  83  80  7D  7A  78  75  71  6E  6A  
+  6_off     96  93  91  8F  8B  89  85  81  7E  7B  77  72  6F  6A  68  62  
+  5_off     95  93  91  8E  8B  88  84  80  7C  77  73  6D  66  60  5D  57  
+  4_off     95  94  91  8E  8A  88  84  80  7A  76  6F  6D  65  62  5B  48  
+  3_off     97  94  91  8E  8B  89  84  80  7D  79  74  70  60  48  60  3B  
+  2_off     9C  9A  95  91  8E  89  84  80  7D  7B  79  73  73  76  6E  66  
+
+Icross EvEz  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  
+            --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  5_on      A8  A8  A4  A1  9E  9B  98  95  91  8F  8B  8A  88  85  81  7A  
+  4_on      A8  A6  A4  A1  9E  9A  98  94  91  8F  8C  89  86  84  80  7B  
+  3_on      A8  A7  A3  A1  9F  9B  97  94  92  8F  8C  8B  88  86  82  7D  
+  2_on      A1  A0  9B  97  92  90  8C  88  87  84  80  7E  7F  7C  79  73  
+  1_on      9B  9A  93  8D  89  84  7D  7A  78  72  6B  71  6E  72  71  70  
+  0_on      9B  98  91  8B  82  80  7D  78  74  6F  69  69  6C  6B  6C  6F  
+  7_off     A3  A2  A0  9D  9A  95  96  92  90  8A  8B  8C  8A  88  78  71  
+  6_off     A7  A6  A4  A1  9C  99  97  93  90  8C  8A  89  89  88  82  7B  
+  5_off     A8  A7  A3  A1  9E  99  97  92  91  8F  8B  8A  89  86  83  7B  
+  4_off     A9  A8  A4  A1  9E  9A  96  93  91  8E  8B  89  87  84  81  7B  
+  3_off     A9  A8  A5  A2  A0  9C  9A  96  93  90  8D  8B  88  84  80  7A  
+  2_off     AD  AA  A8  A3  A0  9C  98  94  91  8E  8B  8A  86  83  7F  79  
+
+Band HF1: attenuator = ON and CAL level = 7
+AGCs       4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  
+          --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  Eu      96  98  98  98  98  98  97  96  95  95  94  93  92  92  91  91  
+  Ev      98  99  9A  9A  99  98  98  97  96  95  95  94  93  93  92  91  
+  Ew      8F  91  92  92  92  92  91  91  90  90  8F  8E  8E  8D  8D  8C  
+  Ez      8F  91  92  93  93  92  92  91  90  90  8F  8F  8E  8D  8D  8C  
+
+AUTOs      4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  
+          --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  Eu      9C  9C  9C  9B  9C  9D  9C  9D  9C  9C  9C  9C  9C  9D  9C  9C  
+  Ev      9C  9C  9C  9D  9C  9C  9C  9C  9D  9C  9B  9C  9C  9C  9C  9C  
+  Ew      9C  9C  9C  9B  9C  9D  9C  9D  9C  9C  9C  9C  9C  9D  9C  9C  
+  Ez      9C  9C  9C  9C  9C  9C  9C  9B  9D  9C  9B  9C  9C  9C  9C  9C  
+
+Cross EuEw 4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  
+          --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  Rmag    9C  9C  9C  9B  9C  9C  9C  9C  9C  9C  9B  9C  9C  9D  9C  9C  
+  Rsign   +1  +1  +1  +1  +1  +1  +1  +1  -1  -1  -1  -1  -1  -1  -1  -1  
+  Imag    8C  8D  8C  8B  8C  8C  8B  8B  8A  8A  8A  8A  8A  8A  89  89  
+  Isign   +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  
+
+Cross EvEz 4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  
+          --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  Rmag    9B  9C  9B  9C  9B  9C  9B  9B  9D  9C  9B  9B  9C  9C  9C  9C  
+  Rsign   +1  +1  +1  +1  +1  +1  +1  +1  -1  -1  -1  -1  -1  -1  -1  -1  
+  Imag    91  91  91  91  90  90  8F  8E  90  8E  8C  8D  8D  8C  8C  8C  
+  Isign   -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  
+
+Band HF1: attenuator = OFF and CAL level = 5
+AGCs       4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  
+          --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  Eu      A7  A9  A9  A9  A9  A8  A8  A7  A6  A6  A5  A4  A3  A3  A2  A2  
+  Ev      AA  AB  AB  AB  AA  A9  A9  A8  A7  A6  A6  A5  A4  A4  A3  A2  
+  Ew      9F  A2  A2  A2  A2  A2  A1  A1  A0  A0  9F  9E  9E  9D  9D  9D  
+  Ez      A0  A2  A3  A3  A3  A2  A2  A1  A0  A0  9F  9F  9E  9E  9D  9C  
+
+AUTOs      4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  
+          --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  Eu      9C  9C  9C  9D  9B  9C  9C  9C  9D  9D  9B  9C  9C  9C  9D  9C  
+  Ev      9C  9C  9B  9C  9C  9C  9B  9C  9B  9C  9D  9C  9C  9C  9C  9D  
+  Ew      9C  9C  9C  9D  9B  9C  9C  9C  9D  9C  9B  9C  9C  9C  9D  9C  
+  Ez      9C  9C  9B  9C  9C  9C  9B  9C  9B  9C  9C  9C  9C  9C  9C  9C  
+
+Cross EuEw 4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  
+          --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  Rmag    9B  9C  9C  9C  9B  9B  9B  9C  9C  9C  9B  9C  9C  9C  9C  9B  
+  Rsign   +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  
+  Imag    8B  8C  8C  8C  8B  8B  8B  8B  8B  8A  89  8A  8A  8A  8A  89  
+  Isign   +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  
+
+Cross EvEz 4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  
+          --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  
+  Rmag    9B  9C  9B  9B  9B  9C  9B  9C  9B  9B  9C  9C  9C  9C  9C  9C  
+  Rsign   -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  
+  Imag    91  91  90  90  90  90  8F  8F  8E  8E  8F  8E  8E  8E  8E  8E  
+  Isign   -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  
+
+Band HF1: frequency = 475 kHz (F19)
+Filters    1     2           4                       8  
+AGCs      --    --          --                      --  
+  Eu      A2    A2          A2                      A2  
+  Ev      A3    A3          A3                      A3  
+  Ew      9D    9D          9C                      9C  
+  Ez      9D    9D          9D                      9D  
+
+AUTOs     --  ------  --------------  ------------------------------  
+  Eu      9D  A7  A7  B1  B2  B1  AE  B4  B8  B6  B7  B6  B9  B7  B4  
+  Ev      9C  A8  A8  B0  B1  B1  AF  B6  B8  B7  B6  B9  B8  B2  B3  
+  Ew      9D  A7  A7  B0  B2  B1  AF  B5  B8  B6  B7  B6  B9  B7  B5  
+  Ez      9C  A8  A8  B0  B1  B1  AF  B6  B8  B7  B6  B9  B8  B2  B3  
+
+Cross EuEz--  ------  --------------  ------------------------------  
+  Rmag    9C  A7  A7  B0  B2  B1  AE  B4  B8  B6  B7  B6  B8  B7  B4  
+  Rsign   +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  
+  Imag    8A  93  94  9C  9F  9E  9D  A0  A4  A2  A4  A3  A6  A5  A4  
+  Isign   +0  +0  +0  +0  +0  +0  +0  +0  +0  +0  +0  +0  +0  +0  +0  
+
+Cross EvEz--  ------  --------------  ------------------------------  
+  Rmag    9C  A8  A8  B0  B1  B1  AE  B6  B8  B7  B6  B9  B8  B1  B2  
+  Rsign   -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  
+  Imag    8E  98  99  9F  A2  A2  A1  A5  A8  A8  A8  AA  A9  A4  A5  
+  Isign   +0  +0  +0  +0  +0  +0  +0  +0  +0  +0  +0  +0  +0  +0  +0  
+
+Band HF2: attenuator = ON  and CAL level = 7
+            5  10  15  20  25  30  35  40  45  50  55  60  65  70  75  80 
+AGCs      --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Eu       8E  8B  89  88  87  86  85  84  83  83  83  82  81  80  7F  7F  
+  Ev       8F  8C  8B  89  87  87  85  85  84  83  82  81  80  7F  7F  7E  
+  Ew       8A  87  85  84  83  82  81  80  7F  7E  7D  7D  7C  7B  7A  7A  
+  Ez       8A  87  86  84  83  82  81  80  80  7F  7E  7D  7C  7C  7B  7A  
+
+           85  90  95 100 105 110 115 120 125 130 135 140 145 150 155 160 
+AGCs      --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Eu       7E  7E  7D  7D  7C  7C  7C  7B  7B  7B  7B  7A  7A  7A  7A  7B  
+  Ev       7D  7D  7C  7B  7A  7A  7A  79  79  78  78  78  78  78  78  78  
+  Ew       79  78  78  77  77  76  76  76  76  76  75  75  75  75  75  75  
+  Ez       79  79  78  78  77  77  77  77  76  76  76  76  76  76  76  76  
+
+          165 170 175 180 185 190 195 200 205 210 215 220 225 230 235 240 
+AGCs      --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Eu       7B  7A  7B  7B  7B  7B  7B  7C  7B  7B  7B  7A  7A  79  78  77  
+  Ev       78  78  78  78  78  78  79  77  78  78  77  77  76  75  75  73  
+  Ew       76  75  76  76  76  76  76  76  75  75  75  74  73  73  71  70  
+  Ez       76  76  76  77  76  77  77  76  76  77  75  74  74  73  72  70  
+
+          245 250 255 260 265 270 275 280 285 290 295 300 305 310 315 320 
+AGCs      --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Eu       76  74  74  73  71  70  6F  6E  6D  6C  6B  6A  6B  69  69  69  
+  Ev       73  71  70  6E  6D  6C  6B  69  68  68  67  66  66  66  65  65  
+  Ew       6E  6C  6B  6A  69  67  66  66  64  64  63  63  63  62  62  63  
+  Ez       6F  6D  6C  6B  6A  68  67  66  65  65  64  64  63  64  64  64  
+
+            5  10  15  20  25  30  35  40  45  50  55  60  65  70  75  80 
+AUTOs     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Eu       9C  9B  9C  9B  9D  9D  9C  9D  9C  9C  9D  9B  9C  9C  9D  9D  
+  Ev       9C  9D  9C  9D  9C  9C  9C  9C  9D  9B  9D  9C  9C  9D  9D  9C  
+  Ew       9C  9B  9C  9B  9D  9D  9C  9D  9C  9C  9D  9B  9C  9C  9D  9D  
+  Ez       9C  9D  9C  9D  9C  9C  9C  9C  9C  9B  9D  9C  9C  9D  9D  9C  
+
+           85  90  95 100 105 110 115 120 125 130 135 140 145 150 155 160 
+AUTOs     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Eu       9D  9C  9D  9C  9D  9D  9B  9D  9C  9B  9B  9C  9D  9C  9D  9D  
+  Ev       9C  9C  9D  9D  9D  9D  9C  9D  9E  9B  9B  9C  9D  9D  9D  9C  
+  Ew       9D  9C  9D  9C  9D  9D  9B  9D  9C  9B  9B  9C  9D  9C  9D  9D  
+  Ez       9C  9C  9D  9D  9D  9D  9B  9D  9E  9B  9B  9C  9D  9D  9D  9C  
+
+          165 170 175 180 185 190 195 200 205 210 215 220 225 230 235 240 
+AUTOs     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Eu       9C  9C  9C  9C  9D  9D  9C  9D  9D  9C  9D  9B  9D  9E  9C  9C  
+  Ev       9D  9D  9B  9C  9C  9C  9C  9C  9E  9D  9B  9B  9C  9D  9D  9C  
+  Ew       9C  9C  9C  9C  9D  9D  9C  9D  9D  9C  9D  9B  9D  9E  9C  9C  
+  Ez       9D  9D  9B  9C  9C  9C  9C  9C  9E  9D  9B  9B  9C  9D  9D  9C  
+
+          245 250 255 260 265 270 275 280 285 290 295 300 305 310 315 320 
+AUTOs     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Eu       9E  9D  9C  9C  9D  9D  9B  9D  9D  9E  9D  9D  9D  9C  9B  9D  
+  Ev       9D  9D  9C  9C  9D  9D  9D  9D  9C  9C  9C  9C  9C  9D  9D  9C  
+  Ew       9E  9D  9C  9C  9D  9C  9B  9D  9D  9D  9D  9D  9D  9C  9B  9D  
+  Ez       9C  9D  9C  9C  9D  9D  9D  9C  9C  9C  9C  9C  9C  9D  9D  9C  
+
+            5  10  15  20  25  30  35  40  45  50  55  60  65  70  75  80 
+Cross EuEw--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Rmag     9C  9B  9C  9B  9D  9D  9C  9D  9C  9C  9D  9B  9C  9C  9D  9D  
+  Rsign    +1  +1  -1  +1  +1  -1  -1  +1  +1  +1  +1  -1  -1  -1  -1  +1  
+  Imag     88  85  84  82  83  82  80  81  80  7F  80  7C  7E  7D  7F  7D  
+  Isign    +1  +1  -1  +1  +1  -1  -1  +1  +1  +1  +1  -1  -1  -1  -1  +1  
+
+           85  90  95 100 105 110 115 120 125 130 135 140 145 150 155 160 
+Cross EuEw--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Rmag     9D  9C  9D  9C  9D  9D  9B  9D  9C  9A  9B  9C  9D  9C  9D  9D  
+  Rsign    +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  
+  Imag     7D  7E  7F  7E  80  80  7E  80  80  7D  7D  7F  81  80  80  80  
+  Isign    +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  
+
+          165 170 175 180 185 190 195 200 205 210 215 220 225 230 235 240 
+Cross EuEw--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Rmag     9C  9C  9C  9C  9D  9D  9C  9D  9D  9C  9D  9B  9D  9E  9C  9C  
+  Rsign    +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  
+  Imag     7F  7E  7B  7B  7A  77  72  6A  4C  64  6A  70  71  73  6D  67  
+  Isign    +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  
+
+          245 250 255 260 265 270 275 280 285 290 295 300 305 310 315 320 
+Cross EuEw--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Rmag     9E  9D  9C  9C  9D  9C  9B  9C  9D  9D  9D  9D  9D  9C  9B  9C  
+  Rsign    +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  
+  Imag     64  6A  72  79  7B  7D  7E  82  82  84  86  88  88  88  88  89  
+  Isign    +1  +1  +1  +1  +1  +1  +1  -1  -1  -1  -1  -1  -1  -1  -1  +1  
+
+            5  10  15  20  25  30  35  40  45  50  55  60  65  70  75  80 
+Cross EvEz--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Rmag     9C  9D  9C  9D  9C  9C  9C  9C  9C  9B  9D  9C  9C  9D  9C  9C  
+  Rsign    -1  +1  -1  +1  +1  -1  -1  +1  +1  +1  +1  -1  -1  -1  -1  -1  
+  Imag     8B  8B  8A  8B  8B  8A  8A  8A  8B  8A  8C  8B  8B  8B  8B  8B  
+  Isign    -1  +1  -1  +1  +1  -1  -1  +1  +1  +1  +1  -1  -1  -1  -1  -1  
+
+           85  90  95 100 105 110 115 120 125 130 135 140 145 150 155 160 
+Cross EvEz--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Rmag     9C  9C  9D  9C  9D  9C  9B  9D  9E  9B  9B  9B  9C  9C  9C  9C  
+  Rsign    -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  
+  Imag     8C  8C  8D  8D  8D  8D  8C  8D  8E  8B  8C  8C  8D  8D  8D  8C  
+  Isign    -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  
+
+          165 170 175 180 185 190 195 200 205 210 215 220 225 230 235 240 
+Cross EvEz--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Rmag     9C  9D  9B  9C  9C  9C  9C  9C  9E  9D  9B  9B  9C  9D  9D  9C  
+  Rsign    -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  
+  Imag     8D  8D  8B  8B  8B  8A  8A  89  8A  89  87  86  87  88  88  88  
+  Isign    -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  
+
+          245 250 255 260 265 270 275 280 285 290 295 300 305 310 315 320 
+Cross EvEz--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Rmag     9C  9D  9C  9C  9C  9D  9C  9C  9C  9C  9B  9C  9B  9C  9C  9C  
+  Rsign    -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  
+  Imag     89  89  89  8A  8A  8C  8B  8C  8D  8C  8D  8E  8E  8F  90  8E  
+  Isign    -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  
+
+Band HF2: attenuator = OFF  and CAL level = 5
+            5  10  15  20  25  30  35  40  45  50  55  60  65  70  75  80 
+AGCs      --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Eu       9D  9C  9A  99  98  97  95  95  94  92  AB  90  8F  8E  8D  8B  
+  Ev       9F  9E  9B  9A  98  97  96  94  93  92  90  8E  8E  8C  8A  88  
+  Ew       98  97  95  94  93  91  90  8F  8E  8D  8C  8B  89  88  87  86  
+  Ez       9A  98  95  94  92  91  91  8F  8E  8D  8C  8B  8A  89  88  86  
+
+           85  90  95 100 105 110 115 120 125 130 135 140 145 150 155 160 
+AGCs      --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Eu       89  89  88  87  86  85  85  83  82  82  81  81  80  80  7F  7F  
+  Ev       88  86  86  85  84  82  81  81  7F  7E  7D  7E  7C  7B  7C  7B  
+  Ew       85  84  83  82  81  80  80  7F  7E  7E  7D  7D  7C  7C  7C  7B  
+  Ez       86  84  84  83  82  81  80  7F  7E  7E  7D  7E  7D  7C  7C  7C  
+
+          165 170 175 180 185 190 195 200 205 210 215 220 225 230 235 240 
+AGCs      --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Eu       7F  7F  7E  7F  7E  7E  7E  7E  7D  7D  7C  7B  79  79  78  76  
+  Ev       7A  7A  7A  79  79  7A  7A  79  79  79  77  76  76  75  72  70  
+  Ew       7B  7B  7C  7B  7B  7B  7B  7A  7A  79  78  76  75  74  72  70  
+  Ez       7B  7B  7C  7B  7B  7B  7C  7B  7A  7A  79  77  75  74  72  70  
+
+          245 250 255 260 265 270 275 280 285 290 295 300 305 310 315 320 
+AGCs      --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Eu       73  73  70  6F  6D  6C  6A  68  68  67  66  65  66  66  65  66  
+  Ev       70  6D  6B  6A  68  65  64  64  62  62  61  61  5F  5F  61  60  
+  Ew       6E  6C  69  68  68  65  63  62  62  60  5F  60  60  5F  5F  61  
+  Ez       6F  6D  6A  69  67  65  63  62  62  61  5F  60  60  5F  60  61  
+
+            5  10  15  20  25  30  35  40  45  50  55  60  65  70  75  80 
+AUTOs     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Eu       9E  9D  9C  9C  9D  9D  9E  9D  9D  9C  9F  9C  9C  9C  9D  9C  
+  Ev       9C  9E  9C  9C  9C  9D  9C  9C  9C  9D  9D  9C  9B  9D  9D  9C  
+  Ew       9E  9D  9C  9C  9C  9D  9E  9C  9D  9C  9C  9C  9C  9C  9D  9C  
+  Ez       9C  9E  9C  9C  9C  9D  9C  9C  9C  9D  9D  9C  9B  9D  9D  9C  
+
+           85  90  95 100 105 110 115 120 125 130 135 140 145 150 155 160 
+AUTOs     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Eu       9C  9D  9C  9C  9D  9C  9D  9D  9D  9E  9C  9D  9C  9D  9C  9B  
+  Ev       9B  9B  9C  9C  9B  9C  9C  9D  9D  9D  9D  9B  9D  9C  9D  9D  
+  Ew       9C  9D  9C  9C  9D  9C  9D  9D  9D  9E  9C  9D  9C  9D  9C  9B  
+  Ez       9B  9B  9C  9C  9B  9C  9C  9D  9D  9D  9D  9B  9D  9C  9D  9C  
+
+          165 170 175 180 185 190 195 200 205 210 215 220 225 230 235 240 
+AUTOs     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Eu       9D  9C  9E  9C  9C  9D  9D  9E  9C  9D  9C  9B  9C  9D  9C  9C  
+  Ev       9C  9D  9C  9D  9E  9C  9B  9C  9D  9C  9C  9C  9E  9C  9C  9E  
+  Ew       9D  9C  9E  9C  9C  9D  9D  9E  9C  9D  9C  9B  9D  9E  9C  9C  
+  Ez       9B  9D  9C  9D  9E  9C  9B  9C  9D  9C  9C  9B  9E  9C  9C  9E  
+
+          245 250 255 260 265 270 275 280 285 290 295 300 305 310 315 320 
+AUTOs     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Eu       9C  9C  9D  9C  9A  9C  9C  9D  9B  9E  9D  9D  9C  9C  9C  9B  
+  Ev       9C  9D  9D  9C  9D  9D  9C  9C  9B  9D  9C  9D  9D  9C  9D  9C  
+  Ew       9C  9C  9D  9C  9A  9C  9D  9D  9B  9E  9D  9C  9C  9C  9C  9B  
+  Ez       9C  9D  9D  9C  9D  9D  9C  9C  9B  9D  9C  9D  9D  9C  9C  9C  
+
+            5  10  15  20  25  30  35  40  45  50  55  60  65  70  75  80 
+Cross EuEw--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Rmag     9E  9D  9C  9C  9C  9D  9E  9C  9D  9C  90  9C  9C  9C  9D  9C  
+  Rsign    +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  
+  Imag     89  88  87  84  84  85  86  84  85  83  47  83  86  86  83  81  
+  Isign    +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  
+
+           85  90  95 100 105 110 115 120 125 130 135 140 145 150 155 160 
+Cross EuEw--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Rmag     9C  9D  9C  9C  9D  9C  9D  9C  9C  9D  9C  9C  9C  9C  9C  9A  
+  Rsign    +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  
+  Imag     85  87  84  84  88  86  84  84  87  87  83  86  87  85  83  83  
+  Isign    +1  +1  +1  +1  +1  +1  +1  +1  +1  -1  +1  +1  +1  +1  +1  +1  
+
+          165 170 175 180 185 190 195 200 205 210 215 220 225 230 235 240 
+Cross EuEw--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Rmag     9D  9C  9D  9C  9C  9D  9D  9E  9C  9D  9C  9B  9C  9D  9C  9C  
+  Rsign    +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  
+  Imag     84  80  82  81  7A  77  7A  74  71  6E  56  78  7E  78  71  79  
+  Isign    +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  
+
+          245 250 255 260 265 270 275 280 285 290 295 300 305 310 315 320 
+Cross EuEw--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Rmag     9C  9C  9D  9C  9A  9C  9C  9D  9A  9E  9D  9C  9C  9C  9C  9B  
+  Rsign    +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  +1  
+  Imag     73  6B  55  74  6E  79  6B  67  79  7D  72  7C  81  7B  71  80  
+  Isign    +1  +1  +1  +1  +1  +1  +1  -1  -1  -1  -1  -1  -1  -1  -1  -1  
+
+            5  10  15  20  25  30  35  40  45  50  55  60  65  70  75  80 
+Cross EvEz--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Rmag     9C  9E  9C  9C  9B  9C  9C  9C  9B  9C  9C  9B  9B  9C  9C  9C  
+  Rsign    -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  
+  Imag     8C  8C  8B  8D  8D  8E  8D  8F  8F  90  90  90  90  90  90  91  
+  Isign    -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  
+
+           85  90  95 100 105 110 115 120 125 130 135 140 145 150 155 160 
+Cross EvEz--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Rmag     9B  9B  9C  9B  9B  9B  9B  9C  9C  9C  9C  9B  9C  9B  9C  9B  
+  Rsign    -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  
+  Imag     90  8F  90  90  90  90  90  90  90  90  91  8F  91  90  90  90  
+  Isign    -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  
+
+          165 170 175 180 185 190 195 200 205 210 215 220 225 230 235 240 
+Cross EvEz--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Rmag     9B  9C  9C  9D  9D  9B  9B  9C  9D  9C  9C  9B  9E  9C  9B  9D  
+  Rsign    -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  
+  Imag     8F  90  8E  8F  8F  8C  8A  8B  8B  88  88  89  89  86  87  8B  
+  Isign    -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  
+
+          245 250 255 260 265 270 275 280 285 290 295 300 305 310 315 320 
+Cross EvEz--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+  Rmag     9C  9D  9C  9B  9D  9D  9C  9C  9B  9C  9B  9D  9D  9C  9C  9C  
+  Rsign    -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  
+  Imag     88  89  8C  8A  88  8A  8D  89  85  8A  8C  88  8A  8E  88  80  
+  Isign    -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  
+
+Band HF2: frequency = 775 kHz (F15)
+AGCs  5_on  4_on  3_on  2_on  1_on  0_on  7_off 6_off 5_off 4_off 3_off 2_off
+      ----  ----  ----  ----  ----  ----  ----- ----- ----- ----- ----- ----- 
+  Eu   49    2D    14    08    07    06    B1    9E    86    6E    53    35    
+  Ev   47    2A    0E    05    04    04    AF    9B    83    6A    4F    34    
+  Ew   45    29    10    07    07    08    AB    98    81    69    4F    32    
+  Ez   45    29    10    07    06    07    AC    98    82    6A    50    32    
+
+Band HF2: frequency = 775 kHz (F15)
+AUTOs 5_on  4_on  3_on  2_on  1_on  0_on  7_off 6_off 5_off 4_off 3_off 2_off
+      ----  ----  ----  ----  ----  ----  ----- ----- ----- ----- ----- ----- 
+  Eu   9C    9C    9A    9A    99    99    9C    9B    9C    9C    9D    9C    
+  Ev   9C    9B    9C    99    9A    9A    9D    9C    9D    9D    9D    9B    
+  Ew   9C    9C    9A    9A    9A    9C    9C    9B    9C    9C    9C    9C    
+  Ez   9C    9B    9C    9A    9C    9B    9C    9B    9D    9C    9D    9B    
+
+Band HF2 Cross EuEw: frequency = 775 kHz (F15)
+       5_on  4_on  3_on  2_on  1_on  0_on  7_off 6_off 5_off 4_off 3_off 2_off
+       ----  ----  ----  ----  ----  ----  ----- ----- ----- ----- ----- ----- 
+ Rmag   9C    9B    93    88    84    88    9C    9B    9B    9C    9C    99    
+ Rsign  +1    +1    +1    +1    +1    +1    +1    +1    +1    +1    +1    +1    
+ Imag   80    83    79    60    75    74    84    85    86    89    64    8D    
+ Isign  +1    +1    -1    +1    +1    +1    +1    +1    +1    +1    +1    +1    
+
+Band HF2 Cross EvEz: frequency = 775 kHz (F15)
+       5_on  4_on  3_on  2_on  1_on  0_on  7_off 6_off 5_off 4_off 3_off 2_off
+       ----  ----  ----  ----  ----  ----  ----- ----- ----- ----- ----- ----- 
+ Rmag   9C    99    91    7E    8C    86    9C    9B    9C    9C    9C    97    
+ Rsign  -1    -1    -1    -1    -1    -1    -1    -1    -1    -1    -1    -1    
+ Imag   8D    8B    83    76    7F    62    90    90    91    90    91    90    
+ Isign  -1    -1    -1    -1    -1    -1    -1    -1    -1    -1    -1    -1    
+
+HFR cal  4D1C7CB0.E1B1 0x1CB0 00000000 00 00000000 1998-364T12:29:22.780

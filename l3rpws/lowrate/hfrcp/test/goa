@@ -1,0 +1,29 @@
+#!/bin/ksh
+
+
+tBeg=1999-011
+tEnd=1999-013
+fndcal.ksh $tBeg $tEnd
+
+
+exit 0
+
+tBeg=2000-037
+tEnd=2000-066
+fndcal.ksh $tBeg $tEnd
+
+tBeg=1999-227
+tEnd=1999-257
+fndcal.ksh $tBeg $tEnd
+
+tBeg=1999-001
+tEnd=1999-020
+fndcal.ksh $tBeg $tEnd
+
+tBeg=1998-364
+tEnd=1998-366
+fndcal.ksh $tBeg $tEnd
+
+tBeg=1997-298
+tEnd=1997-300
+fndcal.ksh $tBeg $tEnd

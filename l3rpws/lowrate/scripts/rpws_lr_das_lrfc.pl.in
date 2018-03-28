@@ -1,0 +1,286 @@
+#!/usr/bin/env perl
+#
+# das_lrfc -- perl script to invoke das without going through
+# the web form cgi interface.
+# The statements in "PrintCommon" can be modified for any combinations
+# of readers and plot layouts.
+#
+# usage:
+# das_lrfc 'tBegin' 'tEnd' yMin yMax zMin zMax sOrbitParm bgd RcvAnt 'title'
+#             0        1    2    3    4    5       6       7    8       9
+#
+
+
+if( ($ARGV[1] == "-h" ) or ($ARGV[1] == "--help")){
+	print STDOUT "rpws_lr_das_lrfc.pl - Generate Low Rate Specturm plots in units of dB above background\n";
+	print STDOUT "\n";
+	print STDOUT "Usage:\n";
+	print STDOUT "   rpws_lr_das_lrfc.pl BEGIN END Y_MIN Y_MAX Z_MIN ZMAX TARGET BG_LEVEL RCVANT_OPTS TITLE\n";
+	print STDOUT "\n";
+	print STDOUT "Description:\n";
+	print STDOUT "   Generate Das1 style plots for Cassini RPWS Low-Rate data.  The command line\n";
+	print STDOUT "   parameters are:\n";
+	print STDOUT "\n";
+	print STDOUT "      BEGIN  - The starting spacecraft event time (SCET) for the plot.\n";
+	print STDOUT "\n";
+	print STDOUT "      END    - The ending SCET for the plot.\n";
+	print STDOUT "\n";
+	print STDOUT "      Y_MIN  - The minimum frequency to plot, in Hertz (suggest 2 Hz)\n";
+	print STDOUT "\n";
+	print STDOUT "      Y_MAX  - The maximum frequency to plot, in Hertz (suggest 16,100,000 Hz)\n";
+	print STDOUT "\n";
+	print STDOUT "      Z_MIN  - The minimum dB above background (or spectral density) for the\n";
+	print STDOUT "               colorbar. (suggestion use 0 when BG_LEVEL is non-zero.)\n";
+	print STDOUT "\n";
+	print STDOUT "      Z_MAX  - The maximum dB above background (or spectral density) for the\n";
+	print STDOUT "               colorbar. (suggestion use 35 when BG_LEVEL is non-zero.)\n";
+	print STDOUT "\n";
+	print STDOUT "      TARGET - The reference object from which spacecraft position information\n";
+	print STDOUT "               is calculated.  Use one of the characters, 'E'arth, 'V'enus, \n";
+	print STDOUT "               'H'elicentric, 'J'upiter, 'S'aturn\n";
+	print STDOUT "\n";
+	print STDOUT "      BG_LEVEL - In a histogram of amplitudes for each channel, this is percent\n";
+	print STDOUT "               of each points from which to calculate the background level.  For\n";
+	print STDOUT "               example, if 7 is selected, the amplitude below which 7%% of points\n";
+	print STDOUT "               in a channel fall is considered to be the background for that\n";
+	print STDOUT "               channel.  The dB above background for that channel is then\n";
+	print STDOUT "               calculated from this amplitude.\n";
+	print STDOUT "\n";
+	print STDOUT "               Setting this value to 0 disables the dB Above background\n";
+	print STDOUT "               calculation and instead spectral densities are plotted.  If this is\n";
+	print STDOUT "               zero then Z_MIN and Z_MAX must be specified in units of spectral\n";
+	print STDOUT "               density\n";
+	print STDOUT "\n";
+	print STDOUT "      RCVANT_OPTS - A ridiculously long string of reader options selecting the\n";
+	print STDOUT "               receivers and antennas to plot.  See comments in the script:\n";
+	print STDOUT "\n";
+	print STDOUT "                   rpws_lr_das2rdr.sh\n";
+	print STDOUT "\n";	
+	print STDOUT "               for details.  (suggestion: '-lfdr ExEw -mfdr ExEw -mfr 13ExEw \n";
+	print STDOUT "               -hfr ABC12EuEvEx -a -n hfr_snd -n lp_rswp -n mfdr_mfr2 \n";
+	print STDOUT "               -n mfr3_hfra -n hf1_hfrc' )\n";
+   print STDOUT "\n";
+   print STDOUT "      TITLE - Text to display along the plot title bar\n";
+   print STDOUT "\n";
+	print STDOUT "   The output of the program is a plot file named:\n";
+	print STDOUT "\n";
+	print STDOUT "      batch.eps\n";
+	print STDOUT "\n";
+	print STDOUT "   and a log file named\n";
+	print STDOUT "\n";
+	print STDOUT "      rpws_lr_das_lrfc.log\n";
+	print STDOUT "\n";
+	print STDOUT "   in the \$RPWS_TEMP/pds directory.\n";
+	print STDOUT "\n";
+	print STDOUT "Environment:\n";
+	print STDOUT "   Basic operation of the script is to restores giferator.sav then runs\n";
+	print STDOUT "   giferator.pro.  These are assumed to be in the first component of the\n";
+	print STDOUT "   \$IDL_PATH.\n";
+	print STDOUT "\n";
+	print STDOUT "   Before restoring the giferator, \$DAS_DATASETROOT is set to\n";
+	print STDOUT "\n";
+	print STDOUT "      %(INST_ETC)s/datasetroot\n";
+	print STDOUT "\n";
+	print STDOUT "   which is exected to contain the Das 1 datasource definition files:\n";
+	print STDOUT "\n";
+	print STDOUT "       rpws_pds.dsdf fce.dsdf cephemE.dsdf cephemJ.dsdf \n";
+	print STDOUT "       cephemS.dsdf cephemSun.dsdf cephemV.dsdf color_wedge.dsdf \n";
+	print STDOUT "\n";
+	exit(0);
+}
+
+
+# Setup GIFERATOR environment
+$ENV{'DAS_DATASETROOT'} = "%(INST_ETC)s/datasetroot" ; 
+
+
+# Open pipe to IDL process
+#print STDERR "INFO: Logging to $ENV{'RPWS_TEMP'}/pds/rpws_lr_das_lrfc.log\n";
+if (!open(PROG, "| %(IDL_BIN)s 2> $ENV{'RPWS_TEMP'}/pds/rpws_lr_das_lrfc.log")) {
+  print STDERR "ERROR: Could not open pipe to IDL process\n";
+  exit(1);
+}
+
+# get begin time, end time, and optional title from command line
+if ($#ARGV < 9) {
+  print STDERR "$#ARGV\n";
+  print STDERR "USAGE: $0 \'tBegin\' \'tEnd\' yMin yMax zMin zMax target bgd RcvAnt_opts \'title\' \n";
+  print STDERR "USAGE: or $0 -h for help \n";
+  exit (1);
+}
+
+$begtime = `das2_prtime $ARGV[0]`; chomp $begtime;
+$endtime = `das2_prtime $ARGV[1]`; chomp $endtime;
+$xtitle  = "\'$begtime    SCET    $endtime\'";
+
+# das_lrfc 'tBegin' 'tEnd' yMin yMax zMin zMax sOrbitParm bgd RcvAnt 'title'
+#             0        1    2    3    4    5       6       7    8       9
+$yMin=$ARGV[2];  $yMax=$ARGV[3];  $zMin=$ARGV[4];  $zMax=$ARGV[5];
+$sOrbitParm=$ARGV[6];  $nBgd=$ARGV[7];  $sRcvAnt=$ARGV[8];  $sTitle=$ARGV[9];
+chomp $sTitle;
+if( $sOrbitParm eq "V" )                     # "",cephemE,cephemS,cephemJ
+  { $sOrbitParm = "ephemeris/cephemV.dsdf"; }
+elsif( $sOrbitParm eq "E" )
+  { $sOrbitParm = "ephemeris/cephemE.dsdf"; }
+elsif( $sOrbitParm eq "J" )
+  { $sOrbitParm = "ephemeris/cephemJ.dsdf"; }
+elsif( $sOrbitParm eq "S" )
+  { $sOrbitParm = "ephemeris/cephemS.dsdf"; }
+elsif( $sOrbitParm eq "H" )                  # Heliocentric
+  { $sOrbitParm = "ephemeris/cephemSun.dsdf"; }
+else
+  { $sOrbitParm = "ephemeris/cephemSun.dsdf"; }
+if( $sTitle eq "" ){$sTitle='Cassini RPWS Low Rate Full Calibration';}
+
+$sOptions=$sRcvAnt."-b $nBgd ";  # -a correct for antenna resonance
+                                           # -base correct for base capactance
+
+if( $nBgd > 0 ){
+  $yTitle="dB above background ($nBgd%%)";
+  $nColorMap=1;
+}
+else{
+  if( $sOptions =~ /E[uvwxz]/ ){
+    $yTitle = "V!E2 !Nm!E-2 !NHz!E-1 !N";
+    if( $sOptions =~ /B[xyz]/ ){ $yTitle = $yTitle." or nT!E2 !NHzE-1 !N"; }
+  }
+  elsif( $sOptions =~ /B[xyz]/ ){
+    $yTitle = "nT!E2 !NHzE-1 !N";
+  }
+  else{
+    $yTitle = "Calibrated Spectral Density";
+  }
+  $nColorMap=0;
+}
+
+$sOrbitNumber=`cas_orbit.ksh $ARGV[0]`;
+if( $sOrbitNumber =~ /\S+/){
+  chomp $sOrbitNumber;
+  $sOrbitNumber="Orbit $sOrbitNumber";
+}
+else{
+  $sOrbitNumber="     ";
+}
+
+
+print PROG <<EOH;
+
+ON_ERROR, 1
+RESTORE, '%(GIFER_PATH)s/giferator.sav'
+.RUN giferator.pro
+
+batch = 1
+batchgifname = 'batch.eps'
+display.color.r=interpolate([000,000,000,000,000,255,255,255,255],(findgen(200)+1.)/25.)
+display.color.g=interpolate([000,000,255,255,255,255,200,080,000],(findgen(200)+1.)/25.)
+display.color.b=interpolate([127,255,255,127,000,000,000,000,000],(findgen(200)+1.)/25.)
+display.color.b(0)=1
+rows = 3
+columns = 2
+colormaps = 1
+images = 2
+axes = 2
+plots = 1
+sets = 2
+labels = 1
+colormap_i.klow = 0
+colormap_i.khigh = display.color.nz
+set_i.ticklen = -0.03
+axis_i.set = 0
+axis_i.method = 'plot'
+
+init
+
+display.isize = 1024
+display.jsize = 768
+column(0).ileft = display.isize / 8
+column(0).iright = display.isize * 6 / 8
+column(0).time = 1
+column(0).tleft = '$ARGV[0]'
+column(0).tright = '$ARGV[1]'
+
+column(1).ileft = column(0).iright + display.isize / 8
+column(1).iright = column(1).ileft + display.isize / 32
+
+row(0).jbottom = display.jsize * 2 / 10
+row(0).jtop = display.jsize * 8 / 10
+row(0).log = 1
+row(0).ybottom = $yMin
+row(0).ytop =    $yMax
+
+row(1) = row(0)
+
+row(2).jtop = row(0).jbottom
+row(2).jbottom = display.jsize*1/10
+row(2).ytop = 1
+row(2).ybottom = 0
+
+label(0).charsize = 1
+label(0).alignment = 0.5
+label(0).orientation = 0
+label(0).row = 2
+label(0).column = 1
+label(0).xp = 0.5
+label(0).yp = 0.0
+label(0).value = '$sOrbitNumber'
+
+
+colormap(0).log = 1
+colormap(0).db = $nColorMap
+colormap(0).zlow =  $zMin
+colormap(0).zhigh = $zMax
+
+axis(0).row = 0
+axis(0).column = 0
+axis(0).timeaxis = 'x'
+axis(0).y.title = 'frequency (Hz)'
+axis(0).set = 1
+axis(0).x.title = $xtitle
+axis(0).tca = '$sOrbitParm'
+
+axis(1).row = 1
+axis(1).column = 1
+axis(1).x.style = supress
+axis(1).y.ticklen = -0.3
+axis(1).y.title = '$yTitle'
+
+image(0).query = image(0).query + " -lfdr LExEz -mfr 123ExEz -hfr ABC12ExpExmEx -n mfr3_hfra -n hf1_hfrc -a -b $bgd "
+image(0).row = 0
+image(0).column = 0
+image(0).colormap = 0
+image(0).dataset = 'rpws/rpws_pds.dsdf'
+image(0).bgd = $nBgd
+image(0).query = '$sOptions'
+
+
+image(1).row = 1
+image(1).column = 1
+image(1).colormap = 0
+image(1).dataset = 'color_wedge.dsdf'
+
+set(1).title = '$sTitle'
+
+mfr3_hfrA_overlap = on
+hfrC_hfr1_overlap = on
+
+plot(0).row = 0
+plot(0).column = 0
+plot(0).set = 0
+plot(0).multi = 0
+plot(0).color = display.color.offwhite
+plot(0).thick = 5
+plot(0).dataset = 'mag/fce.dsdf'
+plot(0).enable = 1
+
+device_name = 'PS'
+gif_mime_header = 'image/gif'
+ps_mime_header = 'application/postscript'
+
+
+go
+EOH
+
+close(PROG);
+
+exit(0);
+

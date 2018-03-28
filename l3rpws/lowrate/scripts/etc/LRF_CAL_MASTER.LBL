@@ -1,0 +1,442 @@
+PDS_VERSION_ID                  = PDS3                                        
+/* label standards identifiers PDS Version 3.5 */                             
+                                                                              
+DESCRIPTION = 
+                                                                              
+/* pds label for rpws low rate full */                                        
+                                                                              
+RECORD_TYPE                     = FIXED_LENGTH                                
+RECORD_BYTES                    = 140                                         
+FILE_RECORDS                    = 594                                         
+                                                                              
+/* pointers to start records of objects in file, std ref3.5:5.3.3.2 */        
+                                                            /*Band A */       
+^HFRA_CAL_LEVELS_AGC_TABLE      = ("T2001362_CAL0.TAB",4)   /*Agc */          
+^HFRA_CAL_LEVELS_AUTOEU_TABLE   = ("T2001362_CAL0.TAB",12)  /*Auto Eu*/       
+^HFRA_CAL_LEVELS_AUTOEW_TABLE   = ("T2001362_CAL0.TAB",28)  /*Auto Ew*/       
+^HFRA_CAL_LEVELS_AUTOEV_TABLE   = ("T2001362_CAL0.TAB",44)  /*Auto Ev*/       
+^HFRA_CAL_LEVELS_AUTOEZ_TABLE   = ("T2001362_CAL0.TAB",60)  /*Auto Ez*/       
+^HFRA_CAL_LEVELS_CMAGEUEW_TABLE = ("T2001362_CAL0.TAB",76)  /*CmagEuEw*/      
+^HFRA_CAL_LEVELS_CMAGEVEZ_TABLE = ("T2001362_CAL0.TAB",92)  /*CmagEvEz*/      
+^HFRA_CAL_LEVELS_CPHSEUEW_TABLE = ("T2001362_CAL0.TAB",108) /*CphsEuEw*/      
+^HFRA_CAL_LEVELS_CPHSEVEZ_TABLE = ("T2001362_CAL0.TAB",124) /*CphsEvEz*/      
+                                                            /*Band B */       
+^HFRB_CAL_LEVELS_AGC_TABLE      = ("T2001362_CAL0.TAB",140) /*Agc */          
+^HFRB_CAL_LEVELS_AUTOEU_TABLE   = ("T2001362_CAL0.TAB",148) /*Auto Eu*/       
+^HFRB_CAL_LEVELS_AUTOEW_TABLE   = ("T2001362_CAL0.TAB",164) /*Auto Ew*/       
+^HFRB_CAL_LEVELS_AUTOEV_TABLE   = ("T2001362_CAL0.TAB",180) /*Auto Ev*/       
+^HFRB_CAL_LEVELS_AUTOEZ_TABLE   = ("T2001362_CAL0.TAB",196) /*Auto Ez*/       
+^HFRB_CAL_LEVELS_CMAGEUEW_TABLE = ("T2001362_CAL0.TAB",212) /*CmagEuEw*/      
+^HFRB_CAL_LEVELS_CMAGEVEZ_TABLE = ("T2001362_CAL0.TAB",228) /*CmagEvEz*/      
+^HFRB_CAL_LEVELS_CPHSEUEW_TABLE = ("T2001362_CAL0.TAB",244) /*CphsEuEw*/      
+^HFRB_CAL_LEVELS_CPHSEVEZ_TABLE = ("T2001362_CAL0.TAB",260) /*CphsEvEz*/      
+                                                            /*Band C */       
+^HFRC_CAL_LEVELS_AGC_TABLE      = ("T2001362_CAL0.TAB",276) /*Agc */          
+^HFRC_CAL_LEVELS_AUTOEU_TABLE   = ("T2001362_CAL0.TAB",284) /*Auto Eu*/       
+^HFRC_CAL_LEVELS_AUTOEW_TABLE   = ("T2001362_CAL0.TAB",300) /*Auto Ew*/       
+^HFRC_CAL_LEVELS_AUTOEV_TABLE   = ("T2001362_CAL0.TAB",316) /*Auto Ev*/       
+^HFRC_CAL_LEVELS_AUTOEZ_TABLE   = ("T2001362_CAL0.TAB",332) /*Auto Ez*/       
+^HFRC_CAL_LEVELS_CMAGEUEW_TABLE = ("T2001362_CAL0.TAB",348) /*CmagEuEw*/      
+^HFRC_CAL_LEVELS_CMAGEVEZ_TABLE = ("T2001362_CAL0.TAB",364) /*CmagEvEz*/      
+^HFRC_CAL_LEVELS_CPHSEUEW_TABLE = ("T2001362_CAL0.TAB",380) /*CphsEuEw*/      
+^HFRC_CAL_LEVELS_CPHSEVEZ_TABLE = ("T2001362_CAL0.TAB",396) /*CphsEvEz*/      
+                                                            /*Band HF1*/      
+^HFRHF1_CAL_LEVELS_7ON_TABLE    = ("T2001362_CAL0.TAB",412) /* 7_on   */      
+^HFRHF1_CAL_LEVELS_5OFF_TABLE   = ("T2001362_CAL0.TAB",428) /* 5_off  */      
+^HFRHF1_FILTER_AGC_F19_TABLE   = ("T2001362_CAL0.TAB",444) /* F19    */       
+^HFRHF1_FILTER_CAL_F19_TABLE   = ("T2001362_CAL0.TAB",449) /* F19    */       
+                                                            /*Band HF2*/      
+^HFRHF2_CAL_LEVELS_7ONA_TABLE   = ("T2001362_CAL0.TAB",461) /* 7_on   */      
+^HFRHF2_CAL_LEVELS_7ONB_TABLE   = ("T2001362_CAL0.TAB",476) /* 7_on   */      
+^HFRHF2_CAL_LEVELS_7ONC_TABLE   = ("T2001362_CAL0.TAB",491) /* 7_on   */      
+^HFRHF2_CAL_LEVELS_7OND_TABLE   = ("T2001362_CAL0.TAB",506) /* 7_on   */      
+^HFRHF2_CAL_LEVELS_5OFFA_TABLE  = ("T2001362_CAL0.TAB",522) /* 5_off  */      
+^HFRHF2_CAL_LEVELS_5OFFB_TABLE  = ("T2001362_CAL0.TAB",537) /* 5_off  */      
+^HFRHF2_CAL_LEVELS_5OFFC_TABLE  = ("T2001362_CAL0.TAB",552) /* 5_off  */      
+^HFRHF2_CAL_LEVELS_5OFFD_TABLE  = ("T2001362_CAL0.TAB",567) /* 5_off  */      
+^HFRHF2_CAL_LEVELS_F15_TABLE    = ("T2001362_CAL0.TAB",583) /* F15    */      
+                                                                              
+/* identification data elements - data product labels, std ref3.5:5.3.4.1 */  
+                                                                              
+DATA_SET_ID                     = "CO-V/E/J/S/SS-RPWS-3-RDR-LRFULL-V1.0"      
+STANDARD_DATA_PRODUCT_ID        = RPWS_LOW_RATE_FULL                          
+PRODUCT_TYPE                    = DATA                                        
+PRODUCT_ID                      = T2001362_CAL0_V1                            
+INSTRUMENT_HOST_NAME            = "CASSINI ORBITER"                           
+INSTRUMENT_HOST_ID              = CO                                          
+INSTRUMENT_NAME                 = "RADIO AND PLASMA WAVE SCIENCE"             
+INSTRUMENT_ID                   = RPWS                                        
+SECTION_ID                      = HFR                                         
+MISSION_PHASE_NAME              = {"QUIET CRUISE","OUTER CRUISE"}             
+TARGET_NAME                     = "SOLAR SYSTEM"                              
+ORBIT_NAME                      = "A"
+START_TIME                      = 2001-362T00:05:05.956Z                      
+STOP_TIME                       = 2001-362T00:05:05.956Z                      
+SPACECRAFT_CLOCK_START_COUNT    = "1/1388190023.000"                          
+SPACECRAFT_CLOCK_STOP_COUNT     = "1/1388190023.000"                          
+PRODUCT_CREATION_TIME           = 2005-03-28                                  
+                                                                              
+/* table objects */                                                           
+                                                                              
+OBJECT                          = HFRA_CAL_LEVELS_AGC_TABLE                   
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 4                                           
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_AGC_TABLE.FMT"          
+END_OBJECT                      = HFRA_CAL_LEVELS_AGC_TABLE                   
+                                                                              
+OBJECT                          = HFRA_CAL_LEVELS_AUTOEU_TABLE                
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                           
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRA_CAL_LEVELS_AUTOEU_TABLE                
+                                                                              
+OBJECT                          = HFRA_CAL_LEVELS_AUTOEW_TABLE                
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRA_CAL_LEVELS_AUTOEW_TABLE                
+                                                                              
+OBJECT                          = HFRA_CAL_LEVELS_AUTOEV_TABLE                
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRA_CAL_LEVELS_AUTOEV_TABLE                
+                                                                              
+OBJECT                          = HFRA_CAL_LEVELS_AUTOEZ_TABLE                
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRA_CAL_LEVELS_AUTOEZ_TABLE                
+                                                                              
+OBJECT                          = HFRA_CAL_LEVELS_CMAGEUEW_TABLE              
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRA_CAL_LEVELS_CMAGEUEW_TABLE              
+                                                                              
+OBJECT                          = HFRA_CAL_LEVELS_CMAGEVEZ_TABLE              
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRA_CAL_LEVELS_CMAGEVEZ_TABLE              
+                                                                              
+OBJECT                          = HFRA_CAL_LEVELS_CPHSEUEW_TABLE              
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRA_CAL_LEVELS_CPHSEUEW_TABLE              
+                                                                              
+OBJECT                          = HFRA_CAL_LEVELS_CPHSEVEZ_TABLE              
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRA_CAL_LEVELS_CPHSEVEZ_TABLE              
+                                                                              
+OBJECT                          = HFRB_CAL_LEVELS_AGC_TABLE                   
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 4                                           
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_AGC_TABLE.FMT"          
+END_OBJECT                      = HFRB_CAL_LEVELS_AGC_TABLE                   
+                                                                              
+OBJECT                          = HFRB_CAL_LEVELS_AUTOEU_TABLE                
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRB_CAL_LEVELS_AUTOEU_TABLE                
+                                                                              
+OBJECT                          = HFRB_CAL_LEVELS_AUTOEW_TABLE                
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRB_CAL_LEVELS_AUTOEW_TABLE                
+                                                                              
+OBJECT                          = HFRB_CAL_LEVELS_AUTOEV_TABLE                
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRB_CAL_LEVELS_AUTOEV_TABLE                
+                                                                              
+OBJECT                          = HFRB_CAL_LEVELS_AUTOEZ_TABLE                
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRB_CAL_LEVELS_AUTOEZ_TABLE                
+                                                                              
+OBJECT                          = HFRB_CAL_LEVELS_CMAGEUEW_TABLE              
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRB_CAL_LEVELS_CMAGEUEW_TABLE              
+                                                                              
+OBJECT                          = HFRB_CAL_LEVELS_CMAGEVEZ_TABLE              
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRB_CAL_LEVELS_CMAGEVEZ_TABLE              
+                                                                              
+OBJECT                          = HFRB_CAL_LEVELS_CPHSEUEW_TABLE              
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRB_CAL_LEVELS_CPHSEUEW_TABLE              
+                                                                              
+OBJECT                          = HFRB_CAL_LEVELS_CPHSEVEZ_TABLE              
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRB_CAL_LEVELS_CPHSEVEZ_TABLE              
+                                                                              
+OBJECT                          = HFRC_CAL_LEVELS_AGC_TABLE                   
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 4                                           
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_AGC_TABLE.FMT"          
+END_OBJECT                      = HFRC_CAL_LEVELS_AGC_TABLE                   
+                                                                              
+OBJECT                          = HFRC_CAL_LEVELS_AUTOEU_TABLE                
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRC_CAL_LEVELS_AUTOEU_TABLE                
+                                                                              
+OBJECT                          = HFRC_CAL_LEVELS_AUTOEW_TABLE                
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRC_CAL_LEVELS_AUTOEW_TABLE                
+                                                                              
+OBJECT                          = HFRC_CAL_LEVELS_AUTOEV_TABLE                
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRC_CAL_LEVELS_AUTOEV_TABLE                
+                                                                              
+OBJECT                          = HFRC_CAL_LEVELS_AUTOEZ_TABLE                
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRC_CAL_LEVELS_AUTOEZ_TABLE                
+                                                                              
+OBJECT                          = HFRC_CAL_LEVELS_CMAGEUEW_TABLE              
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRC_CAL_LEVELS_CMAGEUEW_TABLE              
+                                                                              
+OBJECT                          = HFRC_CAL_LEVELS_CMAGEVEZ_TABLE              
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRC_CAL_LEVELS_CMAGEVEZ_TABLE              
+                                                                              
+OBJECT                          = HFRC_CAL_LEVELS_CPHSEUEW_TABLE              
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRC_CAL_LEVELS_CPHSEUEW_TABLE              
+                                                                              
+OBJECT                          = HFRC_CAL_LEVELS_CPHSEVEZ_TABLE              
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_ABC_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRC_CAL_LEVELS_CPHSEVEZ_TABLE              
+                                                                              
+OBJECT                          = HFRHF1_CAL_LEVELS_7ON_TABLE                 
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_HF12_CAL_LEVELS_TABLE.FMT"             
+END_OBJECT                      = HFRHF1_CAL_LEVELS_7ON_TABLE                 
+                                                                              
+OBJECT                          = HFRHF1_CAL_LEVELS_5OFF_TABLE                
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_HF12_CAL_LEVELS_TABLE.FMT"             
+END_OBJECT                      = HFRHF1_CAL_LEVELS_5OFF_TABLE                
+                                                                              
+OBJECT                          = HFRHF1_FILTER_AGC_F19_TABLE                 
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 4                                           
+  COLUMNS                       = 5                                           
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_HF1_FILTER_AGC_TABLE.FMT"              
+END_OBJECT                      = HFRHF1_FILTER_AGC_F19_TABLE                 
+                                                                              
+OBJECT                          = HFRHF1_FILTER_CAL_F19_TABLE                 
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 8                                           
+  COLUMNS                       = 5                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_HF1_FILTER_CAL_TABLE.FMT"              
+END_OBJECT                      = HFRHF1_FILTER_CAL_F19_TABLE                 
+                                                                              
+OBJECT                          = HFRHF2_CAL_LEVELS_7ONA_TABLE                
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_HF12_CAL_LEVELS_TABLE.FMT"             
+END_OBJECT                      = HFRHF2_CAL_LEVELS_7ONA_TABLE                
+                                                                              
+OBJECT                          = HFRHF2_CAL_LEVELS_7ONB_TABLE                
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_HF12_CAL_LEVELS_TABLE.FMT"             
+END_OBJECT                      = HFRHF2_CAL_LEVELS_7ONB_TABLE                
+                                                                              
+OBJECT                          = HFRHF2_CAL_LEVELS_7ONC_TABLE                
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_HF12_CAL_LEVELS_TABLE.FMT"             
+END_OBJECT                      = HFRHF2_CAL_LEVELS_7ONC_TABLE                
+                                                                              
+OBJECT                          = HFRHF2_CAL_LEVELS_7OND_TABLE                
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_HF12_CAL_LEVELS_TABLE.FMT"             
+END_OBJECT                      = HFRHF2_CAL_LEVELS_7OND_TABLE                
+                                                                              
+OBJECT                          = HFRHF2_CAL_LEVELS_5OFFA_TABLE               
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_HF12_CAL_LEVELS_TABLE.FMT"             
+END_OBJECT                      = HFRHF2_CAL_LEVELS_5OFFA_TABLE               
+                                                                              
+OBJECT                          = HFRHF2_CAL_LEVELS_5OFFB_TABLE               
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_HF12_CAL_LEVELS_TABLE.FMT"             
+END_OBJECT                      = HFRHF2_CAL_LEVELS_5OFFB_TABLE               
+                                                                              
+OBJECT                          = HFRHF2_CAL_LEVELS_5OFFC_TABLE               
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_HF12_CAL_LEVELS_TABLE.FMT"             
+END_OBJECT                      = HFRHF2_CAL_LEVELS_5OFFC_TABLE               
+                                                                              
+OBJECT                          = HFRHF2_CAL_LEVELS_5OFFD_TABLE               
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 2                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_HF12_CAL_LEVELS_TABLE.FMT"             
+END_OBJECT                      = HFRHF2_CAL_LEVELS_5OFFD_TABLE               
+                                                                              
+OBJECT                          = HFRHF2_CAL_LEVELS_F15_TABLE                 
+  INTERCHANGE_FORMAT            = ASCII                                       
+  ROW_BYTES                     = 140                                         
+  ROWS                          = 12                                          
+  COLUMNS                       = 3                                          
+  DESCRIPTION                   = ""                                          
+  ^STRUCTURE                    = "HFR_HF2_CAL_LEVELS_TABLE.FMT"              
+END_OBJECT                      = HFRHF2_CAL_LEVELS_F15_TABLE                 
+                                                                              
+                                                                              
+END                                                                           

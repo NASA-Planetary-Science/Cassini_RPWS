@@ -1,0 +1,121 @@
+#!/bin/ksh
+
+#PATH=$PATH:/home/raj/project/Cassini/pds/bin
+# export PATH
+
+#mpii=%(BUILD_DIR)s/mpii      # 3.5
+dsp4=%(BUILD_DIR)s/dsp4      #
+dsp5=%(BUILD_DIR)s/dsp5      #
+
+mpii=%(BUILD_DIR)s/mpii37      
+decomp=%(BUILD_DIR)s/decomp  # 1.2
+mpus=%(BUILD_DIR)s/mpus8.9   
+lfdr_fake=%(BUILD_DIR)s/lfdr_fake
+usdc=%(BUILD_DIR)s/usdc     
+Cmeander=%(BUILD_DIR)s/Cmeander3.2
+#Cmeander=/opt/project/cassini/src/cmeander/ver3.2/Cmeander
+#mperr=/home/raj/project/Cassini/src/mperr/ver0.1/mperr
+mperr=%(BUILD_DIR)s/mperr
+
+
+Make_Data(){
+  ext=${hRfile##*.}
+  hUfile=${hRfile%%%%$ext}
+  hUfile=${hUfile##*/}
+  ext=${ext#r}
+  hUfile=$hUfile"u"$ext
+
+  echo "rfile=$hRfile"
+  echo "ufile=$hUfile"
+  echo $hUfile 1>>mpus.err
+  echo $hUfile 1>>meander.err
+
+  $mpii +eof -pool 0  < $hRfile 2>>mpii.err | 
+  $decomp +eof 2>>decomp.err |
+  $mpus +eof 2>>mpus.err | 
+  $lfdr_fake +eof 2>>lfdr_fake.err  | 
+  $usdc +eof 2>>usdc.err | 
+  $Cmeander +eof 2>>meander.err | 
+  $mperr 1>>mperr.log
+
+}
+
+
+Get_Files(){
+data_base=/opt/project/cassini/data/CassiniJPL.db
+typeset -Z3 nDoy
+
+tBeg=$sBeg
+tEnd=$sEnd
+while [[ $tBeg < $tEnd ]]; do
+
+  for f in $(cat $data_base | grep $tBeg | awk '{print $5}'); do
+    r_dir=${f%%/*}
+    if [[ $r_dir != $r_dir_old ]]; then 
+      for r in $(ls ${f%%[0-9][0-9][0-9][0-9].u00}*.r*); do
+        hRfile=$r
+        echo $hRfile
+        Make_Data
+      done
+      r_dir_old=$r_dir;
+    fi
+  done
+  nYear=${tBeg%%-*};  nDoy=${tBeg#*-}
+  nDoy=$((nDoy+1))
+  tBeg=$(fud -f 0 $nYear-$nDoy)
+done
+}
+
+
+
+# 2003-292 to 2003-312 done
+# 2003-349 to 2003-355 done
+# 2004-011 to 2004-012 done
+
+sBeg="2004-008";  sEnd="2004-009"
+Get_Files
+
+exit 0
+
+sBeg="2004-008";  sEnd="2004-009"
+Get_Files
+sBeg="2004-008";  sEnd="2004-009"
+./mklrfc $sBeg $sEnd
+
+exit 0
+
+#sBeg="2001-329";  sEnd="2001-330"
+#Get_Files
+#./mklrfc $sBeg $sEnd
+
+#sBeg="2002-005";  sEnd="2002-006"
+#Get_Files
+#./mklrfc $sBeg $sEnd
+
+
+sBeg="2001-206";  sEnd="2001-207"
+Get_Files
+./mklrfc $sBeg $sEnd
+
+sBeg="2001-224";  sEnd="2001-225"
+Get_Files
+./mklrfc $sBeg $sEnd
+
+sBeg="2001-236";  sEnd="2001-237"
+Get_Files
+./mklrfc $sBeg $sEnd
+
+sBeg="2002-038";  sEnd="2002-039"
+Get_Files
+./mklrfc $sBeg $sEnd
+
+sBeg="2003-129";  sEnd="2003-132"
+Get_Files
+./mklrfc $sBeg $sEnd
+
+sBeg="2003-324";  sEnd="2003-325"
+Get_Files
+./mklrfc $sBeg $sEnd
+
+
+exit 0

@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//W3O//DTD W3 HTML 2.0//EN">
+<HTML>
+<HEAD>
+<TITLE> Trigger 28 Description </TITLE>
+</HEAD>
+
+<BODY>
+<h2>
+Trigger 28 Description
+</h2>
+<pre>
+Sequence: C25
+Trigger 28 (Interplanetary Cruise with Direction-Finding)
+
+     This mode is designed to provide a low bit-rate Survey with low temporal
+and spectral resolution for periods during cruise. No Wideband or Waveform
+measurements are made. The entire RPWS frequency range (1 Hz - 16 MHz) is covered.
+
+
+Receiver      Frequency Range	      Sensors	      Time between Snapshots
+--------      ----------------        -------         ----------------------
+  LFR	         1 - 25 Hz	      EX, BX		  32 seconds
+  MFR	        25 - 12 KHz	      EX, BZ		  32 seconds
+  HFR	      3.6 KHz - 16 MHz	        E		  64 seconds
+
+The HFR is in direction-finding mode for the frequency range from 3.6 KHz to 2 MHz.
+Thus, measurements are made on all three monopoles EU, EV and EW. For higher
+frequencies only EX and EW are used.
+
+This mode is defined by:
+
+          Correlations     Channels        Integ.                Size Frequency
+Band Ant. Auto-  Cross-    per Band   df   Period    Rep   Steps kHz  Start - Stop
+---- ---- -----  ------    --------   --   ------    ---   ----- ---- ------------
+ABC  2E   y         y        16       y    1000      1                3.6-319 kHz
+H1   2E   y         y         1       y    160       1     18    100  325k-2.0MHz
+H2   2E   y         y         1       n    80        1     71    200  2.0M-16MHz
+
+Bands ABC require 6.40 sec to complete, H1 requires 6.07 sec, and H2 requires 6.36 sec
+for a total of 18.83 sec per sweep. However, to keep the bit rate down the HFR only
+performs one complete sweep every 64 seconds.
+
+</pre>
+</BODY>
+</HTML>

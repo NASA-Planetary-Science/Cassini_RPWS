@@ -1,0 +1,32 @@
+#!/bin/ksh
+
+
+if [ "$CAS_TIME_KERNELS" = "" ]; then
+	echo "Set CAS_TIME_KERNELS 1st" 
+	exit 13
+fi
+
+if ["$RPWS_SUPERVOL" = "" ]; then
+	echo "Set RPWS_SUPERVOL"
+	exit 13
+fi
+
+dat_dir=$RPWS_SUPERVOL/DATA/RPWS_LOW_RATE_FULL
+
+
+tTime="-tBeg  2004-008T00:00 -tEnd 2004-009T00:00:00"
+args="-lfdr -mfdr -mfr -hfr -msc"
+dat_file=$(ls $dat_dir/T20040XX/T2004008/*LFR0.DAT)
+
+tTime="-tBeg 2004-285T07:00:00 -tEnd 2004-285T08:00:00"
+dat_file=$(ls $dat_dir/T20042XX/T2004285/*MFR0.DAT)
+args="-mfr"
+
+# -c bCongolmeration -s silent
+#./pdsmark -v $dat_file 1>tmp.out 2>tmp.err
+./pdsmark -v $tTime $args 1>tmp.out 2>tmp.err
+diff $dat_file tmp.out
+
+
+
+exit 0

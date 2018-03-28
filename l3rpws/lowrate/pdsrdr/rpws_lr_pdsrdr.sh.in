@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+# set up the enviroment variables
+
+
+# 1st cut down to a small path
+PATH=%(PDSRDR_SCRIPT_PATH)s
+
+# Now add in the cassini stuff
+. %(INST_ETC)s/setup.sh
+
+# check for the existance of directories
+if [ ! -d "${RPWS_SUPERVOL}" ]; then
+	echo "Supervolume '${RPWS_SUPERVOL}' doesn't exist, exiting" >&2
+fi
+
+
+# Reader History
+# /home/Web/raj/cassini/das/pdsrdr1.7 
+#
+# New reader to fix split days: 2003-314T12 to 2003-316T12 (jan 20, 2004)
+# /home/Web/raj/cassini/das/pdsrdr1.8
+#
+# New reader Feb 12, 2004
+# /home/Web/raj/cassini/das/pdsrdr2.0
+#
+# New reader Mar 22, 2004
+# /home/Web/raj/cassini/das/pdsrdr2.2
+#
+# New reader Apr 28, 2004
+# /home/Web/raj/cassini/das/pdsrdr2.3
+#
+# New reader Feb 10, 2005
+# /home/Web/raj/cassini/das/pdsrdr2.5
+#  eliminate bad data sets
+
+# Using SVN reader
+reader=%(INST_NAT_BIN)s/rpws_lr_pdsrdr
+
+# debugging information
+#echo 1>&2 $0
+#echo 1>&2 all args=$*
+#args=$*
+#nIdx=1
+#for a in $args
+#do
+#  echo 1>&2 $nIdx=$a
+#  nIdx=$((nIdx+1))
+#done
+
+# First two arguments are "2003-175T00:00:00.000" "2003-176T00:00:00.000"
+echo 1>&2 $0
+tStart=$1;  tStop=$2
+shift;  shift;
+sArgs=$*
+sArgs=$sArgs" -version -nofill -n bad_data -n hfr_snd -n lp_rswp "
+echo 1>&2 "rpws_lr_pdsrdr()"
+echo 1>&2 $reader -tStart "$tStart" -tStop "$tStop" $sArgs
+
+$reader -tStart "$tStart" -tStop "$tStop" $sArgs
+
+exit $?
+
+
+sDateBeg=`date`    # keep track of program execution time 
+sDateEnd=`date`  # ending time of program execution
+#prog="/home/Web/raj/cassini/das/difdate"
+#sTmp=`$prog "$sDateBeg" "$sDateEnd"`
+sTmp="$sDateBeg to $sDateEnd"
+echo 1>&2 " "
+echo 1>&2 "-----------------------------------"
+echo 1>&2 "Plot Time Interval: $tStart to $tStop"
+echo 1>&2 "das Reader Start Time: $sDateBeg"
+echo 1>&2 "das Reader End   Time: $sDateEnd"
+echo 1>&2 "Total elasped time: $sTmp"
+echo 1>&2 "-----------------------------------"
+echo 1>&2 " "
+

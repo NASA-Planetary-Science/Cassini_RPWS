@@ -1,0 +1,12 @@
+#!/bin/ksh
+
+cat $1 | awk '
+{ ++nCnt }
+$0 ~ /Band/{
+  printf "%s\n",$0
+}
+#$0 ~ /^ *--* */{
+$0 ~ /^ *-[ -]*$/{
+  printf "  Line No. %3d\n",nCnt+1
+}
+'

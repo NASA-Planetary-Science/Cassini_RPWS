@@ -1,0 +1,5 @@
+#!/bin/ksh
+
+pds_get_file -f tmp.txt -b 1999_001 -e 1999_001
+
+exit 0 

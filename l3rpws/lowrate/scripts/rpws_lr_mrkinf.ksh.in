@@ -1,0 +1,123 @@
+#!/bin/ksh
+# 
+# Version 1.1
+#   make re-locatable on install - cwp 2012-10-04
+#
+# Modifies the low rate fully calibrated pds archive to include various
+# types of interference: hfr sounder, lp raw sweep, etc...
+# Marks lfdr/mfdr data with gnd produced bit
+#
+# Command Line arguments 
+#  one - tBeg - automatically assumes one day 
+#  two - tBeg,tEnd assumes a range day 
+
+# Source the cassini path setup file
+. %(INST_ETC)s/setup.sh
+
+# But over-ride the path
+PATH=%(LRFC_SCRIPT_PATH)s
+export PATH
+
+if [ "$RPWS_SUPERVOL" = "" ]; then
+	echo "Set RPWS_SUPERVOL"
+	exit 13
+fi
+
+if [ "$RPWS_TEMP" = "" ]; then
+	echo "Set RPWS_TEMP"
+	exit 13
+fi
+
+CAS_PDS_ROOT_DIR=${RPWS_SUPERVOL}
+  export CAS_PDS_ROOT_DIR
+  
+CAS_LRS_MARK_DIR=${RPWS_TEMP}/pds/lrsmrk
+  export CAS_LRS_MARK_DIR
+
+lrfc_data_dir=$CAS_PDS_ROOT_DIR/DATA/RPWS_LOW_RATE_FULL
+
+# assumes the directory structure lrsmrk -> t20043xx -> t2004366.txt
+lrs_mark_dir=$CAS_LRS_MARK_DIR
+
+# Note: if you change this, make sure lrs_mark_dir is still created as needed.
+lfdr_mark_dir=$CAS_LRS_MARK_DIR/lfdr
+
+
+# Process command line arguments
+if [[ $# -eq 0 ]]; then
+  echo "usage: mrkinf yyyy-doy [yyyy-doy]"
+  echo "  processing time intervals, begin and option end time"
+  exit 1
+elif [[ $# -eq 1 ]]; then
+  tBeg=$(das1_fxtime "$1" -f "%%Y-%%j")
+  tEnd=$(das1_fxtime "$1" +j 1 -f "%%Y-%%j")
+else
+  tBeg=$(das1_fxtime "$1" -f "%%Y-%%j")
+  tEnd=$(das1_fxtime "$2" -f "%%Y-%%j")
+fi 
+
+
+if [[ ! -d $lrfc_data_dir ]]; then
+  printf "%%s not found\n" $lrfc_data_dir 
+  exit 1
+fi
+
+if [[ ! -d $lfdr_mark_dir ]]; then
+	if  ! mkdir -p "$lfdr_mark_dir" ; then
+		printf "%%s not found, and mkdir failed\n" $lfdr_mark_dir
+		exit 1
+	fi
+fi
+
+printf "rpws_lr_mrkinf() %%s %%s\n" $tBeg $tEnd
+printf "rpws_lr_mrkinf() <- %%s\n" ${CAS_LRS_MARK_DIR}
+printf "rpws_lr_mrkinf() -> %%s\n" ${RPWS_SUPERVOL}
+
+#  printf "  CAS_PDS_ROOT_DIR=%%s\n" $CAS_PDS_ROOT_DIR
+#  printf "  CAS_LRS_MARK_DIR=%%s\n" $CAS_LRS_MARK_DIR
+
+
+while [[ $tBeg < $tEnd ]]; do
+  printf "rpws_lr_mrkinf() %%s..." $tBeg
+
+  nYear=$(das1_fxtime $tBeg -f "%%Y")
+  nDoy=$(das1_fxtime $tBeg -f "%%j")
+  nQtr=${nDoy%%%%[0-9][0-9]}
+  hInt=$lrs_mark_dir/t$nYear${nDoy%%%%[0-9][0-9]}xx/t$nYear$nDoy.txt
+  hLfdrInt=$lfdr_mark_dir/t$nYear${nDoy%%%%[0-9][0-9]}xx/t$nYear$nDoy.txt
+  hPdsList=$(ls $lrfc_data_dir/T$nYear${nDoy%%%%[0-9][0-9]}XX/T$nYear$nDoy/*.DAT 2>/dev/null)
+
+  # scrub the archive and remark with interference
+  if [[ $hPdsList != "" ]]; then
+    if [[ ! -r $hInt ]]; then
+      printf "no interference file..."
+    elif ! rpws_lr_mark -i $hInt $hPdsList 2>/dev/null; then
+      printf "\nrpws_lr_mark failed..."
+      printf "  interference file=%%s\n" $hInt 
+      printf "  pds files = %%s\n" "$hPdsList"
+		exit 3
+    else
+      printf "interference exists..."
+    fi
+
+    # OR in the lfdr/mfdr ground produced data
+    if [[ ! -r $hLfdrInt ]]; then
+      printf "no lfdr/mfdr gnd produced data..."
+    elif ! rpws_lr_mark -clean -i $hLfdrInt $hPdsList 2>/dev/null; then 
+      printf "\nrpws_lr_mark failed...\n"
+      printf "  lfdr gnd pro file=%%s\n" $hLfdrInt 
+      printf "  pds files = %%s\n" "$hPdsList"
+    else
+      printf "gnd pro data..."
+    fi
+  else   
+    printf "no pds archive files..."
+  fi
+
+
+  printf "done\n"
+  tBeg=$(das1_fxtime $tBeg +j 1 -f "%%Y-%%j")
+done
+
+
+exit 0

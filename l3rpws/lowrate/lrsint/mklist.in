@@ -1,0 +1,87 @@
+#!/bin/ksh
+
+mpii=%(INST_NAT_BIN)s/mpii      # 3.5
+#mpii=%(INST_NAT_BIN)s/mpii37      
+decomp=%(INST_NAT_BIN)s/decomp  # 1.2
+mpus=%(INST_NAT_BIN)s/mpus8.9   
+lfdr_fake=%(INST_NAT_BIN)s/lfdr_fake
+usdc=%(INST_NAT_BIN)s/usdc8.1      # 8.0
+Cmeander=%(INST_NAT_BIN)s/Cmeander3.2 
+dsp5=%(INST_NAT_BIN)s/dsp5      #
+dsp4=%(INST_NAT_BIN)s/dsp4      #
+
+
+
+hRfile=/opt/project/cassini/data/earth_flyby_1/t1999230*.r00
+hRfile=/opt/project/cassini/data/s04flight_1/t2004292*.r00
+hRfile2=/opt/project/cassini/data/s05flight_1/t2004292*.r00
+
+list=$(ls $hRfile $hRfile2)
+
+cat $list |
+$mpii +eof -pool 0 | $decomp +eof |
+$mpus +eof <$hMfile 2>mpus.err | 
+$lfdr_fake +eof 2>lfdr_fake.err  | 
+#$usdc +eof 2>usdc.err |  
+$Cmeander +eof 2>meander.err |
+./lrsint 1>tmp.out 2>tmp.err
+
+exit 0
+
+
+
+
+
+exit 0
+
+hRfile=/opt/project/cassini/data/c39flight_6/t20032921600.r00
+hRfile=/opt/project/cassini/data/c33flight_1/t20021901700.r00
+hRfile=/opt/project/cassini/data/c40flight_1/t20033240400.r00
+
+hRfile=/opt/project/cassini/data/c40flight_1/t20033240400.r00
+hRfile=/opt/project/cassini/data/c33flight_1/t20021901700.r00
+hRfile=/opt/project/cassini/data/deploy/t19972980300.r00
+hRfile=/opt/project/cassini/data/c39flight_21/t20032770300.r00
+
+hRfile=/opt/project/cassini/data/c44flight_1/t20040080000.r00
+hRfile=/opt/project/cassini/data/c44flight_1/t20041321400.r00
+
+hRfile=/opt/project/cassini/data/earth_flyby_1/t19992271000.r00
+hRfile=/opt/project/cassini/data/earth_flyby_1/t19992300300.r00
+
+#hRfile=/opt/project/cassini/data/s04flight_1/t20042921000.r00
+
+
+
+
+
+#$dsp4 +eof -format +all < $hRfile > rfile.txt
+
+#$mpii +eof -pool 0  -filter lp < $hRfile | $decomp +eof > $hMfile
+#$mpii +eof -pool 0  -filter hfr < $hRfile | $decomp +eof > $hMfile
+#$mpii +eof -pool 0  -filter wfr < $hRfile | $decomp +eof > $hMfile
+#$mpii +eof -pool 0  -filter wbr < $hRfile | $decomp +eof > $hMfile
+#$mpii +eof -pool 0  < $hRfile | $decomp +eof > $hMfile
+#$mpii +eof -pool 0  < $hRfile > $hMfile
+
+$mpii +eof -pool 0 < $hRfile | $decomp +eof > $hMfile
+$mpus +eof <$hMfile 2>mpus.err | 
+$lfdr_fake +eof 2>lfdr_fake.err  | 
+$usdc +eof 2>usdc.err |  # 1>$hUfile
+$Cmeander +eof 2>meander.err 1>ufile.u00 
+#./mperr ufile.u00 -anc 1>mperr.err
+#more mperr.err
+
+exit 0
+
+#$dsp4 +eof -format +all < $hRfile > rfile.txt
+#$dsp5 +eof -format +all < $hMfile > mfile.txt
+
+
+
+
+#%(INST_NAT_BIN)s/dsp5x1.bat data_em wfr
+
+#source %(INST_NAT_BIN)s/.CASSINIrc
+#cd /opt/project/cassini/data/$1
+#mpii -pool 4 +get -local -filter $2 | decomp | mpus | usdc | /home/wtr/cassini/dsp5 +$2 -bit_rate -vsize 32

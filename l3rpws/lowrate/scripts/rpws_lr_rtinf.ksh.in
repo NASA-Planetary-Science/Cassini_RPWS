@@ -1,0 +1,88 @@
+#!/bin/ksh
+
+# Version 1.1
+#   make re-locatable on install - cwp 2012-10-04
+#   used to be called rtinf
+#
+# Script to call lstinf() to build the interference files for the push data
+
+# Source the cassini path setup file
+. %(INST_ETC)s/setup.sh
+
+# But over-ride the path
+PATH=%(LRFC_SCRIPT_PATH)s
+export PATH
+
+if [ "$RPWS_MPDB" = "" ]; then
+	echo "Set RPWS_MPDB"
+	exit 13
+fi
+  
+if [ "$RPWS_SUPERVOL" = "" ]; then
+	echo "Set RPWS_SUPERVOL"
+	exit 13
+fi
+
+if [ "$CAS_TIME_KERNELS" = "" ]; then
+	echo "Set CAS_TIME_KERNELS"
+	exit 13
+fi
+if [ "$RPWS_TEMP" = "" ]; then
+	echo "Set RPWS_TEMP"
+	exit 13
+fi
+
+CAS_LRS_MARK_DIR=${RPWS_TEMP}/pds/lrsmrk
+  export CAS_LRS_MARK_DIR
+  
+database=$RPWS_MPDB
+
+tEnd=$(date +%%Y-%%j)
+# Cut down to 2 days for end of mission work
+#tBeg=$(das1_fxtime $tEnd -j 7 -f "%%Y-%%j")
+tBeg=$(das1_fxtime $tEnd -j 2 -f "%%Y-%%j")
+tEnd=$(das1_fxtime $tEnd +j 1 -f "%%Y-%%j")
+printf "rpws_lr_rtinf() %%s (%%s)\n" "$(date)" "$(date +%%j)"
+printf "rpws_lr_rtinf() $tBeg $tEnd\n"
+
+tend=$tEnd
+list=$(cat $database | awk '$5 ~ /bg_push/{print $1}' | sort)
+for n in $list; do
+  sDate=${n%%%%T*}
+  if [[ $sDate < $tend ]]; then
+    tend=$sDate
+  fi
+done
+if [[ $tend > $tBeg ]]; then
+  tBeg=$tend
+fi
+printf "rpws_lr_rtinf() found $tend $tEnd, using $tBeg $tEnd\n"
+
+umask 002
+
+CAS_PDS_ROOT_DIR=${RPWS_SUPERVOL}/pds
+hLock=${RPWS_TEMP}/pds/flock/lstinf.flock
+if [[ -r $hLock ]]; then
+  printf "rpws_lr_rtinf() interference archive %%s is locked, exiting.\n" $CAS_LRS_MARK_DIR
+  exit 1
+else
+
+  if [ ! -d ${RPWS_TEMP}/pds/flock ]; then
+    if ! mkdir ${RPWS_TEMP}/pds/flock; then
+	    echo "rpws_lr_rtinf() cannot create directory '${RPWS_TEMP}/pds/flock'" 1>&2
+		 exit 3
+    fi
+  fi
+  echo "rpws_lr_rtinf() lock obtained, $hLock"
+  echo "$LOGNAME $tBeg $tEnd rpws_lr_rtint() $(date +%%Y-%%jT%%H:%%M:%%S)">$hLock
+fi
+
+rpws_lr_listinf.ksh $tBeg $tEnd  # create interference files
+
+if rm $hLock ; then
+	echo "rpws_lr_rtinf() lock released, $hLock"
+	exit 0
+else
+	echo "rpws_lr_rtinf() error: Couldn't remove $hLock"
+	exit 3
+fi

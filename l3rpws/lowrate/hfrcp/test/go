@@ -1,0 +1,30 @@
+#!/bin/ksh
+
+#PATH=$PATH:/opt/project/cassini/archive/bin
+
+hUfile=/opt/project/cassini/data/c42flight_1/t20040110000.u00
+
+hUfile=$(mpflist 1998-364)
+
+hUfile=1998-364.u00
+
+hUfile=$(mpflist 2005-054T00:00 2005-054T01:00)
+hUfile=$(mpflist 2001-363T07:00 2001-363T08:00)
+hUfile=%(RPWS_TEMP)s/pds/hfrcalpkt/minipkts/2005-054.u00 
+
+hfrcp -v -pds -mp $hUfile 1>tmp.out 2>tmp.err
+less tmp.err
+
+exit 0
+
+#$dsp4 +eof -format +all < $hRfile > rfile.txt
+#$dsp5 +eof -format +all < $hMfile > mfile.txt
+
+
+
+
+#/opt/project/cassini/bin/dsp5x1.bat data_em wfr
+
+#source /opt/project/cassini/bin/.CASSINIrc
+#cd /opt/project/cassini/data/$1
+#mpii -pool 4 +get -local -filter $2 | decomp | mpus | usdc | /home/wtr/cassini/dsp5 +$2 -bit_rate -vsize 32

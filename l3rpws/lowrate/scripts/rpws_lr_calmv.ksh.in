@@ -1,0 +1,61 @@
+#!/bin/ksh
+
+# das1_fxtime()
+
+# Source the cassini path setup file
+. %(INST_ETC)s/setup.sh
+
+# But over-ride the path
+PATH=%(LRFC_SCRIPT_PATH)s
+export PATH
+
+if [ "$RPWS_SUPERVOL" = "" ]; then
+	echo "Set RPWS_SUPERVOL"
+	exit 13
+fi
+
+if [ "$RPWS_TEMP" = "" ]; then
+	echo "Set RPWS_TEMP"
+	exit 13
+fi
+
+src_dir=${RPWS_TEMP}/pds/hfrcalpkt/pdstab 
+CAS_PDS_ROOT_DIR=${RPWS_SUPERVOL}
+
+if [[ $# -eq 1 ]]; then
+  tBeg=$(das1_fxtime $1 -f "%%Y-%%j")
+  tEnd=$(das1_fxtime $1 +j 1 -f "%%Y-%%j")
+elif [[ $# -eq 2 ]]; then
+  tBeg=$(das1_fxtime $1 -f "%%Y-%%j")
+  tEnd=$(das1_fxtime $2 -f "%%Y-%%j")
+else
+  printf "usage: mkcalpds() tbeg [tend]\n"
+  exit 1
+fi
+
+pds_root=$CAS_PDS_ROOT_DIR/DATA/RPWS_LOW_RATE_FULL
+if [[ ! -d $pds_root ]]; then
+  printf "no pds root directory %%s\n" $pds_root
+  exit 1
+fi
+while [[ $tBeg < $tEnd ]]; do
+
+  nYear=$(das1_fxtime $tBeg -f "%%Y")
+  nDoy=$(das1_fxtime $tBeg -f "%%j")
+  nQtr=${nDoy%%[0-9][0-9]}XX
+  hFiles=$(ls $src_dir/T$nYear$nDoy"_CAL"[0-9].* 2>/dev/null)
+  dst_dir=$pds_root/T$nYear$nQtr/T$nYear$nDoy
+  if [[ $hFiles == "" ]]; then
+   echo "silent" > /dev/null 
+  elif [[ ! -d $dst_dir ]]; then
+    printf "no destination directory %%s\n",$dst_dir
+  else
+    printf "copying for %%s\n" $tBeg
+    cp -p $hFiles $dst_dir
+    rm $hFiles
+  fi
+
+  tBeg=$(das1_fxtime $tBeg +j 1 -f "%%Y-%%j")
+done
+
+exit 0

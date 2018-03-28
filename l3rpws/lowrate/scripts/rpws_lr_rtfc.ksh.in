@@ -1,0 +1,145 @@
+#!/bin/ksh
+
+# Version 1.1
+#   make re-locatable on install - cwp 2012-10-04
+#
+# Script to call rpws_lr_make() to build the pds archive in a temporary directory
+# then move it to the online pds archive directory
+
+
+# Source the cassini path setup file
+. %(INST_ETC)s/setup.sh
+
+# But over-ride the path
+PATH=%(LRFC_SCRIPT_PATH)s
+export PATH
+
+if [ "$RPWS_MPDB" = "" ]; then
+	echo "Set RPWS_MPDB"
+	exit 13
+fi
+  
+if [ "$RPWS_SUPERVOL" = "" ]; then
+	echo "Set RPWS_SUPERVOL"
+	exit 13
+fi
+
+if [ "$CAS_TIME_KERNELS" = "" ]; then
+	echo "Set CAS_TIME_KERNELS"
+	exit 13
+fi
+
+if [ "$RPWS_TEMP" = "" ]; then
+	echo "Set RPWS_TEMP"
+	exit 13
+fi
+
+
+CAS_LRS_MARK_DIR=${RPWS_TEMP}/pds/lrsmrk
+  export CAS_LRS_MARK_DIR
+
+database=$RPWS_MPDB
+
+tEnd=$(date +%%Y-%%j)
+#tBeg=$(das1_fxtime $tEnd -j 7 -f "%%Y-%%j")
+tBeg=$(das1_fxtime $tEnd -j 2 -f "%%Y-%%j")
+tEnd=$(das1_fxtime $tEnd +j 1 -f "%%Y-%%j")
+printf "%%s (%%s)\n" "$(date)" "$(date +%%j)"
+printf "rpws_lr_rtfc() $tBeg $tEnd\n"
+
+tend=$tEnd
+list=$(cat $database | awk '$5 ~ /bg_push/{print $1}' | sort)
+for n in $list; do
+  sDate=${n%%%%T*}
+  if [[ $sDate < $tend ]]; then
+    tend=$sDate
+  fi
+done
+if [[ $tend > $tBeg ]]; then
+  tBeg=$tend
+fi
+printf "rpws_lr_rtfc() found $tend $tEnd, using $tBeg $tEnd\n"
+
+#lstinf $tBeg $tEnd  # create interference files
+
+umask 002
+
+# make data in temporary directory
+sOldSuper=$RPWS_SUPERVOL
+RPWS_SUPERVOL=${RPWS_TEMP}/pds/lrs_rtu
+src_dir=${RPWS_SUPERVOL}/DATA/RPWS_LOW_RATE_FULL
+
+rpws_lr_u2dat.ksh $tBeg $tEnd    # make the data products 
+rpws_lr_mrkinf.ksh $tBeg $tEnd    # mark data set for interference
+rpws_lr_datlbl.ksh  $tBeg $tEnd    # label all data products 
+
+RPWS_SUPERVOL=$sOldSuper
+
+CAS_PDS_ROOT_DIR=${RPWS_SUPERVOL}
+dst_dir=$CAS_PDS_ROOT_DIR/DATA/RPWS_LOW_RATE_FULL
+
+hLock=${RPWS_TEMP}/pds/flock/lrfc.flock
+if [[ -r $hLock ]]; then
+  printf "rpws_lr_rtfc() pds archive %%s is locked, exiting.\n" $CAS_PDS_ROOT_DIR 
+
+  cd $src_dir   # DATA->LOW_RATE_FULL
+  tbeg=$tBeg
+  while [[ $tbeg < $tEnd ]]; do
+    nYear=$(das1_fxtime $tbeg -f "%%Y")
+    nDoy=$(das1_fxtime $tbeg -f "%%j")
+    sub_dir=T$nYear${nDoy%%%%[0-9][0-9]}XX/T$nYear$nDoy
+    rm $sub_dir/*     
+    tbeg=$(das1_fxtime $tbeg +j 1 -f "%%Y-%%j")
+  done
+
+  exit 1
+fi
+
+if [ ! -d ${RPWS_TEMP}/pds/flock ]; then
+   if ! mkdir ${RPWS_TEMP}/pds/flock; then
+    echo "Cannot create directory '${RPWS_TEMP}/pds/flock'" 1>&2
+    exit 3
+  fi
+fi
+
+echo "$LOGNAME $tBeg $tEnd rpws_lr_rtfc() $(date +%%Y-%%jT%%H:%%M:%%S)">$hLock
+echo "rpws_lr_rtfc() lock obtained, $hLock"
+
+printf "rpws_lr_rtfc() copying data files to archive\n"
+printf "rpws_lr_rtfc() <- %%s\n" $src_dir
+printf "rpws_lr_rtfc() -> %%s\n" $dst_dir
+tbeg=$tBeg
+while [[ $tbeg < $tEnd ]]; do
+  nYear=$(das1_fxtime $tbeg -f "%%Y")
+  nDoy=$(das1_fxtime $tbeg -f "%%j")
+  sub_dir=T$nYear${nDoy%%%%[0-9][0-9]}XX/T$nYear$nDoy
+  echo "$sub_dir"
+
+  if [[ -d $dst_dir/$sub_dir ]]; then
+    cd $dst_dir/$sub_dir 1>/dev/null
+    rm *.DAT *.LBL
+  elif mkdir -p $dst_dir/$sub_dir; then
+    cd $dst_dir/$sub_dir 1>/dev/null
+  else
+    printf "rpws_lr_rtfc() unable to write %%s\n" $dst_dir/$sub_dir
+    rm $hLock
+    exit 1
+  fi
+  if [[ $? -ne 0 ]]; then
+    printf "rpws_lr_rtfc() error removing %%s files \n" $dst_dir/$sub_dir
+  fi 
+  mv $src_dir/$sub_dir/* .
+  rmdir $src_dir/$sub_dir
+
+  tbeg=$(das1_fxtime $tbeg +j 1 -f "%%Y-%%j")
+done
+
+rpws_lr_make.ksh $tBeg $tEnd False
+
+if rm $hLock ; then
+	echo "rpws_lr_rtfc() lock released, $hLock"
+	exit 0
+else
+	echo "rpws_lr_rtfc() error: Couldn't remove $hLock"
+	exit 3
+fi

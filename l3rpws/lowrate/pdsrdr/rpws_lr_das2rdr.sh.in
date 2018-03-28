@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+
+# Set a minimal path, then add in the cassini specific stuff
+PATH=%(PATH)s
+source %(INST_ETC)s/setup.sh
+
+#export LD_LIBRARY_PATH=/usr/lib
+
+#echo "PATH IS: $PATH" 1>&2
+
+CAS_NAIF_METAKERNEL=%(CAS_TIME_KERNELS)s
+  export CAS_NAIF_METAKERNEL
+
+sBeg=${1:?"begin time not defined"};  shift
+sEnd=${1:?"end time not defined"};    shift
+if [[ $# -lt 1 ]]; then
+  echo 1>&2 "no args defined - using standard set"
+  sArgs="-lfdr ExEw -mfdr ExEw -mfr 13ExEw -hfr ABC12EuEvExEw -n hfr_snd "
+  sArgs=$sArgs"-n lp_rswp -n bad_data -n dpf_zero -n mfdr_mfr2 -n mfr3_hfra -n hf1_hfrc "
+else
+  sArgs=$*
+fi
+
+rdr=%(INST_NAT_BIN)s/rpws_lr_pdsrdr
+
+# Generic version, doesn't seem to work for this data
+#cvt=/home/Web/raj/cassini/das2/dasI2dasII
+#cvt=%(PREFIX)s/bin/das12dasII
+cvt=%(INST_NAT_BIN)s/das2_from_tagged_das1
+
+echo 1>&2 "exec: $rdr -s -tStart \"$sBeg\" -tStop \"$sEnd\" $sArgs | $cvt -s -tBeg \"$sBeg\" "
+$rdr -s -tStart "$sBeg" -tStop "$sEnd" $sArgs | $cvt -s -tBeg "$sBeg" 
+
+exit 0
+
+##############################################################################
+#Command Line Options for the Reader:
+#
+#LFR 
+#  Antennas: Ex,Ew,Bx,By,Bz
+#  Bands: 25Hz
+#
+#  command line argument:  -lfdr ExEwBxByBz
+#
+#----
+#MFDR
+#  Antennas: Ex,Ew,Bx,By,Bz
+#  Bands: 2.5KHz
+#
+#  command line argument:  -mfdr ExEwBxByBz
+#
+#----
+#MFR 
+#  Antennas: Ex,Ew,Bx,Bz
+#  Bands: 1,2,3
+#
+#  command line argument:  -mfr 123ExEwBxBz
+#
+#----
+#HFR 
+#  Antennas: Eu,Ev,Ex,Ew
+#  Bands: A,B,C,Hf1,Hf2
+#
+#  command line argument:  -hfr ABC12EuEvExEw
+#
+#Filtering Options:
+#  Hfr Sounder Interferance
+#  command line argument:  -n hfr_snd
+#
+#  Lp Raw Sweep Interferance
+#  command line argument:  -n lp_rswp
+#  
+#  Bandlimit mfdr to mfr band 2 frequencies
+#  command line argument:  -n mfdr_mfr2
+# 
+#  Bandlimit Mfr Band 3 to hfr band A frequencies
+#  command line argument:  -n mfr3_hfra
+#
+#  Bandlimit Hfr Band HF1 to hfr band C frequencies
+#  command line argument:  -n hf1_hfrc
+#
+#  Bandlimit Hfr Band A to Mfr Band 3 frequencies
+#  command line argument:  -n hfra_mfr3
+#
+#  Bandlimit Hfr Band C to hfr band HF1 frequencies
+#  command line argument:  -n hfrc_hf1
+#
+#  correct for antenna resonance 
+#  command line argument:  -a
+#
+#  background division
+#  command line argument:  -b  NNN
+#        where NNN is a percentage: ex.  -b 7  ; is background is 7%%
+#  Note: there are other background schemes:
+#      1. By Instrument Mode
+#      2. Generic Background
+#      3. Noise Levels
+#        a. close to Jupiter
+#        b. far from jupiter
+#
+#  background division using day long interval
+#  command line argument:  -bgday
+##############################################################################

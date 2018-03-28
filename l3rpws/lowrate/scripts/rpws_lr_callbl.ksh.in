@@ -1,0 +1,97 @@
+#!/bin/ksh
+# callbl() filename yyyyTdoy:hr:mn:sc.msc
+
+# gawk(), das1_fxtime()
+# Source the cassini path setup file
+. %(INST_ETC)s/setup.sh
+
+# But over-ride the path
+PATH=%(LRFC_SCRIPT_PATH)s
+export PATH
+
+if [ "$CAS_TIME_KERNELS" = "" ]; then
+	echo "Set $CAS_TIME_KERNELS"
+	exit 13
+fi
+
+hMasLbl=%(INST_ETC)s/pds/LRF_CAL_MASTER.LBL
+
+if [[ ! -r $hMasLbl ]]; then
+  print "unable to read master label %%s\n",$hMasLbl
+  exit 1
+fi
+
+hTab=$1
+sScet=$2
+if [[ ! -r $hTab ]]; then
+  print "unable to read tab file %%s\n",$hTab
+  exit 1
+fi
+hPath=${hTab%%/*}
+hLbl=${hTab##*/}
+hLbl=${hLbl%%%%.*}.LBL
+
+
+sFile=${hLbl%%.*}.TAB
+sPid=${hLbl%%.*}_V1
+sMis=$(cas_phase $sScet $sScet)
+sTar=$(cas_target $sScet $sScet)
+sOrb="\""$(cas_orbit.ksh $sScet $sScet)"\""
+sSclk=$(cas_sclk $sScet)
+
+mon_day=$(ls -l $hTab | awk '{print $6" "$7}')
+year=$(ls -l $hTab | awk '{print $8}')
+if [[ ${year%%%%:*} != $year ]]; then
+  year=$(date +%%Y)
+fi
+sDate=$(das1_fxtime "$mon_day $year" -f "%%Y-%%m-%%d")
+
+
+cat $hMasLbl | gawk '
+/^ *START_TIME *=/ || /STOP_TIME *=/{
+  sub(/=.*/,"= "sScet"Z")
+}
+/^ *SPACECRAFT_CLOCK_START_COUNT *=/ || /SPACECRAFT_CLOCK_STOP_COUNT *=/{
+  sub(/=.*/,"= "sSclk)
+}
+/^ *PRODUCT_CREATION_TIME *=/{
+  sub(/=.*/,"= "sDate)
+}
+{print $0}
+' sScet=$sScet sSclk=$sSclk sDate=$sDate | 
+gawk '
+/^\^HFR/{
+  sub(/\".*\"/,"\""sFile"\"")
+}
+/^ *PRODUCT_ID *=/{
+  sub(/=.*/,"= "sPid)
+}
+/^ *MISSION_PHASE_NAME *=/{
+  sub(/=.*/,"= "sMis)
+}
+/^ *TARGET_NAME *=/{
+  sub(/=.*/,"= "sTar)
+}
+/^ *ORBIT_NAME *=/{
+  sub(/=.*/,"= "sOrb)
+}
+{print $0}
+' sFile="$sFile" sPid="$sPid" sMis="$sMis" sTar="$sTar" sOrb="$sOrb" | 
+gawk '
+/^DESCRIPTION *=/{
+  sub(/=.*/,"= ")
+  gsub(/"/,"",sTar)
+  gsub(/\{/,"",sTar)
+  gsub(/\}/,"",sTar)
+  printf "%%s\"%%s contains internal calibrations for the\n",$0,sTab
+  printf "    Cassini Radio and Plasma Wave (RPWS) high frequency receiver (HFR) for\n"
+  printf "    %%s and includes the following targets:\n",sScet
+  printf "    %%s.\"\n",sTar
+  $0=""
+}
+{print $0}
+' sTab=${hTab##*/} sScet=$sScet sTar="$sTar" > $hPath/$hLbl
+
+pdspad -p 80 $hPath/$hLbl
+
+exit 0

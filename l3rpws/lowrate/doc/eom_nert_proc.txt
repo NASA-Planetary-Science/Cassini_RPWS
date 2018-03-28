@@ -1,0 +1,32 @@
+Notes on accelerating processing for end of mission work.  Start with
+the goal of 10-minute updates and increase from there.
+
+1. Current kickoff schedule
+
+   12 -> KP Work
+	22 -> LRFC Patch in
+	40 -> Push processing check
+	45 -> Database patch in from push data
+	55 -> LRFC interference run 
+
+  New kickoff schedule
+  
+
+2. Keep push area clean, drops processing time for database patch in
+
+   
+
+
+
+3. Shortend Low-Rate PDS processing window
+
+    rpws_lr_rtinf.ksh -> go back 2 days, not 7
+	 rpws_lr_rtfc.ksh 
+ 
+    timing:
+	 
+	     rpws_lr_rtfc.ksh    ->  1:47   (min:sec)
+		  rpws_lr_rtinf.ksh   ->    41.8  (sec)
+	     rpws_push_wpatch.sh ->     2.9  (sec)   
+	
+	     

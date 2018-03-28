@@ -1,0 +1,100 @@
+#!/bin/ksh
+
+# Version 1.1
+#   make re-locatable on install - cwp 2012-10-04
+#
+#
+# datlbl labels the .DAT files with .LBL files
+#
+
+# Source the cassini path setup file
+. %(INST_ETC)s/setup.sh
+
+# But over-ride the path
+PATH=%(LRFC_SCRIPT_PATH)s
+export PATH
+
+
+if [ "$RPWS_MPDB" = "" ]; then
+	echo "Set RPWS_MPDB"
+	exit 13
+fi
+  
+if [ "$RPWS_SUPERVOL" = "" ]; then
+	echo "Set RPWS_SUPERVOL"
+	exit 13
+fi
+
+if [ "$CAS_TIME_KERNELS" = "" ]; then
+	echo "Set CAS_TIME_KERNELS"
+	exit 13
+fi
+
+# Initial Error Checking: lrs2dat 1999-227 1999-257
+tBeg=${1:?"start time not defined"};  tBeg=$(das1_fxtime "$tBeg" -f "%%Y-%%j")
+tEnd=${2:?"end time not defined"};    tEnd=$(das1_fxtime "$tEnd" -f "%%Y-%%j")
+
+echo "rpws_lr_datlbl() $tBeg to $tEnd"
+
+# check for the existance of the master label file
+lrfc_master_label=%(INST_ETC)s/pds/LRFC_MASTER.LBL
+if [[ ! -r $lrfc_master_label ]]; then
+  echo "rpws_lr_datlbl() Lrfc Master Label doesn't exist, $lrf_master_label"
+  exit 1
+fi
+
+echo "rpws_lr_datlbl() <- ${lrfc_master_label}"
+
+# change to root pds directory */DATA/RPWS_LOW_RATE_FULL
+lrfc_data_dir=${RPWS_SUPERVOL}/DATA/RPWS_LOW_RATE_FULL
+if ! cd $lrfc_data_dir 1>/dev/null; then
+  exit 1
+fi
+
+echo "rpws_lr_datlbl() <- ${RPWS_SUPERVOL}"
+echo "rpws_lr_datlbl() -> ${RPWS_SUPERVOL}"
+
+
+# Normalize begin and end time to look like YYYY-DOY
+while [[ $tBeg < $tEnd ]]; do  
+
+  # Create/Check the directory structure
+  tYear=$(das1_fxtime $tBeg -f "%%Y")
+  tDoy=$(das1_fxtime $tBeg -f "%%j")
+  sub_dir=T$tYear$tDoy
+  sub_dir=${sub_dir%%%%[0-9][0-9]}XX/T$tYear$tDoy
+
+  # should be in the directory */DATA/RPWS_LOW_RATE_FULL
+  if [[ -d $sub_dir ]];  then 
+    cd $sub_dir 1>/dev/null
+    sFiles=$(ls *.DAT 2>/dev/null)
+    if [[ $sFiles != "" ]]; then
+      echo "rpws_lr_datlbl() labeling DAT for $tBeg"
+      rm *LFR*.LBL *MFR*.LBL *HFR*.LBL *MSC*.LBL 2>/dev/null
+      rpws_lr_label -m $lrfc_master_label $sFiles 2>/dev/null
+      # sOrbitName=$(casorb $tBeg)
+      sOrbitName="$(cas_orbit $tBeg)"
+      sLabels=$(ls *.LBL 2>/dev/null)
+      for f in $sLabels; do
+        cp $f tmp.lbl
+        gawk '
+          $0 ~ /^ *ORBIT_NAME *=/{
+            gsub(/=.*/,("= " sOrbitName))
+          }
+          {print $0}
+        '-v sOrbitName=$sOrbitName tmp.lbl > $f 
+      done
+      rm tmp.lbl
+      pdspad $(ls *.LBL) 2>/dev/null
+    else
+      echo "rpws_lr_datlbl(), directory exists, but no DAT files for $tBeg"
+    fi
+    cd - 1>/dev/null
+  else
+    echo "rpws_lr_datlbl() no DAT files for $tBeg"
+  fi
+
+  tBeg=$(das1_fxtime $tBeg +j 1 -f "%%Y-%%j")
+done
+
+exit 0

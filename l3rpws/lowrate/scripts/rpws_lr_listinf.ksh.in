@@ -1,0 +1,137 @@
+#!/bin/ksh
+#
+# Version 1.1
+#   make re-locatable on install - cwp 2012-10-04
+#
+#
+# Generate a list of interference packets on day long boundaries and 
+# put them in a pds file structure
+# 
+# Command Line arguments 
+#  one - tBeg - automatically assumes one day 
+#  two - tBeg,tEnd assumes a range day 
+
+PATH=%(LRFC_SCRIPT_PATH)s
+export PATH
+
+if [ "$RPWS_TEMP" = "" ]; then
+	echo "Set RPWS_TEMP"
+	exit 13
+fi
+
+CAS_LRS_MARK_DIR=${RPWS_TEMP}/pds/lrsmrk
+  export CAS_LRS_MARK_DIR
+
+
+alias mpii='rpws_mpii +eof -pool 0 2>mpii.err' 
+
+alias decomp='rpws_decomp +eof 2>decomp.err' 
+
+alias mpus='rpws_mpus +eof 2>mpus.err'
+
+alias lfdr_fake='rpws_lfdr_fake +eof'
+
+alias usdc='rpws_usdc +eof 2>usdc.err'
+
+alias meander='rpws_meander +eof 2>meander.err'
+
+
+if [[ $# -eq 1 ]]; then
+  tBeg=$(das1_fxtime "$1")
+  tEnd=$(das1_fxtime "$1" +j 1)
+else
+  tBeg=$(das1_fxtime "$1")
+  tEnd=$(das1_fxtime "$2")
+fi 
+printf "rpws_lr_listinf() %%s %%s\n" $tBeg $tEnd
+printf "rpws_lr_listinf() -> %%s\n" $CAS_LRS_MARK_DIR
+
+
+if mkdir -p $CAS_LRS_MARK_DIR; then
+  cd $CAS_LRS_MARK_DIR 1>/dev/null
+else
+  exit $?
+fi
+lfdr_dir=$(pwd)/lfdr
+
+while [[ $tBeg < $tEnd ]]; do
+  tPrgBeg=$(date +"%%a %%b %%d %%Y %%H:%%M:%%S")
+
+  tRbeg=$(das1_fxtime $tBeg -m 30)
+  tRend=$(das1_fxtime $tBeg +j 1 +m 30)
+
+  sRfiles=$(rpws_mpflist -r $tRbeg $tRend)  # -b bracket by one hour
+  nRfiles=0
+  for f in $sRfiles; do
+    nRfiles=$((nRfiles+1))
+  done
+  
+  #printf "rpws_lr_listinf() <- %%s\n" "$sRfiles"
+  
+  printf "rpws_lr_listinf() %%s %%2d R-files :: %%s - " ${tBeg%%%%T*} $nRfiles "$tPrgBeg"
+
+  if [[ $nRfiles -gt 0 ]]; then
+
+    sDir=t$(das1_fxtime $tBeg -f "%%Y")$(das1_fxtime $tBeg -f "%%j")
+    sDir=${sDir%%%%[0-9][0-9]}xx
+    sFile=t$(das1_fxtime $tBeg -f "%%Y")$(das1_fxtime $tBeg -f "%%j").txt
+    sElog=t$(das1_fxtime $tBeg -f "%%Y")$(das1_fxtime $tBeg -f "%%j").log
+
+    if ! mkdir -p lfdr/$sDir; then
+      exit 1
+    fi
+    if mkdir -p $sDir/log; then
+      cd  $sDir
+    else
+      exit $?
+    fi
+
+    # The CassiniJPL.db has the last entries that span from present to 10
+    # years from now...(scet is approximately correct, but sclk spans from
+    # present to 10 years from now).  The sclk and scet are suppose to
+    # agree, but don't, so in essence the times in the data base have
+    # become unreliable and useless for current data; it only serves as a 
+    # "suggestion" about wheither data exists for a current time period. A 
+    # simple solution would be to make the sclk agree with the scet, but
+    # for some reason, this is impossible.
+    # I always enjoy adding needless line of code to programs.
+
+    cat $sRfiles | mpii | decomp | 
+    mpus | meander | usdc | lfdr_fake | 
+    rpws_lr_int -lfdr_fake |
+    gawk '
+      # HFR_snd  58056BE2 5DFC 2004-291T23:59:15.017 33.997 24000000 snd act.
+      $4 > tbeg && $4 < tend {
+        print $0
+      }
+    ' tbeg=${tRbeg%%%%T*}T23:59 tend=${tRend%%%%T*}T00:01 | sort -k 4,4 1>tmp.txt
+
+    rm $sFile 2>/dev/null
+    rm $lfdr_dir/$sDir/$sFile 2>/dev/null
+    cat tmp.txt | awk '$0 !~ /gnd pro/{print $0}' > $sFile
+    cat tmp.txt | grep "gnd pro" > $lfdr_dir/$sDir/$sFile
+    if [[ $(wc -l < $sFile | awk '{print $1}') -eq 0 ]]; then
+      printf "lrs len 0 "
+      rm $sFile
+    fi 
+    if [[ $(wc -l < $lfdr_dir/$sDir/$sFile | awk '{print $1}') -eq 0 ]]; then
+      printf "lfdr len 0 "
+      rm $lfdr_dir/$sDir/$sFile
+    fi 
+    rm tmp.txt
+
+    cat mpii.err decomp.err mpus.err meander.err usdc.err > $sElog
+    mv $sElog log
+    rm  mpii.err decomp.err mpus.err meander.err usdc.err 
+
+    cd - 1>/dev/null
+  fi
+
+  tPrgEnd=$(date +"%%H:%%M:%%S")  
+  printf "%%s\n" "$tPrgEnd"
+
+  tBeg=$(das1_fxtime $tBeg +j 1)
+done
+
+
+exit 0

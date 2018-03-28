@@ -1,0 +1,170 @@
+#!/bin/ksh
+# Purpose:
+#   Make browse html files from html files.
+
+# Initial Error Checking: htm2brws 1999-227 1999-257
+
+# Source the cassini path setup file
+. %(INST_ETC)s/setup.sh
+
+# But over-ride the path
+PATH=%(LRFC_SCRIPT_PATH)s
+export PATH
+
+if [ "$RPWS_MPDB" = "" ]; then
+	echo "Set RPWS_MPDB"
+	exit 13
+fi
+  
+if [ "$RPWS_SUPERVOL" = "" ]; then
+	echo "Set RPWS_SUPERVOL"
+	exit 13
+fi
+
+if [ "$CAS_TIME_KERNELS" = "" ]; then
+	echo "Set $CAS_TIME_KERNELS"
+	exit 13
+fi
+
+tBeg=${1:?"start time not defined"};  tBeg=$(das1_fxtime "$tBeg" -f "%%Y-%%j")
+tEnd=${2:?"end time not defined"};    tEnd=$(das1_fxtime "$tEnd" -f "%%Y-%%j")
+
+echo "rpws_lr_htm2brws() $tBeg to $tEnd"
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+ # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+BrowseAll(){
+nCnt=0
+nCols=4
+b_files=""
+
+print '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">'
+echo "<HTML>"
+echo "<HEAD>"
+print '<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">'
+print '<TITLE>Cassini Low Rate Full</TITLE>'
+echo "</HEAD>"
+echo "<BODY>"
+
+echo "<TABLE>"
+for f in $e_files
+do
+  if ! ((nCnt%%nCols)); then
+    echo "<TR ALIGN=\"CENTER\">"
+  fi
+  hHtml=${f%%.PNG}.HTM
+  echo " <TD><A HREF=\"HTML/$hHtml\" NAME=\"${f%%.PNG}\">"
+  thumb=HTML/${f%%.*}_TN.PNG
+  echo "  <IMG SRC=\"$thumb\" HEIGHT=150 WIDTH=200"
+  echo "   ALT=\"rpws low rate full\"><BR>"
+  tmp=${f#T};  tmp=${tmp%%%%_*};  
+  tYear=${tmp%%[0-9][0-9][0-9]};  tDoy=${tmp#$tYear}
+#  echo "  `fud -f5 "$tYear-$tDoy"`</A>"
+  echo "  $(das1_fxtime $tYear-$tDoy -f "%%Y-%%m-%%d (%%j)")</A>"
+  nCnt=$((nCnt+1))
+  b_files="$b_files $f"
+
+  if ! ((nCnt%%nCols)); then  # roll out the b portions
+    echo "<TR ALIGN=\"CENTER\">"
+    for f in $b_files
+    do
+      f=${f%%_E*}
+      f=$f"_B_LRB.PNG"
+      hHtml=${f%%.PNG}.HTM
+      echo " <TD><A HREF=\"HTML/$hHtml\" NAME=\"${f%%.PNG}\">"
+      thumb=HTML/${f%%.*}_TN.PNG
+      echo "  <IMG SRC=\"$thumb\" HEIGHT=150 WIDTH=200"
+      echo "   ALT=\"rpws low rate full\"><BR>"
+      tmp=${f#T};  tmp=${tmp%%%%_*}
+      tYear=${tmp%%[0-9][0-9][0-9]};  tDoy=${tmp#$tYear}
+#      echo "  `fud -f5 "$tYear-$tDoy"`</A>"
+      echo "  $(das1_fxtime $tYear-$tDoy -f "%%Y-%%m-%%d (%%j)")</A>"
+    done
+    b_files=""
+
+    echo "<TR><TD COLSPAN=$nCols>&nbsp</TD>"
+    echo "<TR><TD COLSPAN=$nCols><HR></TD>"
+    echo "<TR><TD COLSPAN=$nCols>&nbsp</TD>"
+  fi  # magnetic files
+
+
+done
+
+if [[ $b_files != "" ]]; then # roll out the remaining b portions
+  echo "<TR ALIGN=\"CENTER\">"
+  for f in $b_files   # assume T1999364_E_LRB.PNG
+  do
+    f=${f%%_E*}
+    f=$f"_B_LRB.PNG"
+    hHtml=${f%%.PNG}.HTM
+    echo " <TD><A HREF=\"HTML/$hHtml\" NAME=\"${f%%.PNG}\">"
+    thumb=HTML/${f%%.*}_TN.PNG
+    echo "  <IMG SRC=\"$thumb\" HEIGHT=150 WIDTH=200"
+    echo "   ALT=\"rpws low rate full\"><BR>"
+    tmp=${f#T};  tmp=${tmp%%%%_*}
+    tYear=${tmp%%[0-9][0-9][0-9]};  tDoy=${tmp#$tYear}
+#    echo "  `fud -f5 "$tYear-$tDoy"`</A>"
+    echo "  $(das1_fxtime $tYear-$tDoy -f "%%Y-%%m-%%d (%%j)")</A>"
+  done
+
+  echo "<TR><TD COLSPAN=$nCols>&nbsp</TD>"
+  echo "<TR><TD COLSPAN=$nCols><HR></TD>"
+  echo "<TR><TD COLSPAN=$nCols>&nbsp</TD>"
+fi  # magnetic files
+
+echo "</TABLE>"
+
+# w3c html3.2 png
+print "<p>"
+print '<A HREF="http://validator.w3.org/check/referer">'
+print '<IMG BORDER="0" SRC="../../ANCILLARY/VALID_HTML32.PNG"'
+print ' ALT="Valid HTML 3.2!" HEIGHT="31" WIDTH="88"></A>'
+print "</p>"
+
+echo "</BODY>"
+echo "</HTML>"
+}
+
+ # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+
+lrf_plot_dir=$RPWS_SUPERVOL/BROWSE/RPWS_LOW_RATE_FULL
+lrf_ancl_dir=$RPWS_SUPERVOL/BROWSE/ANCILLARY
+if ! cd $lrf_plot_dir; then
+  exit 1
+fi
+# should be in the directory */BROWSE/RPWS_LOW_RATE_FULL
+
+echo "rpws_lr_htm2brws() <- ${RPWS_SUPERVOL}/BROWSE/RPWS_LOW_RATE_FULL"
+echo "rpws_lr_htm2brws() -> ${RPWS_SUPERVOL}/BROWSE/RPWS_LOW_RATE_FULL"
+
+while [[ $tBeg < $tEnd ]]; do
+
+  tYear=$(das1_fxtime $tBeg -f "%%Y")
+  tDoy=$(das1_fxtime $tBeg -f "%%j")
+  tQtr=${tDoy%%[0-9][0-9]}
+
+  brws_dir=T$tYear$tQtr"XX"
+  e_files=$(ls $brws_dir/*E_LRB.PNG)
+  if [[ $e_files != "" ]]; then
+    #echo 1>&2 "$brws_dir"
+    cd $brws_dir
+    e_files=$(ls *E_LRB.PNG)  # remove leading path
+    hHtml=$(pwd)
+    hHtml=$hHtml/BROWSE.HTM
+    exec 1>$hHtml
+    BrowseAll
+    cd ..
+  else
+    echo 1>&2 "No $brws_dir/*E_LRB.PNG"
+  fi 
+
+  tDoy=$tQtr"00"
+  tBeg=$(das1_fxtime "$tYear-$tDoy" +j 100 -f "%%Y-%%j") # 2000-000 + 100 = 2000-101
+
+done
+
+exit 0

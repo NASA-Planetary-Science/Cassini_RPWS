@@ -1,0 +1,72 @@
+#!/bin/ksh
+
+if [ "$CAS_TIME_KERNELS" = "" ]; then
+	echo "Set CAS_TIME_KERNELS 1st" 
+	exit 13
+fi
+
+if [ "RPWS_MPDB=" = "" ]; then
+	echo "Set RPWS_MPDB"
+	exit 13;
+fi
+
+alias lrscal=./lrscal
+
+# -d    don't read from database file 
+# -r    generate a packet report 
+
+sTime="-tStart 2004-256T20:00:00 -tStop 2004-256T20:00:20"
+args="-hfr CEx"
+
+sTime="-tStart 2006-341T00:00:00 -tStop 2006-342T00:00:00"
+args="-lfr ExEwBxByBz -mfr 123ExEwBxBz -hfr ABC12EuEvEwEx -mfdr ExEwBxByBz"
+
+sTime="-tStart 2006-346T00:00:00 -tStop 2006-347T00:00:00"
+args="-lfr ExEwBxByBz"
+
+sTime="-tStart 2007-008T00:00:00 -tStop 2007-009T00:00:00"
+args="-mfr ExEwBxBz"
+
+lrscal -v -r $sTime $args 1>tmp.pkt 2>tmp.err
+
+
+exit 0
+
+
+
+file=/opt/project/cassini/data/c23flight_4/t20003330300.u00
+
+args="-tStart 2000-333T00:00 -tStop 2000-334T00:00 "
+args="-tStart 2000-313T00:00 -tStop 2000-314T00:00 "
+args="-tStart 2000-313T06:26 -tStop 2000-313T06:30 "
+args="-tStart 2000-037T00:00 -tStop 2000-038T00:00 "
+args="-tStart 2000-186T14:00 -tStop 2000-186T15:00 "
+args="-tStart 1999-230T00:00 -tStop 1999-231T00:00 "
+args="-tStart 2003-175T00:00 -tStop 2003-176T00:00 "
+args="-tStart 2003-277T00:00 -tStop 2003-278T00:00 "
+#args=$args" -lfdr ExEwBxByBz"
+#args=$args" -mfdr ExEwBxByBz"
+#args=$args" -mfr 123ExEwBxBz"
+#args=$args" -hfr ABC12EuEvExEw"
+#args=$args" -msc 12EuEvExEw"
+
+args="-tStart 2004-021T00:00 -tStop 2004-022T00:00 "
+sTime="-tStart 1998-116T00:00 -tStop 1998-117T00:00 "
+sTime="-tStart 2002-038T00:00 -tStop 2002-039T00:00"
+
+sTime="-tStart 2004-008T00:00 -tStop 2004-009T00:00"
+args="-lfdr ExEwBxByBz -mfdr ExEwBxByBz -mfr 123ExEwBxBz "
+args=$args" -hfr ABC12EuEvExEw -msc 12EuEvExEw"
+
+sTime="-tStart 2004-285T00:00 -tStop 2004-286T00:00"
+args="-lfdr ExEwBxByBz -mfdr ExEwBxByBz -mfr 123ExEwBxBz "
+args=$args" -hfr ABC12EuEvExEw -msc 12EuEvExEw"
+
+$mp_reader -v -r $sTime $args 1>tmp.pkt 2>tmp.err
+
+exit 0
+
+args="-tStart 2000-333T00:00 -tStop 2000-333T05:00 "
+$mp_reader -s -r -d -o pds $args 1>tmp.pkt 
+
+exit 0

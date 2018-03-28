@@ -1,0 +1,9 @@
+This code originally was found at:
+
+   /home/raj/cassini/src/pdsrdr/ver2.5  
+	
+and was copied over by cwp on 2012-10-22.  The source was modified to get
+rid of explicit paths.  See the notes at the top of the source files for 
+details.
+
+

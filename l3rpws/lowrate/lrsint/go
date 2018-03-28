@@ -1,0 +1,41 @@
+#!/bin/ksh
+
+#hUfile=$(ls /opt/project/cassini/data/s08flight_2/t2005035*.u*)
+#Ufile2=$(ls /opt/project/cassini/data/bg_push/t2005035*.u*)
+
+#hUfile=/opt/project/cassini/data/s14flight_1/t20052620200.u00
+#./lrsint $hUfile 1>tmp.out 2>tmp.err
+
+
+hUfile=/opt/project/cassini/data/s28flight_1/t20070580100.u00
+
+dIn=/opt/project/cassini/data/s28flight_1
+typeset -Z2 nCnt
+nCnt=00
+while [[ $nCnt -lt 24 ]]; do
+  print $nCnt
+  hIn=$dIn/t2007059${nCnt}00.u00
+  print $nCnt $hIn
+  ./lrsint $hIn 1>tmp.out 2>tmp.err
+  if [[ -s tmp.err ]]; then
+    exit 1
+  fi
+nCnt=$((nCnt+1))
+done
+
+exit 0
+./lrsint $hUfile 1>tmp.out 2>tmp.err
+
+exit 0
+
+tmp=$(/opt/project/cassini/archive/bin/mpflist -b 2005-262)
+hUfile=""
+for f in $tmp; do
+  hUfile=$hUfile$f" "
+  echo $f
+done
+./lrsint $hUfile 1>tmp.out 2>tmp.err
+
+#./lrsint $hUfile2 1>tmp.out 2>tmp.err
+
+exit 0

@@ -1,0 +1,44 @@
+#!/bin/ksh
+# takes a bunch of png files and makes a pds label out of them
+
+
+# specifics to the label file 
+htm_lbl="LRB_HTML.LBL"      # output label file name
+document_name="CASSINI RPWS LRFC SPECTROGRAM PLOTS"
+
+
+exec 1>$htm_lbl
+
+set -A htm_files `ls *.HTM`
+num_of_files=${#htm_files[*]}
+
+echo "PDS_VERSION_ID          = PDS3"
+echo "RECORD_TYPE             = STREAM"
+
+sTmp="{"
+for f in ${htm_files[*]}
+do
+  sTmp=$sTmp"\"$f\""
+  if [[ $f != ${htm_files[$((num_of_files-1))]} ]]; then
+    sTmp=$sTmp","
+  fi
+done
+sTmp=$sTmp"}"        # last file of list
+if [[ $num_of_files -eq 1 ]]; then
+  sTmp="\"$f\""
+fi
+
+echo "^HTML_DOCUMENT           = "$sTmp
+
+echo "OBJECT                  = HTML_DOCUMENT"
+echo "  DOCUMENT_NAME           = \"$document_name\""
+echo "  DOCUMENT_TOPIC_TYPE     = \"BROWSE HTML\""
+echo "  INTERCHANGE_FORMAT      = ASCII"
+echo "  DOCUMENT_FORMAT         = HTML"
+echo "  PUBLICATION_DATE        = `date +"%%Y-%%m-%%d"` "
+echo "  FILES                   = $num_of_files"
+echo "  DESCRIPTION             = \"These files are HyperText Markup Language"
+echo "    Version 3.2 aka Wilber (-//W3C//DTD HTML 3.2//EN) for the Cassini"
+echo "    RPWS Low Rate Full Resolution Spectograms PNG files.\""
+echo "END_OBJECT              = HTML_DOCUMENT"
+echo "END"

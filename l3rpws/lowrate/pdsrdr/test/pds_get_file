@@ -1,0 +1,58 @@
+#!/bin/ksh
+
+
+sPdsDir=/home/raj/data/pds/cassini
+
+hOut=tmp.txt
+
+# parse the format :: -b 1999_364 -e 2000_002 -f tmp.txt
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -b ) tBeg=$2 shift ;;
+    -e ) tEnd=$2 shift ;;
+    -f ) hOut=$2 shift ;;
+     * ) echo "Invalid Argument $1" 1>&2
+      exit 127 ;;
+  esac
+  shift
+done
+
+tYrBeg=${tBeg%%_[0-9]*}
+tDoyBeg=${tBeg##[0-9]*_}
+tYrEnd=${tEnd%%_[0-9]*}
+tDoyEnd=${tEnd##[0-9]*_}
+
+echo \# $tBeg $tYrBeg $tDoyBeg $tEnd $tYrEnd $tDoyEnd > $hOut
+
+while [[ tYrBeg -le tYrEnd ]]; do
+
+  if [[ tYrBeg -eq tYrEnd ]]; then
+    tTmp=$tDoyEnd
+  else
+    tTmp=365
+  fi
+
+  while [[ tDoyBeg -le tTmp ]]; do
+    sFile=$sPdsDir/$tYrBeg/$tYrBeg"_"
+    tDoyBeg=$((tDoyBeg+0))   # type coerse to number
+    if [[ $tDoyBeg -lt 10 ]]; then
+      sFile=$sFile"00"$tDoyBeg
+    else
+      if [[ $tDoyBeg -lt 100 ]]; then
+        sFile=$sFile"0"$tDoyBeg
+      else
+        sFile=$sFile$tDoyBeg
+      fi
+    fi
+
+    ls $sFile/*.DAT >> $hOut
+
+    tDoyBeg=$((tDoyBeg+1))
+  done
+
+  tYrBeg=$((tYrBeg+1))
+  tDoyBeg=1
+
+done
+
+exit 0

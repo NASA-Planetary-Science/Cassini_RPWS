@@ -1,0 +1,80 @@
+#!/bin/ksh
+# 
+# Modifies the low rate fully calibrated pds archive to include various
+# types of interference: hfr sounder, lp raw sweep, etc...
+# 
+# Command Line arguments 
+#  one - tBeg - automatically assumes one day 
+#  two - tBeg,tEnd assumes a range day 
+
+PATH=/usr/bin:/usr/local/bin
+  export PATH
+
+RPWS_SUPERVOL=${RPWS_SUPERVOL:-/opt/project/cassini/pds}
+  export RPWS_SUPERVOL
+lrfc_data_dir=$RPWS_SUPERVOL/DATA/RPWS_LOW_RATE_FULL
+
+# assumes the directory structure lrsmrk -> t20043xx -> t2004366.txt
+lrs_mark_dir=%(RPWS_TEMP)s/pds/lrsmark
+
+alias lrsmark=%(INST_NAT_BIN)s/rpws_lr_mark
+alias fud=%(INST_NAT_BIN)s/fud.ksh
+
+# Process command line arguments
+typeset -Z3 nDoy nBegDoy nEndDoy
+if [[ $# -eq 0 ]]; then
+  echo "usage: mark_lrfc yyyy-doy [yyyy-doy]"
+  echo "  processing time intervals, begin and option end time"
+  exit 1
+elif [[ $# -eq 1 ]]; then
+  tBeg=$(fud -f0 $1)
+  nYear=$(fud -y $tBeg)
+  nDoy=$(fud -n $tBeg)
+  nEndDoy=$((nDoy + 1))
+  tEnd=$nYear-$nEndDoy
+else
+  tBeg=$1
+  tEnd=$2
+fi 
+tBeg=$(fud -f0 $tBeg)
+tEnd=$(fud -f0 $tEnd)
+
+if [[ ! -d $lrs_mark_dir ]]; then
+  printf "%%s not found\n" $lrs_mark_dir
+  printf "%%s not found\n" $lrs_mark_dir 1>&2
+  exit 1
+fi
+if [[ ! -d $lrfc_data_dir ]]; then
+  printf "%%s not found\n" $lrfc_data_dir 
+  printf "%%s not found\n" $lrfc_data_dir 1>&2
+  exit 1
+fi
+
+while [[ $tBeg < $tEnd ]]; do
+  
+  nYear=$(fud -y $tBeg);  nDoy=$(fud -n $tBeg);  nQtr=${nDoy%%%%[0-9][0-9]}
+  hInt=$lrs_mark_dir/t$nYear${nDoy%%%%[0-9][0-9]}xx/t$nYear$nDoy.txt
+  hPdsList=$(ls $lrfc_data_dir/T$nYear${nDoy%%%%[0-9][0-9]}XX/T$nYear$nDoy/*.DAT)
+
+  if [[ ! -r $hInt ]]; then
+    printf "no interference files found for %%s\n" $tBeg 
+    printf "no interference files found for %%s\n" $tBeg  1>&2
+  elif [[ $hPdsList == "" ]]; then
+    printf "no pds archive files found for %%s\n" $tBeg 
+    printf "no pds archive files found for %%s\n" $tBeg 1>&2
+  else
+    printf "marking pds archive %%s\n" $tBeg
+    printf "marking pds archive %%s\n" $tBeg 1>&2
+    if ! lrsmark -i $hInt $hPdsList; then
+      printf "lrsmark failed for %%s\n" $tBeg
+      printf "lrsmark failed for %%s\n" $tBeg 1>&2
+    fi
+  fi
+
+  nYear=$(fud -y $tBeg);  nDoy=$(fud -n $tBeg);  nDoy=$((nDoy+1))
+  tBeg=$(fud -f0 $nYear-$nDoy)
+
+done
+
+
+exit 0

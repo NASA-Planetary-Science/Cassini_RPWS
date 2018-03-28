@@ -1,0 +1,111 @@
+#!/bin/ksh
+
+# Version 1.1
+#   make re-locatable on install - cwp 2012-10-04
+#
+# Version 1.0
+#   Jan 31, 2005
+#   Clean up the scripts - raj
+#
+
+# Source the cassini path setup file
+. %(INST_ETC)s/setup.sh
+
+# But over-ride the path
+PATH=%(LRFC_SCRIPT_PATH)s
+export PATH
+
+if [ "$RPWS_MPDB" = "" ]; then
+	echo "Set RPWS_MPDB"
+	exit 13
+fi
+  
+if [ "$RPWS_SUPERVOL" = "" ]; then
+	echo "Set RPWS_SUPERVOL"
+	exit 13
+fi
+
+if [ "$CAS_TIME_KERNELS" = "" ]; then
+	echo "Set CAS_TIME_KERNELS"
+	exit 13
+fi
+
+
+# Initial Error Checking: lrs2dat 1999-227 1999-257
+tBeg=${1:?"start time not defined"}  
+tEnd=${2:?"end time not defined"}   
+
+
+echo "rpws_lr_u2dat() $tBeg to $tEnd"
+
+lrf_data_dir=${RPWS_SUPERVOL}/DATA/RPWS_LOW_RATE_FULL
+
+echo "rpws_lr_u2dat() <- ${RPWS_MPDB}"
+echo "rpws_lr_u2dat() -> ${lrf_data_dir}"
+
+if [[ -d $lrf_data_dir && -r $lrf_data_dir && -w $lrf_data_dir && -x $lrf_data_dir ]]; then
+  cd $lrf_data_dir
+else
+  if mkdir -p $lrf_data_dir; then
+    cd $lrf_data_dir
+  else
+    echo "Problem with $lrf_data_dir"
+    ls -laFd $lrf_data_dir
+    exit 1
+  fi
+fi
+
+# should be in the directory */DATA/RPWS_LOW_RATE_FULL, times are normalized
+tBeg=$(das1_fxtime "$tBeg" -f "%%Y-%%j")
+tEnd=$(das1_fxtime "$tEnd" -f "%%Y-%%j")
+while [[ $tBeg < $tEnd ]];  # tBeg and tEnd should look like YYYY-DOY
+do
+  sDateBeg=$(date +"%%a %%b %%d %%Y %%H:%%M:%%S")  # record the processing time
+
+  # Create/Check the subdirectory structure
+  tYear=${tBeg%%%%-*}
+  tDoy=${tBeg##*-}
+  sub_dir=T$tYear$tDoy
+  sub_dir=${sub_dir%%[0-9][0-9]}XX/T$tYear$tDoy
+
+  if mkdir -p $sub_dir; then
+    cd $sub_dir 1>/dev/null
+  else
+    exit 1
+  fi
+
+  # should be in TyyyyqXX/Tyyyydoy
+  rm *.DAT 2>/dev/null
+  rm *.LBL 2>/dev/null
+
+  # Check the mini-packet data base for file for the day
+  sFiles="";  nFiles=0
+  for f in $(cat $RPWS_MPDB | grep $tBeg | awk '{print $5}'); do
+    sFiles="$sFiles$f "
+    nFiles=$((nFiles+1))
+  done
+
+  if [[ $nFiles -eq 0 ]]; then
+    echo "rpws_lr_u2dat() no U-files for $tBeg" 
+    cd - 1>/dev/null
+    rmdir $sub_dir
+  else
+    printf "rpws_lr_u2dat() %%s %%2d U-files :: " $tBeg $nFiles 
+    printf "%%s to " "$sDateBeg" 
+    # -d don't use mp data base, -s silent, -r record report 
+    tB=$(das1_fxtime "$tBeg" -f "%%Y-%%j")
+    tE=$(das1_fxtime "$tBeg" +j 1 -f "%%Y-%%j")
+    args="-lfr ExEwBxByBz -mfr 123ExEwBxBz -hfr ABC12EuEvEwEx -mfdr ExEwBzByBz"
+    args=$args" -tStart $tB -tStop $tE"
+    rpws_lr_cal -s -d -r $args $sFiles 2>/dev/null
+    sDateBeg=$(date +"%%H:%%M:%%S")
+    printf "%%s\n" "$sDateBeg"
+	 #echo "rpws_lr_u2dat() exec'ed:  rpws_lr_cal -s -d -r $args $sFiles"
+    cd - 1>/dev/null
+  fi
+
+  tBeg=$(das1_fxtime $tBeg +j 1 -f "%%Y-%%j")
+
+done
+
+exit 0

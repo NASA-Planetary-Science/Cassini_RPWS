@@ -1,0 +1,164 @@
+#!/bin/ksh
+# Purpose:
+#   Make html files from png plots.
+
+# Source the cassini path setup file
+. %(INST_ETC)s/setup.sh
+
+# But over-ride the path
+PATH=%(LRFC_SCRIPT_PATH)s
+export PATH
+
+if [ "$RPWS_MPDB" = "" ]; then
+	echo "Set RPWS_MPDB"
+	exit 13
+fi
+  
+if [ "$RPWS_SUPERVOL" = "" ]; then
+	echo "Set RPWS_SUPERVOL"
+	exit 13
+fi
+
+if [ "$CAS_TIME_KERNELS" = "" ]; then
+	echo "Set $CAS_TIME_KERNELS"
+	exit 13
+fi
+
+
+# Initial Error Checking: png2htm 1999-227 1999-257
+tBeg=${1:?"start time not defined"};  tBeg=$(das1_fxtime "$tBeg" -f "%%Y-%%j")
+tEnd=${2:?"end time not defined"};    tEnd=$(das1_fxtime "$tEnd" -f "%%Y-%%j")
+
+echo "rpws_lr_png2htm() $tBeg to $tEnd"
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+ # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+RollOutHtml(){
+
+print '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">'
+print "<HTML>"
+print "<HEAD>"
+print '<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">'
+print "<TITLE> Cassini RPWS Low Rate Full </TITLE>"
+print "<!-- IS0-8859-1 character set -->"
+print "</HEAD>"
+print "<BODY>"
+
+print "<DIV ALIGN=CENTER>"
+print "<IMG SRC=\"$png_dir/$png_file\""
+print ' ALT="rpws low rate full">'
+print "</DIV>"
+
+print "<HR>"
+
+print "<DIV ALIGN=CENTER>"
+print "<TABLE>"
+print " <CAPTION><A HREF=\"$dat_dir/T$tYear$tDoy\">"
+#print " <CAPTION><A HREF=\"$dat_dir/T$year$doy\">"
+print " Low Rate Full Directory</A></CAPTION>" 
+print " <TR ALIGN=CENTER>"
+print "   <TH>DATA</TH>"
+print "   <TH>LABEL</TH></TR>"
+#print " <TR ALIGN=CENTER>"
+#print " <TR>"
+
+#year=${png_file%%%%_*};  year=${year#T} 
+#doy=${year#[0-9][0-9][0-9][0-9]};  year=${year%%$doy}
+dat_file=""
+dat0=$(ls $dat_dir/T$tYear$tDoy/*_LFR*.DAT 2>/dev/null)
+dat1=$(ls $dat_dir/T$tYear$tDoy/*_MFDR*.DAT 2>/dev/null)
+dat2=$(ls $dat_dir/T$tYear$tDoy/*_MFR*.DAT 2>/dev/null)
+dat3=$(ls $dat_dir/T$tYear$tDoy/*_HFR[0-9].DAT 2>/dev/null)
+dat4=$(ls $dat_dir/T$tYear$tDoy/*_HFR[0-9][0-9].DAT 2>/dev/null)
+dat5=$(ls $dat_dir/T$tYear$tDoy/*_MSC*.DAT 2>/dev/null)
+dat6=$(ls $dat_dir/T$tYear$tDoy/*_CAL*.TAB 2>/dev/null)
+dat_file="$dat0 $dat1 $dat2 $dat3 $dat4 $dat5 $dat6"
+for d in $dat_file; do
+  print "   <TR><TD><A HREF=\"$d\">${d##*/}</A></TD>"
+  l=${d%%.DAT}
+  l=${l%%.TAB}.LBL
+  print "   <TD><A HREF=\"$l\">${l##*/}</A></TD></TR>"
+done
+
+print " "
+print "</TABLE>"
+print "</DIV>"
+
+# w3c html3.2 png
+print "<p>"
+print '<A HREF="http://validator.w3.org/check/referer">'
+print "<IMG BORDER=\"0\" SRC=\"../../../../BROWSE/ANCILLARY/VALID_HTML32.PNG\""
+print ' ALT="Valid HTML 3.2!" HEIGHT="31" WIDTH="88"></A>'
+print "</p>"
+
+print "</BODY>"
+print "</HTML>"
+
+}
+
+ # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+# check for the existance of directories
+if [[ ! -d $RPWS_SUPERVOL ]]; then 
+  echo "pds root directory doesn't exist $RPWS_SUPERVOL"
+  exit 1
+fi
+
+printf "rpws_lr_png2htm() <- %%s\n" "${RPWS_SUPERVOL}/DATA/RPWS_LOW_RATE_FULL/"
+printf "rpws_lr_png2htm() <- %%s\n" "${RPWS_SUPERVOL}/BROWSE/RPWS_LOW_RATE_FULL/"
+printf "rpws_lr_png2htm() -> %%s\n" "${RPWS_SUPERVOL}/BROWSE/RPWS_LOW_RATE_FULL/"
+
+lrf_data_dir=$RPWS_SUPERVOL/DATA/RPWS_LOW_RATE_FULL
+lrf_plot_dir=$RPWS_SUPERVOL/BROWSE/RPWS_LOW_RATE_FULL
+lrf_ancl_dir=$RPWS_SUPERVOL/BROWSE/ANCILLARY
+
+if [[ ! -d $lrf_data_dir ]]; then
+  echo "pds data dir doesn't exist, $lrf_data_dir"
+  exit 1
+elif [[ ! -d $lrf_plot_dir ]]; then
+  echo "pds plot dir doesn't exist, $lrf_plot_dir"
+  exit 1
+elif ! cd $lrf_plot_dir; then
+  exit 1
+fi
+
+while [[ $tBeg < $tEnd ]]; do  # tBeg and tEnd should look like YYYY-DOY
+
+  # Create/Check the directory structure
+  #tYear=$(fud -y $tBeg)
+  #tDoy=$(fud -n $tBeg)
+  tYear=$(das1_fxtime $tBeg -f "%%Y")
+  tDoy=$(das1_fxtime $tBeg -f "%%j")
+  brws_dir=T$tYear$tDoy
+  brws_dir=${brws_dir%%%%[0-9][0-9]}XX       # xform T1999230 to T19992XX
+
+  files=$(ls $brws_dir/T$tYear$tDoy*.PNG 2>/dev/null)
+  if [[ $files != "" ]]; then 
+    if [[ ! -d $brws_dir/HTML ]]; then
+      mkdir -p $brws_dir/HTML
+    fi
+    cd $brws_dir/HTML
+    for f in $files; do
+      png_file=$f
+      png_file=${png_file##*/}
+      hHtml=${png_file%%.PNG}.HTM
+      png_dir="../../../../BROWSE/RPWS_LOW_RATE_FULL/$brws_dir"  # T19992XX
+      dat_dir="../../../../DATA/RPWS_LOW_RATE_FULL/$brws_dir"    # T19992XX   
+      hml_dir="$png_dir/HTML"
+      exec 1>$hHtml
+      RollOutHtml
+    done
+    cd ../..
+    echo 1>&2 "rpws_lr_png2htm() $tBeg"
+  else 
+    echo 1>&2 "rpws_lr_png2htm() no files for $tBeg"
+  fi
+
+
+  # Increament date and continue
+  tBeg=$(das1_fxtime $tBeg +j 1 -f "%%Y-%%j")
+done
+
+exit 0

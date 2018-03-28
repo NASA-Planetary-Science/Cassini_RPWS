@@ -1,0 +1,154 @@
+PDS_VERSION_ID                = PDS3
+/* label standards identifiers PDS Version 3.5 */
+
+DESCRIPTION = "LRF_INPUT.DAT contains fully calibrated, full resolution
+     Cassini Radio and Plasma Wave (RPWS) low rate data for the time period
+     between 2003-330T00:00:00.000 and 2003-331T00:00:00.000 and includes
+     the following targets: SOLAR SYSTEM."
+
+
+
+/* pds label for a rpws low rate full */
+RECORD_TYPE                   = FIXED_LENGTH
+RECORD_BYTES                  = 208
+FILE_RECORDS                  = 17
+
+/* pointers to start records of objects in file, std ref3.5:5.3.3.2 */
+^LRFULL_TABLE                 = ("LRF_INPUT.DAT",1)
+^TIME_TABLE                   = ("LRF_INPUT.DAT",2)
+^FREQUENCY_TABLE              = ("LRF_INPUT.DAT",3)
+^SPECTRAL_DENSITY_TABLE       = ("LRF_INPUT.DAT",4)
+
+/* identification data elements - data product labels, std ref3.5:5.3.4.1 */
+DATA_SET_ID                   = "CO-V/E/J/S/SS-RPWS-3-RDR-LRFULL-V1.0"
+STANDARD_DATA_PRODUCT_ID      = RPWS_LOW_RATE_FULL
+PRODUCT_TYPE                  = DATA
+PRODUCT_ID                    = "LRF_INPUT_V1"
+INSTRUMENT_HOST_NAME          = "CASSINI ORBITER"                 
+INSTRUMENT_HOST_ID            = CO
+INSTRUMENT_NAME               = "RADIO AND PLASMA WAVE SCIENCE"
+INSTRUMENT_ID                 = RPWS
+SECTION_ID                    = HFR
+MISSION_PHASE_NAME            = {"SPACE SCIENCE","SCIENCE CRUISE"}
+TARGET_NAME                   = "SOLAR SYSTEM"
+ORBIT_NAME                    = "N/A" 
+START_TIME                    = 2003-330T00:00:00.000Z
+STOP_TIME                     = 2003-331T00:00:00.000Z
+SPACECRAFT_CLOCK_START_COUNT  = "1/1448497332:088"
+SPACECRAFT_CLOCK_STOP_COUNT   = "1/1448583732:232"
+PRODUCT_CREATION_TIME         = 2004-03-08
+
+
+NOTE = "
+/************************************************************************/
+/*                         Record Structure                             */
+/*       +------------------------------------------------------------+ */
+/* ROW 1 | LRFULL_TABLE (FILE_ID RECORD_LENGTH NUMBER_OF_RECORDS ETC) | */
+/*       +------+------+--------+---------------+-----+---------------+ */
+/* ROW 2 | SCLK | SCET | SPARE  | TIME_OFFSET_0 | ... | TIME_OFFSET_N | */
+/*       +------+------+--------+---------------+-----+---------------+ */
+/* ROW 3 | SCLK | SCET | SPARE  |  FREQUENCY_0  | ... |  FREQUENCY_N  | */
+/*       +------+------+--------+---------------+-----+---------------+ */
+/* ROW 4 | SCLK | SCET | Dq/Sen |   DENSITY_0   | ... |   DENSITY_N   | */
+/*       +------+------+--------+---------------+-----+---------------+ */
+/*  ...  | .... | .... | ...... | ............. | ... | ............. | */
+/*       +------+------+--------+---------------+-----+---------------+ */
+/* ROW M | SCLK | SCET | Dq/Sen |   DENSITY_0   | ... |   DENSITY_N   | */
+/*       +------+------+--------+---------------+-----+---------------+ */
+/* BYTE  1      7      13       17                                      */
+/*                                                                      */
+/*                                                                      */
+/*  TIME_OFFSET - The number of seconds from the beginning of the data  */
+/*          acquisition when the individual sample was captured.        */
+/*                                                                      */
+/*  SCLK - The spacecraft clock marking the beginning of the data       */
+/*         acquisition.                                                 */
+/*                                                                      */
+/*  SCET - The spacecraft event time marking the beginning of the data  */
+/*          acquisition, UTC.                                           */
+/*                                                                      */
+/*  Dq/Sen - Data quality and sensor identifies bits, msb first.  The 4 */
+/*            LSBs contain the sensor information, 0-16.  The rest      */
+/*            contains the data quality information.                    */
+/*                                                                      */
+/*  DENSITY - Calibrated spectral density, either electric or magnetic. */
+/*                                                                      */
+/************************************************************************/
+"
+
+
+/* descriptive data elements */
+OBJECT                        = LRFULL_TABLE
+  NAME                        = LRFULL_TABLE
+  INTERCHANGE_FORMAT          = BINARY
+  ROW_BYTES                   = 208
+  ROWS                        = 1
+  COLUMNS                     = 8
+  ^STRUCTURE                  = "LRFULL_TABLE.FMT"
+END_OBJECT                    = LRFULL_TABLE
+
+OBJECT                        = TIME_TABLE
+  NAME                        = TIME_TABLE
+  INTERCHANGE_FORMAT          = BINARY
+  ROW_BYTES                   = 208
+  ROWS                        = 1
+  COLUMNS                     = 6
+  ^STRUCTURE                  = "RPWS_SCLK_SCET.FMT"
+  OBJECT                      = COLUMN
+    NAME                      = TIME
+    DATA_TYPE                 = IEEE_REAL
+    START_BYTE                = 17
+    BYTES                     = 192
+    ITEMS                     = 48
+    ITEM_BYTES                = 4
+    UNIT                      = SECOND
+    DESCRIPTION               = "Time offset of individual samples
+                                  in corresponding columns relative
+                                  to time tag of each row."
+  END_OBJECT                  = COLUMN
+END_OBJECT                    = TIME_TABLE
+
+OBJECT                        = FREQUENCY_TABLE
+  NAME                        = FREQUENCY_TABLE
+  INTERCHANGE_FORMAT          = BINARY
+  ROW_BYTES                   = 208
+  ROWS                        = 1
+  COLUMNS                     = 6
+  ^STRUCTURE                  = "RPWS_SCLK_SCET.FMT"
+  OBJECT                      = COLUMN
+    NAME                      = FREQUENCY
+    DATA_TYPE                 = IEEE_REAL
+    START_BYTE                = 17
+    BYTES                     = 192
+    ITEMS                     = 48
+    ITEM_BYTES                = 4
+    UNIT                      = HERTZ
+    DESCRIPTION               = "Frequency of spectral densities in
+                                  corresponding columns."
+  END_OBJECT                  = COLUMN
+END_OBJECT                    = FREQUENCY_TABLE
+
+OBJECT                        = SPECTRAL_DENSITY_TABLE
+  NAME                        = SPECTRAL_DENSITY_TABLE
+  INTERCHANGE_FORMAT          = BINARY
+  ROW_BYTES                   = 208
+  ROWS                        = 14
+  COLUMNS                     = 7
+  ^STRUCTURE                  = "LRFC_DATA_QUALITY.FMT"
+  OBJECT                      = COLUMN
+    NAME                      = SPECTRAL_DENSITY
+    DATA_TYPE                 = IEEE_REAL
+    START_BYTE                = 17
+    BYTES                     = 192
+    ITEMS                     = 48
+    ITEM_BYTES                = 4
+    UNIT                      = {"VOLT**2/M**2/HZ", "NANOTESLA**2/HZ "}
+    DESCRIPTION               = "Calibrated spectral densities from one
+                                  of several sensors.  Units for Ex, Eu
+                                  Ev, Ew, Hf sensors are
+                                  VOLT**2/M**2/HZ.  Units for Bx, By,
+                                  Bz sensors are NANOTESLA**2/HZ"
+  END_OBJECT                  = COLUMN
+END_OBJECT                    = SPECTRAL_DENSITY_TABLE
+
+END

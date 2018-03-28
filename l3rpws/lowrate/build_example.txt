@@ -1,0 +1,89 @@
+To build all software needed to run the low-rate full calibration processing
+stack in an alternate location (Will use $HOME as an example).
+
+1 Setup Your Environment
+------------------------
+$ ssh -Y thuban
+$ bash 
+
+$ CAS_TIME_KERNELS=/opt/project/cassini/spice/kernels/cas_kernels.txt
+
+$ PREFIX=$HOME/cassini
+
+$ RPWS_DATA=$PREFIX/rpws/data
+$ MAG_DATA=$PREFIX/mag/data
+$ RPWS_MPDB=$PREFIX/rpws/data/fileindex.tab
+$ RPWS_TEMP=$PREFIX/tmp
+$ RPWS_SUPERVOL=$PREFIX/rpws/pds
+
+$ export CAS_TIME_KERNELS RPWS_DATA MAG_DATA RPWS_MPDB RPWS_TEMP RPWS_SUPERVOL
+
+$ IDL_BIN=/local/itt/idl/idl81/bin/idl
+$ IDL_PATH=$PREFIX/lib/idl8.1:$IDL_PATH
+
+$ export RPWS_IDL RPWS_IDL_DIR
+
+
+2 Build/Install the software
+----------------------------
+
+$ mkdir -p $PREFIX/svn
+$ cd $PREFIX/svn
+
+$ svn co https://saturn.physics.uiowa.edu/util/C/trunk util_c
+$ svn co https://saturn.physics.uiowa.edu/util/C/stable util_idl
+$ svn co https://saturn.physics.uiowa.edu/cassini/production/stable cas_prod
+
+
+$ cd util_c/daslib
+$ gmake
+$ gmake install
+
+$ cd ../libfg
+$ gmake
+$ gmake install
+
+$ cd ../pdspad
+$ gmake
+$ gmake install
+
+$ cd ../../util_c/giferator
+$ gmake
+$ gmake install
+$ gmake test
+
+$ cd ../../cas_prod/GSE
+$ gmake
+$ gmake install
+
+$ cd ../ephemeris
+$ gmake 
+$ gmake install
+
+$ cd ../MAG/cassini_fce
+$ gmake
+$ gmake install
+
+$ cd ../../ephemeris
+$ gmake
+$ gmake install
+
+$ cd ../PDS/lr_pds
+$ gmake
+$ gmake install
+
+
+3 Generate some "U" files
+-------------------------
+
+$ mkdir -p $RPWS_DATA/postpass
+$ cd $RPWS_DATA/postpass
+$ cp $PREFIX/svn/cas_prod/GSE/test/2012-260_2012-284.sfdu .
+$ rpws_sfdu2mp.sh 2012-260_2012-284.sfdu s75flight 12345
+
+
+4 Build the Low Rate Full data
+------------------------------
+$ rpws_lr_listinf.ksh 2012-260 2012-284
+$ rpws_lr_ppfc.ksh 2012-260 2012-284
+

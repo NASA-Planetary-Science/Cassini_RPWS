@@ -1,0 +1,124 @@
+#!/bin/ksh
+
+# Version 1.1
+#   make re-locatable on install - cwp 2012-10-04
+#
+# Script to call rpws_lr_make() to build the pds archive in a temporary directory
+# then move it to the online pds archive directory.  This version doesn't look
+# for files listed as being from /bg_push/ in the cassini master file table.
+
+# Source the cassini path setup file
+. %(INST_ETC)s/setup.sh
+
+# But over-ride the path
+PATH=%(LRFC_SCRIPT_PATH)s
+export PATH
+
+
+if [ "$RPWS_MPDB" = "" ]; then
+	echo "Set RPWS_MPDB"
+	exit 13
+fi
+  
+if [ "$RPWS_SUPERVOL" = "" ]; then
+	echo "Set RPWS_SUPERVOL"
+	exit 13
+fi
+
+if [ "$CAS_TIME_KERNELS" = "" ]; then
+	echo "Set CAS_TIME_KERNELS"
+	exit 13
+fi
+
+if [ "$RPWS_TEMP" = "" ]; then
+	echo "Set RPWS_TEMP"
+	exit 13
+fi
+
+CAS_LRS_MARK_DIR=${RPWS_TEMP}/pds/lrsmrk
+  export CAS_LRS_MARK_DIR
+
+nSleep=30
+
+tBeg=${1:?"start time not defined"};  tBeg=$(das1_fxtime "$tBeg" -f "%%Y-%%j")
+tEnd=${2:?"end time not defined"};    tEnd=$(das1_fxtime "$tEnd" -f "%%Y-%%j")
+
+umask 002 
+
+#lstinf $tBeg $tEnd  # create interference files
+printf "rpws_lr_ppfc() %%s %%s\n" $tBeg $tEnd
+
+
+# make data in temporary directory
+sOldSuper=$RPWS_SUPERVOL
+RPWS_SUPERVOL=${RPWS_TEMP}/pds/lrs_ppq
+src_dir=${RPWS_SUPERVOL}/DATA/RPWS_LOW_RATE_FULL
+
+rpws_lr_u2dat.ksh $tBeg $tEnd    # make the data products 
+rpws_lr_mrkinf.ksh $tBeg $tEnd    # mark data set for interference
+rpws_lr_datlbl.ksh  $tBeg $tEnd    # label all data products 
+
+RPWS_SUPERVOL=$sOldSuper
+
+# now back to the regular directories
+
+CAS_PDS_ROOT_DIR=${RPWS_SUPERVOL}
+dst_dir=$CAS_PDS_ROOT_DIR/DATA/RPWS_LOW_RATE_FULL
+hLock=${RPWS_TEMP}/pds/flock/lrfc.flock
+
+if [[ -r $hLock ]]; then
+  printf "pds arhive %%s is locked.\n" $CAS_PDS_ROOT_DIR 
+  cat $hLock
+fi
+while [[ -r $hLock ]]; do
+  printf "  sleeping for %%d seconds..." $nSleep
+  sleep $nSleep
+  printf "done\n"
+done
+
+if ! mkdir -p ${RPWS_TEMP}/pds/flock ; then
+	echo "error, cannot make lock dir ${RPWS_TEMP}/pds/flock"
+	exit 1
+fi
+
+echo "$LOGNAME $tBeg $tEnd rpws_lr_ppfc() $(date +%%Y-%%jT%%H:%%M:%%S)">$hLock
+nRet=$?
+if [ "$nRet" != "0" ]; then
+	echo "error, cannot make lock file $hlock"
+	exit $nRet
+fi
+
+#printf "copying data files to archive\n"
+printf "rpws_lr_ppfc() <- %%s\n" $src_dir
+printf "rpws_lr_ppfc() -> %%s\n" $dst_dir
+
+tBegSav=$tBeg
+tbeg=$tBeg
+while [[ $tbeg < $tEnd ]]; do
+  nYear=$(das1_fxtime $tbeg -f "%%Y")
+  nDoy=$(das1_fxtime $tbeg -f "%%j")
+  sub_dir=T$nYear${nDoy%%%%[0-9][0-9]}XX/T$nYear$nDoy
+  printf "rpws_lr_ppfc() %%s\n" $sub_dir
+
+  if [[ -d $dst_dir/$sub_dir ]]; then
+    cd $dst_dir/$sub_dir 1>/dev/null
+    rm *.DAT *.LBL
+  elif mkdir -p $dst_dir/$sub_dir; then
+    cd $dst_dir/$sub_dir 1>/dev/null
+  else
+    printf "unable to write %%s\n" $dst_dir/$sub_dir
+    exit 1
+  fi
+  if [[ $? -ne 0 ]]; then
+    printf "error removing %%s files \n" $dst_dir/$sub_dir
+  fi 
+  mv $src_dir/$sub_dir/* .
+
+  tbeg=$(das1_fxtime $tbeg +j 1 -f "%%Y-%%j")
+done
+
+rpws_lr_make.ksh $tBeg $tEnd False
+rm $hLock
+
+echo "rpws_lr_ppfc() Post-pass processing from $tBegSav to $tEnd complete."
+exit 0

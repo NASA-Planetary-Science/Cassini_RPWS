@@ -1,0 +1,147 @@
+#!/bin/ksh
+
+# get the path to das1_fxtime(), hfrcp(), pdspad()
+# Source the cassini path setup file
+. %(INST_ETC)s/setup.sh
+
+# But over-ride the path
+PATH=%(LRFC_SCRIPT_PATH)s
+export PATH
+
+if [ "$RPWS_MPDB" = "" ]; then
+	echo "Set RPWS_MPDB"
+	exit 13
+fi
+
+if [ "$RPWS_TEMP" = "" ]; then
+	echo "Set RPWS_TEMP"
+	exit 13
+fi
+  
+if [ "$RPWS_SUPERVOL" = "" ]; then
+	echo "Set RPWS_SUPERVOL"
+	exit 13
+fi
+
+if [ "$CAS_TIME_KERNELS" = "" ]; then
+	echo "Set CAS_TIME_KERNELS"
+	exit 13
+fi
+
+# filenames are 1988-364.u00  ie fxtime()
+udir=${RPWS_TEMP}/pds/hfrcalpkt/minipkts 
+ddir=${RPWS_TEMP}/pds/hfrcalpkt/pdstab 
+ldir=${RPWS_TEMP}/pds/hfrcalpkt/log 
+
+CAS_PDS_ROOT_DIR=${RPWS_SUPERVOL}
+
+if [[ $# -eq 1 ]]; then
+  tBeg=$(das1_fxtime $1 -f "%%Y-%%j")
+  tEnd=$(das1_fxtime $1 +j 1 -f "%%Y-%%j")
+elif [[ $# -eq 2 ]]; then
+  tBeg=$(das1_fxtime $1 -f "%%Y-%%j")
+  tEnd=$(das1_fxtime $2 -f "%%Y-%%j")
+else
+  printf "usage: mkcalpds() tbeg [tend]\n"
+  exit 1
+fi
+
+printf "rpws_lr_mkcalpds() %%s %%s\n" $tBeg $tEnd
+printf "rpws_lr_mkcalpds() <- %%s\n" ${RPWS_MPDB}
+printf "rpws_lr_mkcalpds() -> %%s\n" ${RPWS_TEMP}/pds/hfrcalpkt
+
+umask 002
+nYear=$(das1_fxtime $tBeg -f %%Y)
+nDoy=$(das1_fxtime $tBeg -f %%j)
+hLog=$nYear$nDoy"Cal.log"
+
+while [[ $tBeg < $tEnd ]]; do
+  printf "rpws_lr_mkcalpds() %%s..." $tBeg | tee -a $hLog    # should be yyy-doy
+
+  # search mini-packets for hfr cal packets
+  hUcal=$udir/$(das1_fxtime $tBeg -f "%%Y-%%j").u00
+  hUfile=$(rpws_mpflist $tBeg)
+    
+  if [[ $hUfile != "" ]]; then
+  
+    if [ ! -d $(dirname $hUcal) ] ; then
+      if ! mkdir -p $(dirname $hUcal) ; then
+        echo "error in mkdir $(dirname $hUcal)"
+        exit 1
+      fi
+    fi
+	 
+    rpws_lr_hfrcp -mp $hUfile 1>$hUcal 2>>$hLog # 2>&1 | tee -a $hLog # -mp on stdout 2>>log.txt
+    nSize=$(ls -l $hUcal | awk '{print $5}')
+  else
+    nSize=0
+  fi
+
+  if [[ $nSize -ne 0 ]]; then
+    printf "cal size=%%s..." $nSize | tee -a $hLog
+  else
+    printf "removing %%s..." ${hUcal##*/} | tee -a $hLog
+    rm $hUcal
+  fi
+  
+
+  # mini-packets to pds tab files with labels
+  if [[ -r $hUcal ]]; then
+    printf "tab..." | tee -a $hLog
+    rpws_lr_hfrcp -pds $hUcal    # creates cal0.txt, cal1.txt, ... output timestamp
+    for f in $(ls cal[0-9].txt); do
+      nLines=$(wc -l $f | awk '{print $1}')
+      if [[ $nLines -ne 596 ]]; then
+        printf "error  %%s has lines=%%d\n" $f $nLines | tee -a $hLog
+      else
+        nYear=$(das1_fxtime $tBeg -f %%Y)
+        nDoy=$(das1_fxtime $tBeg -f %%j)
+        hPds=T$nYear$nDoy 
+        nNum=${f##cal};  nNum=${nNum%%%%.txt}
+        hPds=$ddir/T$nYear$nDoy"_CAL"$nNum.TAB
+		  if [ ! -d $ddir ]; then
+		  	  if ! mkdir -p $ddir; then
+			     echo "error couldn't create directory: $ddir"
+				  exit 3
+			  fi
+        fi
+        sHdr=$(cat $f | awk '{print $0; exit 0}')
+        printf "%%d " $nNum | tee -a $hLog
+        cat $f | awk '
+                 {
+                   if((NR != 1) && (NR != 596))
+                     print $0
+                 }
+                 ' > $hPds
+        if [[ $(wc -l $hPds | awk '{print $1}') -ne 594 ]]; then
+          printf "error incorrect number of lines %%s\n" $hPds | tee -a $hLog
+        fi
+        rm $f
+
+        # label the file lbl(file,scet)
+        printf " labeling..." | tee -a $hLog
+        sScet=$(echo $sHdr | awk '{print $8}')  # HFR cal sclk.rti
+        rpws_lr_callbl.ksh $hPds $sScet
+        
+        # pad out the files
+        printf "padding..." | tee -a $hLog
+        pdspad -p 140 $hPds
+        pdspad -p 80  ${hPds%%.TAB}.LBL
+      fi
+    done
+  fi
+  printf "done\n" | tee -a $hLog
+
+
+
+  tBeg=$(das1_fxtime $tBeg +j 1 -f "%%Y-%%j")
+done
+
+if ! mkdir -p $ldir ; then
+	echo "error in mkdir $ldir"
+	exit 1
+fi
+
+mv $hLog $ldir
+
+exit 0

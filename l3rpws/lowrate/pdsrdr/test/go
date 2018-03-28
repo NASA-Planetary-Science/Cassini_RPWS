@@ -1,0 +1,132 @@
+#!/bin/ksh
+# janurary 9 Feburary 2
+
+
+if [ "$CAS_TIME_KERNELS" = "" ]; then
+	echo "Set CAS_TIME_KERNELS 1st" 
+	exit 13
+fi
+
+if [ "$RPWS_SUPERVOL" = "" ]; then
+	echo "Set RPWS_SUPERVOL"
+	exit 13
+fi
+
+echo  `date`
+
+
+
+tTime="-tStart  2004-256T20:00:00 -tStop 2004-256T20:00:20"
+args="-n bascap -n antlen -hfr CEx"
+
+./pdsrdr -v $tTime $args 1>tmp.out 2>tmp.err
+
+exit 0
+
+
+tTime="-tStart  2004-115T18:00 -tStop 2004-115T23:59:59.999"
+args="-lfdr ExEw  -mfdr ExEw -mfr 123ExEw -hfr ABC12EuEvExEw"
+
+tTime="-tStart  2003-175T00:00 -tStop 2003-175T01:00:00"
+
+tTime="-tStart  1997-298T00:00 -tStop 1997-299T00:00:00"
+tTime="-tStart  2000-365T00:00 -tStop 2000-366T00:00:00"
+args="-lfdr ExEw  -mfdr ExEw -mfr 123ExEw -hfr ABC12EuEvExEw"
+
+tTime="-tStart  2004-256T20:00:00 -tStop 2004-256T20:00:20"
+args="-n bascap -n antlen -hfr 2Ex"
+
+# -c bCongolmeration -s silent
+./pdsrdr $tTime $args 1>tmp.out 2>tmp.err
+
+#./pdsrdr -bgday -b 7 -c $tTime $args 1>tmp.out 2>tmp.err
+
+exit 0
+
+
+
+
+
+
+
+
+#CAS_CAL_DIR='/home/raj/cassini/cal'; export CAS_CAL_DIR
+#CASMPDB='/opt/project/cassini/data/CassiniIOWA.db'; export CASMPDB
+#CASMPDB='/opt/project/cassini/data/CassiniJPL.db'; export CASMPDB
+#CAS_CAL_DIR='/opt/project/cassini/cal'; export CAS_CAL_DIR
+#CAS_DIR_CAL='/opt/project/cassini/cal'; export CAS_DIR_CAL
+
+
+
+tTime="-tStart  2000-153 -tStop 2000-154"
+tTime="-tStart  2000-366T00:00 -tStop 2001-001T00:00"
+tTime="-tStart  2004-010T00:00 -tStop 2004-011T00:00"
+tTime="-tStart  2003-323T00:00 -tStop 2003-325T00:00"
+
+
+./pdsrdr -v -c $tTime $args 1>tmp.pkt 2>tmp.err
+echo  `date`
+
+more tmp.err
+exit 0
+args=$args" -lfdr ExEwBxByBz -mfdr ExEwBxByBz -mfr 123ExEwBxBz -hfr ABC12EuEvExEw -msc 12EuEvExEw -b 20"
+args=$args" -lfdr ExEwBxByBz -mfdr ExEwBxByBz -mfr 123ExEwBxBz -hfr ABC12EuEvExEw -msc 12EuEvExEw -b 20"
+args=$args" -lfdr ExEwBxByBz -mfdr ExEwBxByBz -mfr 123ExEwBxBz -hfr ABC12EuEvExEw -msc 12EuEvExEw -b 20"
+
+
+
+#$prog  -tStart "2000-153T08:50" -tStop "2000-153T09:00" -b \
+#       -lfdr LHExEzBxByBz   \
+#       -mfr 123ExBz $file \
+#       -hfr ABC12ExpExmExEz \
+#       1>tmp.out 2>tmp.err
+
+# more tmp.err
+
+#$prog  -tStart "1999-230T00:00" -tStop "1999-231T00:00"  \
+#       -lfr LHExEzBxByBz   \
+#       -mfr 123ExEzBxBz     \
+#       -hfr ABC12ExpExmExEz \
+#       -filter lfdr mfr hfr 1>tmp.out 2>tmp.err
+
+
+exit 0
+
+echo begin 1>das.err
+$prog  -tStart "2001-088T00:00" -tStop "2001-089T00:00" +h0 +h1 \
+       -lfdr LExEzBxByBz \
+       -filter lfdr 1>lfr.pkt 2>>das.err 
+
+$prog  -tStart "2001-088T00:00" -tStop "2001-089T00:00" +h0 +h1 \
+       -mfr 123ExEzBxBz \
+       -filter mfr 1>mfr.pkt 2>>das.err 
+
+$prog  -tStart "2001-088T00:00" -tStop "2001-089T00:00" +h0 +h1 \
+       -hfr ABC12ExpExmExEz \
+       -filter hfr 1>hfr.pkt 2>>das.err 
+
+exit 0
+
+exit 127
+#$prog  -tStart "2001-088T00:00" -tStop "2001-089T00:00" +h0 +h1 \
+#       -hfr ABC12ExpExmEx \
+#       -filter hfr 2>das.err | ./dasort1.0 1>tmp.pkt 2>tmp.err
+
+
+exit 127
+#$prog  -tStart "2002-261:00:00" -tStop "2002-261T00:05:00" +h0 +h1 \
+#       -mfr 123Ex  \
+#       -filter mfr 2>das.err | ./dasort1.0 1>tmp.pkt 2>tmp.err
+
+
+
+#dasort1.0 < tmp.pkt 1>tmp.out 2>tmp.err
+
+
+#$prog  -tStart "2001-189T01:30" -tStop "2001-189T02:00" +h0 +h1 \
+#       -lfdr LEx \
+#       -mfr 123Ex \
+#       -hfr ABC12ExpExmEx \
+#       -filter lfdr mfr hfr 2>das.err | ./dasort1.0 1>tmp.pkt 2>tmp.err
+
+exit 127 

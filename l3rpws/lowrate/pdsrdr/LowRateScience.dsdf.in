@@ -1,0 +1,13 @@
+description = 'Produce Low Rate Science spectra'
+reader	   = '%(INST_NAT_BIN)s/rpws_lr_das2rdr.sh'
+reducer	   = das2_bin_avgsec
+server      = 'http://www-pw.physics.uiowa.edu/das/das2Server'
+das2Stream  = 1
+
+readAccess = 'GROUP:cassiniTeam'
+securityRealm = 'Cassini Team'
+
+techContact = 'Chris Piker <chris-piker@uiowa.edu>'
+sciContact = 'Bill Kurth <william-kurth@uiowa.edu>'
+
+exampleRange_00 = '2016-001 to 2016-002'
