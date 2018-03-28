@@ -1,0 +1,110 @@
+#!/usr/bin/env python
+
+import sys
+import optparse
+import os
+import os.path
+import logging
+
+import rpw_pds.util
+import rpw_pds.verify
+
+##############################################################################
+# A generic version reporting block
+
+def stripSVNkey(s):
+	if s.find(':') == -1:
+		return s.strip(" $") + ": unknown"
+	else:
+		return s.strip(' $')
+
+g_sRev = stripSVNkey("$Rev$")
+g_sURL = stripSVNkey("$URL$")
+g_sWho = stripSVNkey("$LastChangedBy$")
+g_sWhen = stripSVNkey("$LastChangedDate$")
+
+g_sProgInfo = '%s %s %s %s'%(g_sURL, g_sRev, g_sWho, g_sWhen)
+
+############################################################################
+def main(argv):
+
+	sUsage = '''
+	usage: vol_check [options] VOL_PATH
+	
+	VOL_CHECK - Generic PDS volume verification 
+'''
+	
+	psr = optparse.OptionParser(usage=sUsage)
+
+	
+	psr.add_option("-l", "--log-level", dest="sLevel", metavar="LOG_LEVEL",
+	               help="Logging level one of [critical, error, warning, "+\
+	               "info, debug].  The default is error.", type="string",
+	               action="store", default="error")
+							
+	psr.add_option("-f", "--log-file", dest="sFile", metavar="LOG_FILE",
+	               help="If specified logging information is sent to "+\
+	               "LOG_FILE *in addition* to standard out", type="string",
+	               action="store", default=None)
+	
+	psr.add_option("", "--no-stdout", dest="bStdout", action="store_false",
+	               help="Do not log to standard output.  If this option "+\
+                  "is specified but -f is not, then the program doesn't "+\
+                  "produce any output, except for uncaught tracebacks.",
+                  default=True)
+
+
+	psr.add_option('','--no-lint', dest="bNoLint", action="store_true",
+	               default=False, help="Don't run linklint after "+\
+	               "mastering the volume.  Useful if you don't have linklint.")
+	
+	psr.add_option('-a','--pds-tools', dest="sPvtDir", metavar="PDS_TOOLS_PATH",
+	               help="The path for the pds_tools.  PDS_TOOLS_PATH should"+\
+	               " contain testline.pl, validate.pl etc.",
+	               default='/usr/local/pds_tools') 	
+	
+	psr.add_option('','--perl', dest="sPerl", metavar="PERL_BIN",
+	               help="Path to the perl binary for running validation tools.",
+	               default='perl')
+							
+	psr.add_option('','--pds-tests', dest="sPVtest", default="ltrq",
+	               help="Which PDS tests to run [L|l]vtool, (t)estline.pl "+\
+	               "check(r)ef.pl, checkre(q).pl.  If (L) is specified all"+\
+						"labels are checked, otherwise (l) only checks "+\
+						"one of each type of label. Default=[ltrq]")
+	
+	(opts, lArgs) = psr.parse_args()
+	
+	if len(lArgs) < 1:
+		print 'Volume path not specified, use -h for help'
+		return 1
+		
+	sVol = lArgs[0]
+	
+	if sVol in ['.', './']:
+		print "Cowardly refusing to pollute the volume directory with log files."
+		return 1
+	
+	if opts.sFile == None:
+		opts.sFile = os.path.basename(sVol)
+	
+	
+	rpw_pds.util.setupLogging(opts.sLevel, opts.sFile + '.log', opts.bStdout)
+	log = logging.getLogger('main')
+	log.info(g_sProgInfo)
+	
+	log.info("Cmd line was: %s"%(' '.join(sys.argv[1:])))
+		
+	if not opts.bNoLint:
+		rpw_pds.verify.runLinkLint(sVol, "%s_linklint.log"%opts.sFile)
+			
+	rpw_pds.verify.runPVTools(sVol, "%s_pvt.log"%opts.sFile, opts.sPvtDir,
+			                    opts.sPerl, opts.sPVtest)
+	return 0
+	
+	
+############################################################################
+if __name__ == '__main__':
+	sys.exit(main(sys.argv))
+
+

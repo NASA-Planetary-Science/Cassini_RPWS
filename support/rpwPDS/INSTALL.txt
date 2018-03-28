@@ -1,0 +1,60 @@
+Prerequistes
+============
+
+Some of the functions in rpw_pds.verify are just convienance wrappers around
+various perl utilities.  Before these will function you need to have Perl
+installed as well as the "PDS Tools Package".  See README.txt for links.
+
+
+Installation
+============
+
+1. Run installation script.
+
+  * To install in your home directory under $HOME/lib/python and $HOME/bin:
+   
+    $ python setup.py install --home=$HOME
+      
+    and set PYTHONPATH in your .bashrc or .kshrc.
+
+    This will install files in: $HOME/lib/python/rpw_pds
+
+
+  * To install in the standard sys location:
+
+    $ python setup.py install
+   
+    The standard system location varies but on unix it's usually
+    /usr/local/lib/pythonX.X/site-packages or /usr/lib/pythonX.X/site-packages
+    where X.X is your python major and minor versions.  On windows it is
+    usually C:\PythonXX where XX is the python major and minor versions.
+
+    On UNIX this will (typically) install files in:
+
+       /usr/local/lib/pythonX.X/site-packages/rpw_pds
+   
+
+2. If you are maintaining a personal stock of python libraries in your home
+   directory, you should set PYTHONPATH in your login shell to point to that
+   location, which is typically $HOME/lib/python.  This way all of your
+   personal python libs will be found automatically when python is invoked.
+
+
+Testing the Installation
+========================
+
+Enter the commands below to see the help info.  This test library loading, here
+'$' represents a shell prompt, and '>>>' represents the python interperater
+prompt.
+
+   $ cd ~/   # <--- Important
+   $ python
+   >>> import rpw_pds.util
+   >>> import rpw_pds.parse
+   >>> import rpw_pds.verify
+	>>> help(rpw_pds.util)
+
+Changing out of the installation directory first is important because the
+python interperater could pick up the sources from the installation directory
+if that just happens to be your current working directory.
+
