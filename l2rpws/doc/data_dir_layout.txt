@@ -1,0 +1,16 @@
+The top-level of the Cassini RPWS data directories is defined by the value of
+$RPWS_DATA.  The directory layout is as follows:
+
+$RPWS_DATA
+  |
+  |-bg_push
+  |  |
+  |
+  |-sort_merge
+  |  |
+  |
+  |-database
+  |  |
+  |  |-CassiniJPL.db
+  |
+  |-[Sequence Directories...]

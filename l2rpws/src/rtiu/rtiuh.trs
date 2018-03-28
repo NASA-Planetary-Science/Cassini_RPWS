@@ -1,0 +1,256 @@
+#
+#	rtiuh.trs	default rtiu transaction table
+#	OBSERVE THE ORDER IN WHICH KEYWORDS APPEAR
+#
+#	1.	periodic processing (regularly scheduled transactions)
+#		Table	name
+#		Mode	ident sci_pat eng_pat
+#		Comment	text
+#		Entry 	mnemonic subaddres wordcount bitrate
+#		EndTable
+#			name	    telemetry mode name.  used to
+#				    select telemetry mode
+#			mnemonic    for user benefit (no special chars
+#				    or spaces allowed
+#			subaddress  1553 sub-address
+#			wordcount   CDS record size (16 bit words)
+#			bitrate     collection rate in bits/second
+#			text        arbitrary comment text
+#			ident       mode identifier (i.e. JPL mnemonic)
+#			sci_pat     C style mode word for science
+#			eng_pat     C style mode word for engineering
+#			
+#	The "name" and "ident" fields will typically MATCH
+#	  but his is not required.  All instances of the fields 
+#	  should be unique (later instances will be ignored).
+#	The "ident" field may be used to establish a synonym
+#	  for a mode.  In practice, always have the "ident" 
+#	  field match up with a JPL mode.
+#	BASIC SCIENCE MODES
+#	collection rates from 1 packet / second
+#	to 6 packets / RTI
+#
+Table	S&ER-1
+    Mode	SER1	0x0324 0x0306 
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	S&ER-2
+    Mode	SER2	0x0324 0x0309
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	S&ER-3
+    Mode	SER3	0x0324 0x030C
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	S&ER-4
+    Mode	SER4	0x0324 0x030F 
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	S&ER-5
+    Mode	SER5	0x0324 0x0312 
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	S&ER-6
+    Mode	SER6	0x0324 0x0315
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	S&ER-7
+    Mode	SER7	0x0324 0x0318 
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	S&ER-8
+    Mode	SER8	0x0324 0x031B
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	S&ER-9
+    Mode	SER9	0x0324 0x031E
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	S&ER-10
+    Mode	SER10	0x0327 0x0312
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	PB&RTE-40
+    Mode	PBRETE40	0x3309 0x0300
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	PCHK
+    Mode	PCHK	0x031E 0xC000
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	PRLY
+    Mode	PRLY	0x0321 0xC303
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	RTE&SPB-14.22
+    Mode	RTESPB14	0x032A 0x0321
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	RTE&SPB-22.12
+    Mode	RTESPB22	0x0330 0x0321
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	RTE&SPB-35.55
+    Mode	RTESPB35	0x0336 0x0321
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	RTE&SPB-82.95
+    Mode	RTESPB82	0x0339 0x0321
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	RTE&SPB-124.425
+    Mode	RTESPB124	0x033C 0x0321
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	RTE&SPB-165.9
+    Mode	RTESPB165	0x033F 0x0321
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	SAF-142
+    Mode	SAF142	0x0342 0x0327
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	SAF-248
+    Mode	SAF248	0x033F 0x0324
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	SAF-248-ALT1
+    Mode	SAF248A1	0x0342 0x0B27
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	SAF-248-ALT2
+    Mode	SAF248A2	0x0342 0x1327
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	SAF-248-ALT3
+    Mode	SAF248A3	0x0342 0x1B27
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	IM40
+    Mode	IM40	0x0345 0x0600
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	RTE-5
+    Mode	RTE5	0x0303 0x0300
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	RTE-10
+    Mode	RTE10	0x0306 0xC300
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	RTE-20
+    Mode	RTE20	0x0309 0xC300
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	RTE-40
+    Mode	RTE40	0x030C 0xC300
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	RTE-158
+    Mode	RTE158	0x030F 0xC300
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	RTE-948
+    Mode	RTE948	0x0312 0xC300
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable
+Table	RTE-1896
+    Mode	RTE1896	0x0315 0xC300
+	Comment	(New RTIU scheme)
+	Entry	biust	3	4	64
+	Entry	ancil	10	4	32
+	Entry	house	12	96	768
+EndTable

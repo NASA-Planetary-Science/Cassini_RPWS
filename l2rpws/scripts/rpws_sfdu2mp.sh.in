@@ -1,0 +1,512 @@
+#!/bin/bash
+#
+
+umask 0002
+
+source /opt/project/cassini/etc/setup.sh
+
+
+# 1. First read the SFDUs into R files
+
+#############################################################################
+# Get connonical filesnames 
+
+# Little utility to get connonical path names from partial paths, there are
+# two version, one that follows and preserves symbolic links, the other
+# that only cares about physical device paths
+
+function abspath
+{
+	local sDir=$(pwd -L)
+
+	cd -L -- "$(dirname -- "$1")" &&
+     printf '%%s\n' "$(pwd -L)/$(basename -- "$1")"
+	  
+	cd $sDir
+}
+
+function phypath
+{
+	local sDir=$(pwd -P)
+
+	cd -P -- "$(dirname -- "$1")" &&
+     printf '%%s\n' "$(pwd -P)/$(basename -- "$1")"
+	  
+	cd $sDir
+}
+
+#############################################################################
+function prn_help
+{
+	echo 
+	echo "rpws_sfdu2mp - Read and sort raw RPWS SFDUs into minipacket files"
+	echo 
+	echo "usage:  rpws_sfdu2mp [options] INPUT_FILE SEQUENCE_SUBDIR [STEPS]"
+	echo
+	echo "Files are processed in a sub directory of the current directory"
+	echo "and then moved to \$RPWS_DATA/SEQUENCE_DIR."
+	echo
+	echo "PARAMETERS"
+	echo "  INPUT_FILE - A files of SFDU packets to process"
+	echo 
+	echo "  SEQUENCE_SUBDIR - A sub-directory under \$RPWS_DATA to contain"
+	echo "     The output files"       
+	echo
+	echo "  STEPS - A string of processing steps to preform, by default all"
+	echo "     steps are run, which is equavalent to the string '12345'.  The"
+	echo "     order of the digits is unimportant."
+	echo
+	echo "OPTIONS"
+	echo "  -n Process to mini-packet files but don't update the final data"
+	echo "     locations.  Leaves CassiniJPL.db untouched."
+	echo
+	echo "  -o Set an alternate value for top-level output directory.  The "
+	echo "     default is set by the RPWS_DATA environment variable."
+	echo 
+	echo "  -t Set an alternate file for the minipacket-file index table. "
+	echo "     The default is set by the RPWS_MPDB environment variable."
+	echo
+	echo "ENVIRONMENT"
+	echo "  RPWS_DATA is expected to exist and to define the desired output"
+	echo "  location."
+	echo
+	echo "  RPWS_MPDB is expected to exist and to point to the mini-packet"
+	echo "  index table (usually CassiniJPL.db)."
+	echo 
+}
+
+#############################################################################
+# Make the initial set of R files from the SFDU
+
+function makeRfiles
+{
+	local sInFile sLogFile
+	
+	if [ "$1" = "" ]; then
+		echo "ERROR: Input SFDU file not specified" >&2 
+		return 13
+	fi
+	
+	if [ "$2" = "" ]; then
+		echo "ERROR: Stage 1 Log file not specified" >&2
+		return 13
+	fi
+	
+	sInFile=$1
+	sLogFile=$2
+	
+	echo "INFO: exec: (cat \"$sInFile\" | rpws_chdo +eof -epup 128 | rpws_dsp_hkrom +eof -recent $(pwd -L)/recent_hsk.dat -stdout | rpws_file +eof -sciop -strip) &> $sLogFile"
+	echo "INFO: using: $(which rpws_chdo) $(which rpws_dsp_hkrom) $(which rpws_file)"
+
+	# Successful Test of non-SVN and from-SVN software for these programs
+	# on 2012-10-19.
+	(cat "$sInFile" | \
+	rpws_chdo +eof -epup 128 | \
+	rpws_dsp_hkrom +eof -recent $(pwd -L)/recent_hsk.dat -stdout | \
+	rpws_file +eof -sciop -strip ) &> $sLogFile
+
+
+	nRet=$?
+	if [ $nRet != 0 ] ; then
+		echo "ERROR: Non-zero return code from SFDU -to-> R file processing" >&2		
+	fi
+	
+	return $nRet
+}
+
+#############################################################################
+# Sorting and merging R files
+
+function sortMerge
+{
+	local sOutDir sLogFile
+	
+	if [ "$1" = "" ]; then
+		echo "ERROR: Stage 2 Log file not specified" >&2
+		return 13
+	fi
+	sLogFile=$1
+	
+	# Make a file listing, be careful, sort_merge HAS to have full paths
+	# or it core dumps. -cwp 2012-10-19
+	
+	if [ -e r_file_list.tab ] ; then
+		if ! rm r_file_list.tab ; then return 17; fi
+	fi
+		
+	for file in $(ls t*.r00); do echo $(pwd)/$file >> r_file_list.tab; done
+	
+	# Sort merge wants to read the database, it can handle a missing database
+	# file, but not an empty path to the database file
+	
+	sDbDir=$(dirname "$RPWS_MPDB")
+	if [ ! -d "$sDbDir" ]; then
+		if ! mkdir -p "$sDbDir" ; then
+			echo "ERROR: Couldn't make directory '$sDbDir'" >&2
+			return 17
+		fi
+	fi
+
+	(rpws_sort_merge  -debug 24 -dataset_size 1 -starting_point 1 \
+	  -ending_point 1 r_file_list.tab ) &> $sLogFile
+	
+	nRet=$?
+	if [ $nRet != 0 ] ; then
+		echo "ERROR: Non-zero return code from sort_merge processing" >&2
+	fi
+		
+	return $nRet
+}
+
+#############################################################################
+# Packet decoding, args: Processing Dir, File of "files to process"
+
+function makeUfiles
+{
+	
+	#echo "INFO: Processing directory is $(pwd -L)"
+	
+	local sSortedRs sLogFile
+	
+	if [ "$1" = "" ]; then
+		echo "ERROR: File of \"files to process\" not present" >&2 
+		return 13
+	fi
+	
+	sSortedRs=$1
+	
+	if [ "$2" = "" ]; then
+		echo "ERROR: Stage 3 Log file not specified" >&2
+		return 13
+	fi
+	
+	sLogFile=$2
+	
+	if [ ! -e "${sSortedRs}" ]; then
+	 	echo "ERROR: Expected Post-sort file list '$sSortedRs', not present." >&2
+		return 17
+	fi
+	
+	#echo "INFO: Reading files-to-process from ${sSortedRs}" >&2
+	
+	(rpws_file +eof -strip -stdout -files ${sSortedRs} | \
+	rpws_mpii +eof -pool 0 | \
+	rpws_decomp +eof | \
+	rpws_mpus +eof | \
+	rpws_lfdr_fake +eof | \
+	rpws_usdc +eof | \
+	rpws_file +eof -sciop -split -stpk1 +hfrcal -strip -debug 0x000 -filerc ) &> $sLogFile
+	
+	# The old stack, in case you ever want to turn it back on...
+	#BIN=/opt/project/cassini/bin
+	
+	#${BIN}/rpws_file58 +eof -strip -stdout -files ${sSortedRs} | \
+	#${BIN}/mpii +eof -pool 0 | \
+	#${BIN}/rpws_decomp +eof | \
+	#${BIN}/mpus +eof | \
+	#${BIN}/lfdr_fake +eof | \
+	#${BIN}/usdc +eof | \
+	#${BIN}/rpws_file58 +eof -sciop -split -stpk1 +hfrcal -strip -debug 0x000 -filerc 
+	
+	nRet=$?
+	return $nRet
+}
+
+
+#############################################################################
+# Copy Out
+
+function copyOut
+{
+	local sUindex sOutPath sLogFile 
+		
+	if [ "$1" = "" ]; then
+		echo "ERROR: Index of new entries is not present" >&2 
+		return 13
+	fi
+	
+	sUindex=$1
+	
+	if [ "$2" = "" ]; then
+		echo "ERROR: Output path not specified" >&2
+		return 13
+	fi
+	
+	sOutPath=$2
+	
+	if [ "$3" = "" ]; then
+		echo "ERROR: Stage 5 Log file not specified" >&2
+		return 13
+	fi
+	
+	sLogFile=$3
+	
+	if [ -e "$sLogFile" ]; then
+		rm $sLogFile
+	fi
+	
+	# Make sure output areas exist
+	if [ ! -e "${sOutPath}_1" ] ; then
+		echo "INFO: Making output dir ${sOutPath}_1" >> $sLogFile 2>&1
+		if ! mkdir -p "${sOutPath}_1"; then 
+			echo "ERROR: Couldn't make directory ${sOutPath}_1" >&2
+			exit 17
+		fi
+	fi
+	
+	# Kronos data goes in its own path
+	if [ ! -e "${sOutPath}" ] ; then
+		echo "INFO: Making output dir ${sOutPath}" >> $sLogFile 2>&1
+		if ! mkdir -p "${sOutPath}"; then 
+			echo "ERROR: Couldn't make directory ${sOutPath}" >&2
+			exit 17
+		fi
+	fi
+	
+	
+	chmod	774 z_sort_merge_status.r_file z_sort_merge_status.u_file \
+	z_sort_merge_status.s_file z_sort_merge_status.l_file \
+	z_sort_merge_status.h_file z_sort_merge_status.kronos \
+	z_sort_merge_status.remove	>> $sLogFile 2>&1
+	nRet=$?
+	
+	if [ $nRet != "0" ]; then
+		echo "ERROR: Couldn't chmod move scripts" >&2
+		return 17
+	fi
+	
+	# The Sort_merge_status can return an non-zero value even when
+	# everything is as it should be.  So there went checking for the
+	# return...
+	
+	./z_sort_merge_status.r_file ${sOutPath}_1 >> $sLogFile 2>&1
+	#nRet=$?
+	
+	#if [ $nRet != "0" ]; then
+	#	echo "ERROR: Couldn't move R files" >&2
+	#	return 17
+	#fi
+	
+	./z_sort_merge_status.u_file ${sOutPath}_1 >> $sLogFile 2>&1
+	#nRet=$? 
+	
+	#if [ $nRet != "0" ]; then
+	#	echo "ERROR: Couldn't move U files" >&2
+	#	return 17
+	#fi
+
+	./z_sort_merge_status.s_file ${sOutPath}_1 >> $sLogFile 2>&1
+	#nRet=$?
+	
+	#if [ $nRet != "0" ]; then
+	#	echo "ERROR: Couldn't move S files" >&2
+	#	return 17
+	#fi
+
+	./z_sort_merge_status.l_file ${sOutPath}_1 >> $sLogFile 2>&1
+	#nRet=$?
+	
+	#if [ $nRet != "0" ]; then
+	#	echo "ERROR: Couldn't move L files" >&2
+	#	return 17
+	#fi
+	
+	./z_sort_merge_status.h_file ${sOutPath}_1 >> $sLogFile 2>&1
+	#nRet=$?
+	#	
+	#if [ $nRet != "0" ]; then
+	#	echo "ERROR: Couldn't move H files" >&2
+	#	return 17
+	#fi
+	
+	./z_sort_merge_status.kronos ${sOutPath} >> $sLogFile 2>&1
+	#nRet=$?
+	
+	#if [ $nRet != "0" ]; then
+	#	echo "ERROR: Couldn't move kronos files" >&2
+	#	return 17
+	#fi
+	
+	
+	# Now for the big scary index merge
+	rpws_db_update -fred_file $sUindex >> $sLogFile 2>&1
+	nRet=$?
+	if [ $nRet != "0" ]; then
+		echo "ERROR: Couldn't merge index entries" >&2
+		return 17
+	fi
+
+	return 0
+}
+
+#############################################################################
+# Main Routine
+
+function main
+{
+	local bOutput
+	
+	bOutput=true
+	bKeepTmp=false
+	sRpwsData=$RPWS_DATA
+	sRpwsMpdb=$RPWS_MPDB
+
+	while getopts "hno:t:" opt; do
+		case $opt in
+		h ) prn_help
+			return 0 ;;
+			
+		n ) bOutput=false ;;
+		
+		o ) sRpwsData=$OPTARG ;;
+		
+		t ) sRpwsMpdb=$OPTARG ;;
+		
+		r ) bKeepTmp=true;;
+		    
+		? ) "Unrecognized option Issue $0 -h for help." >&2
+		exit 13;
+		esac
+	done
+	
+	# Shift args back to thier default positions
+	shift $(($OPTIND - 1))
+		
+	if [ "$1" = "" ] ; then
+		echo "ERROR: Input SFDU file not specified, use -h for help" >&2
+		exit 13
+	fi
+	
+	sSfduFile=$(abspath $1)
+	
+	if [ "$2" = "" ]; then
+		echo "ERROR: Output sequence sub-directory not specified, use -h for help" >&2
+		exit 13
+	fi
+	
+	sSeqDir=$2
+	
+	if [ "$3" = "" ]; then
+		echo "INFO: Processing all stages, (1 through 5)" >&2
+		sSteps=12345
+	else
+		sSteps=$3
+	fi
+	
+	if [ "$sSteps" != "${sSteps/1/}" ]; then
+		echo "INFO: Processing $sSfduFile to Mini-packet files" >&2
+	else
+		echo "INFO: Continuing $sSfduFile processing" >&2
+	fi
+	
+	umask 0002
+	nRet=0
+	
+	# Report on alternate output areas and save them
+	if [ "$sRpwsData" != "$RPWS_DATA" ]; then
+		echo "INFO: Using alternate output directory: \"$sRpwsData\"" >&2
+		RPWS_DATA=$sRpwsData
+		export RPWS_DATA
+	fi
+	
+	if [ "$sRpwsMpdb" != "$RPWS_MPDB" ]; then
+		echo "INFO: Using alternate file index: \"$sRpwsMpdb\"" >&2
+		RPWS_MPDB=$sRpwsMpdb
+		export RPWS_MPDB
+	fi
+	
+	
+	# Add a step 0, check main database file consistancy before processing 
+	# the files.
+	
+		
+	sCurDir=$(pwd -L)
+	sProcDir=$(pwd -L)/sfdu2mp
+	echo "INFO: Temporary processing directory is: \"$sProcDir\"" >&2
+	
+	# 1st gen R-files in a sub-directory
+	if [ "$sSteps" != "${sSteps/1/}" ] ; then
+		
+		if [ -e "$sProcDir" ] ; then
+			echo "ERROR: $sProcDir already exits, please move it before proceeding." >&2
+			return 17
+		else
+			mkdir $sProcDir
+		fi
+	
+		if ! cd "$sProcDir"; then 
+			echo "ERROR: Can't cd $sProcDir" >&2
+			return 17
+		fi
+		
+		echo "INFO: Running Stage 1, SFDU to R files (log step1_sfdu2R.log)" >&2
+		makeRfiles "${sSfduFile}" ../step1_sdfu2R.log
+		nRet=$?
+		
+		if [ $nRet != "0" ] ; then 
+			return $nRet
+		fi
+	else
+		if ! cd "$sProcDir"; then 
+			echo "ERROR: Can't cd $sProcDir" >&2
+			return 17
+		fi
+	fi
+
+	
+	# 2nd, handle the sort-merge step
+	if [ "$sSteps" != "${sSteps/2/}" ] ; then
+	
+		echo "INFO: Running Stage 2, Sort-Merge R files (log step2_sortmergeR.log)" >&2
+		sortMerge ../step2_sortmergeR.log
+		nRet=$?
+	
+		if [ $nRet != "0" ] ; then 
+			return $nRet
+		fi
+	fi
+	
+	# 3rd, process to uniform telemetry
+	if [ "$sSteps" != "${sSteps/3/}" ] ; then
+		echo "INFO: Running Stage 3, R files to U S L H files (log step3_R2U.log)" >&2
+	
+		makeUfiles z_sort_merge_status.dat ../step3_R2U.log
+		nRet=$?
+	
+		if [ $nRet != "0" ] ; then 
+			return $nRet
+		fi
+	fi
+	
+	# 4th Make the new entries to add to the file index
+	if [ "$sSteps" != "${sSteps/4/}" ] ; then
+		echo "INFO: Running Stage 4, Index U files (log step4_indexU.log)" >&2
+		
+		rpws_file -files z_sort_merge_status.fred -test \
+		-path $RPWS_DATA/${sSeqDir}_1/ -dbase new_entries.tab &> ../step4_Uindex.log
+	
+		nRet=$?
+		if [ $nRet != "0" ]; then
+			echo "ERROR: Non-zero return from rpws_file during output indexing" >&2
+			return $nRet
+		fi
+	fi
+	
+	# 5th update the files and the database entries
+	if [ "$sSteps" != "${sSteps/5/}" ] ; then
+		echo "INFO: Running Stage 5, copy files and merge index (log step5_copy.log)" >&2
+	
+		copyOut new_entries.tab ${RPWS_DATA}/${sSeqDir} ../step5_copy.log
+		nRet=$?
+	fi
+	
+	echo "INFO: All stages completed without critical errors.  Please inspect:" >&2
+	echo "      MP Index: $RPWS_MPDB" >&2
+	echo "      Files:    ${RPWS_DATA}/${sSeqDir}_1" >&2
+	return $nRet
+}
+
+##############################################################################
+# main stub
+
+main "$@"

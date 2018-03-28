@@ -1,0 +1,20 @@
+TOP=/opt/project/cassini
+LIB=$(TOP)/lib/original
+INC=$(TOP)/include/original
+CFLAGS=-Ae -g -I$(INC) -I/opt/local/include
+
+OBJS =        hfrselect.o
+
+.c:           cc $(CFLAGS) -c $*.c
+
+lib:          $(OBJS)
+		f77 -o hfrselect.exe hfrselect.o \
+                                $(LIB)/libutil.a  \
+                                /home/jbg/cassini/web/util.o \
+				/opt/local/lib/libpgplot.a -lX11 \
+				/local/naif/toolkit/lib/spicelib.a \
+                                -L/opt/local/lib -lspicelib -ldas -lm -lsunmath
+
+clean:
+		rm *.o
+

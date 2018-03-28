@@ -1,0 +1,16 @@
+description	= 'Cassini wideband receiver gain data'
+form		= x_multi_y ; time tag and multiple y values
+reader		= '/home/tfa/cassini/wbr/spec/wbrgain'
+ny		= 1 ; number of y items
+spacecraft	= 'Cassini'
+spacecraft_id	= 'CA'
+instrument	= 'Radio Plasma Wave Subsystem'
+instrument1	= 'Wideband'
+instrument_id	= 'RPWS'
+instrument_id1  = 'WBR'
+x_parameter	= 'time'
+x_unit		= 's'
+x_sample_width	= 8.0 ; interpolate across 4 seconds
+y_parameter	= 'gain' ; need a way to distinguish different y parameters
+y_unit		= 'dB'
+y_fill		= 1.0e-32 ; substitute this in place of missing data

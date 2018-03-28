@@ -1,0 +1,156 @@
+<HTML>
+<HEAD>
+<TITLE>das NEW Cassini WBR 80 KHz HF Spectrogram</TITLE>
+</HEAD>
+
+<BODY>
+<H1><em>das</em> NEW Cassini WBR High-Frequency 80 KHz Spectrogram<br>
+Web Form Interface</H1>
+
+<HR>
+<P>
+
+<FORM METHOD="POST"
+ACTION="http://cassini.physics.uiowa.edu/cgi-test/das-idl8">
+
+<input type="hidden" name="rows" value="4">
+<input type="hidden" name="columns" value="2">
+<input type="hidden" name="colormaps" value="2">
+<input type="hidden" name="images" value="2">
+<input type="hidden" name="axes" value="3">
+<input type="hidden" name="labels" value="0">
+<input type="hidden" name="plots" value="5">
+<input type="hidden" name="sets" value="2">
+
+<b>display size:</b> <select name="display.isize">
+<option>1024
+<option selected>800
+<option>640
+</select>
+<b>x </b> <select name="display.jsize">
+<option>768
+<option selected>600
+<option>480
+</select><br>
+
+<input type="hidden" name="colormap_i.klow" value="0">
+<input type="hidden" name="colormap_i.khigh" value="display.color.nz">
+<input type="hidden" name="set_i.ticklen" value="-0.02">
+<input type="hidden" name="axis_i.set" value="0">
+<input type="hidden" name="axis_i.method" value="'plot'">
+
+<input type="hidden" name="action" value="init">
+
+No Orbit Parameters <INPUT TYPE="RADIO" NAME="axis(0).tca" VALUE="''" ><BR>
+Earth Orbit Parameters <INPUT TYPE="RADIO" NAME="axis(0).tca" VALUE="'galileo/pws/cephemE'"><BR>
+Jupiter Orbit Parameters <INPUT TYPE="RADIO" NAME="axis(0).tca" VALUE="'galileo/pws/cephemJ'" checked><BR>
+Saturn Orbit Parameters <!-- July 5, 2000 //-->
+<INPUT TYPE="RADIO" NAME="axis(0).tca" VALUE="'galileo/pws/cephemS'"><BR>
+
+<input type="hidden" name="column(0).ileft" value="display.isize / 8">
+<input type="hidden" name="column(0).iright" value="display.isize * 6 / 8">
+<input type="hidden" name="column(0).time" value="1">
+
+<br>
+<b>time range: </b>
+<input size=18 name="column(0).tleft" value="'2000-293T11:15:10'">
+<b> to </b>
+<input size=18 name="column(0).tright" value="'2000-293T11:15:50'"><br>
+
+<input type="hidden" name="column(1).ileft" value="column(0).iright + display.isize / 8">
+<input type="hidden" name="column(1).iright" value="column(1).ileft + display.isize / 32">
+
+<input type="hidden" name="row(0).jbottom" value="15 * display.jsize / 64">
+<input type="hidden" name="row(0).jtop" value="row(0).jbottom + 3*(column(0).iright-column(0).ileft)/4">
+
+<br>
+<b>frequency range: </b>
+<input size=8 name="row(0).ybottom" value="962.5">kHz <b>to </b>
+<input size=8 name="row(0).ytop" value="1062.5">kHz
+<input type="checkbox" name="row(0).log" value="1" >log<br>
+
+<input type="hidden" name="row(2)" value="row(0)">
+
+<br>
+<b>amplitude range: </b>
+<input size=8 name="colormap(0).zlow" value="1.e-18">(V/m)<sup>2</sup>/Hz <b>to </b>
+<input size=8 name="colormap(0).zhigh" value="1.e-14">(V/m)<sup>2</sup>/Hz 
+<input type="checkbox" name="colormap(0).log" value="1" checked>log<br>
+<br>
+
+<input type="checkbox" name="gray scale" value="1" ><b>gray scale (default is color)</b><br>
+
+<input type="hidden" name="axis(0).row" value="0">
+<input type="hidden" name="axis(0).column" value="0">
+<input type="hidden" name="axis(0).timeaxis" value="'x'">
+<input type="hidden" name="axis(0).x.ticklen" value="-0.01">
+<input type="hidden" name="axis(0).x.title" value="'SCET'">
+<input type="hidden" name="axis(0).y.title" value="'Frequency (kHz)'">
+<input type="hidden" name="axis(0).set" value="0">
+
+<input type="hidden" name="axis(2).row" value="2">
+<input type="hidden" name="axis(2).column" value="1">
+<input type="hidden" name="axis(2).x.style" value="supress">
+<input type="hidden" name="axis(2).y.ticklen" value="-0.2">
+<input type="hidden" name="axis(2).y.title" value="'Spectral Density ( V!U 2 !N/m!U 2 !N Hz )'">
+
+<input type="hidden" name="image(0).row" value="0">
+<input type="hidden" name="image(0).column" value="0">
+<input type="hidden" name="image(0).colormap" value="0">
+
+<input type="hidden" name="image(0).dataset" value="'cassini/rpws/tfa/RPWSwb80_HF'"><br>
+<input type="hidden" name="image(0).query" value="JPL">
+
+<input type="hidden" name="image(1).row" value="2">
+<input type="hidden" name="image(1).column" value="1">
+<input type="hidden" name="image(1).colormap" value="0">
+<input type="hidden" name="image(1).dataset" value="'color_wedge'">
+
+<b>HFR &nbsp AGC &nbsp amplitude range: </b>
+<input size=8 name="row(1).ybottom" value="1.e-18">(V/m)<sup>2</sup>/Hz <b>to </b>
+<input size=8 name="row(1).ytop" value="1.e-15">(V/m)<sup>2</sup>/Hz
+<input type="checkbox" name="row(1).log" value="1" checked>log<br>
+<input type="hidden" name="row(1).jbottom" value="row(0).jtop + display.jsize / 64">
+<input type="hidden" name="row(1).jtop" value="15 * display.jsize / 16">
+
+<input type="hidden" name="axis(1).row" value="1">
+<input type="hidden" name="axis(1).column" value="0">
+<input type="hidden" name="axis(1).timeaxis" value="'x'">
+<input type="hidden" name="axis(1).x.tickname" value="no_label">
+<input type="hidden" name="axis(1).y.title" value="'HFR SD'">
+<input type="hidden" name="axis(1).y.ticks" value="1">
+<input type="hidden" name="axis(1).set" value="1">
+
+<input type="hidden" name="plot(1).enable" value="1">
+<input type="hidden" name="plot(1).row" value="1">
+<input type="hidden" name="plot(1).column" value="0">
+<input type="hidden" name="plot(1).set" value="1">
+<input type="hidden" name="plot(1).color" value="display.color.black">
+<input type="hidden" name="plot(1).thick" value="2">
+<input type="hidden" name="plot(1).dataset" value="'cassini/rpws/tfa/RPWShfrmsagc'">
+
+<br>
+<b>plot title: </b>
+<input size=36 name="set(1).title" value="'Cassini High-Frequency WBR'"><br>
+
+<b>output: </b>
+<input type="radio" name="device_name" value="'Z'" checked> GIF as
+<select name="gif_mime_header">
+<option>'application/x-das-gif'
+<option selected>'image/gif'
+<option>'application/octet-stream'
+</select> &nbsp;
+<input type="radio" name="device_name" value="'PS'"> PS as
+<select name="ps_mime_header">
+<option>'application/x-das-eps'
+<option selected>'application/postscript'
+<option>'application/octet-stream'
+</select><br>
+
+<P>
+<INPUT TYPE="submit"> <INPUT TYPE="reset">
+</FORM>
+
+<hr>
+</BODY>
+</HTML>

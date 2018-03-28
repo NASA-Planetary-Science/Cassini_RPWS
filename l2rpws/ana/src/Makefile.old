@@ -1,0 +1,62 @@
+CC= cc -Xc -v
+#CC= gcc -ansi -Wall 
+
+OBJs= ana_main.o ana_gui.o ana_evtlp.o ana_dsply.o ana_class.o
+
+#LIBs= -L/home/raj/project/Cassini/lib/libgcc -lrpwsdsp -ltelemetry -lCTools -lXmRPWS -lCext
+#LIBs= -L/home/raj/project/Cassini/lib -lrpwsdsp -ltelemetry -lCTools -lXmRPWS -lCext
+
+LIBs= -L../lib -lrpwsdsp -ltelemetry -lCTools -lXmRPWS -lCext
+
+
+#RAJCAS_INCL=-I/home/raj/project/Cassini/include
+RAJCAS_INCL=-I../lib_inc
+
+#PGPLOT_INCL=-I/home/raj/pgplot/pgplot5.20
+PGPLOT_INCL=-I/local/pgplot
+
+#PGPLOT_LIBs=-L/home/raj/pgplot/pgplot5.20 -lXmPgplot -lcpgplot -lpgplot
+PGPLOT_LIBs=-L/local/pgplot -L/opt/csw/lib -R/local/pgplot -R/opt/csw/lib -lXmPgplot -lcpgplot -lpgplot -lpng
+
+MOTIF_INCL=  -I/usr/dt/include
+MOTIF_LIBs=  -L/usr/dt/lib/Xm -lXm
+
+# Xwindows
+XWIN_INCL=-I/usr/openwin/include                      # linked to /usr/include
+#XWIN_LIBs=-L/usr/openwin/lib -lXt -lX11 -lXext        # linked to /usr/lib  no static archives
+XWIN_LIBs=-L/usr/openwin/lib -lXt -lX11 # linked to /usr/lib  no static archives
+
+
+
+../bin/ana9.00: $(OBJs) 
+#	f77  -o ana $(OBJs) $(LIBs) $(PGPLOT_LIBs) -R/usr/dt/lib \
+ -R/usr/openwin/lib -L/usr/dt/lib -lXm -L/usr/openwin/lib -lXt -lX11 
+	f77  -o ana $(OBJs) $(LIBs) $(PGPLOT_LIBs) $(MOTIF_LIBs) $(XWIN_LIBs)
+	cp ana ../bin/ana9.00
+	
+#	cc   -o ana $(OBJs) $(LIBs) $(PGPLOT_LIBs) $(MOTIF_LIBs) $(XWIN_LIBs) 
+
+
+ana_main.o: ana_main.c
+	$(CC) -c ana_main.c $(RAJCAS_INCL) $(PGPLOT_INCL)
+
+ana_gui.o: ana_gui.c
+	$(CC) -c ana_gui.c $(RAJCAS_INCL) $(PGPLOT_INCL) $(MOTIF_INCL)
+
+ana_evtlp.o: ana_evtlp.c
+	$(CC) -c ana_evtlp.c $(RAJCAS_INCL) $(PGPLOT_INCL) $(MOTIF_INCL)
+
+ana_dsply.o: ana_dsply.c
+	$(CC) -c ana_dsply.c  $(RAJCAS_INCL) $(PGPLOT_INCL)
+
+ana_class.o: ana_class.c
+	$(CC) -c ana_class.c $(RAJCAS_INCL)
+
+recorder.o: recorder.c
+	$(CC) -c recorder.c $(RAJCAS_INCL)
+
+backup:
+	cp *.c makefile *.h bak
+
+clean:
+	rm -f *.o

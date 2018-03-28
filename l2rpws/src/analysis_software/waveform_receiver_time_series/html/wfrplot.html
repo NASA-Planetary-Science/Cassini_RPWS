@@ -1,0 +1,97 @@
+<HTML>
+<HEAD>
+<TITLE>CASSINI RPWS WFR Time Series Plotting tool</TITLE>
+<H1>CASSINI RPWS WFR Time Series Plotting Tool</H1>
+<SCRIPT LANGUAGE="JavaScript">
+
+function NextPlot()
+{
+  var form = document.forms[0];
+  form.elements[7].value++;
+  form.submit();
+  return
+}
+
+function PrevPlot()
+{
+  var form = document.forms[0];
+  form.elements[7].value--;
+  if (form.elements[7].value == 0)
+    form.elements[7].value++;
+  form.submit();
+  return
+}
+
+function Reset()
+{
+  var form = document.forms[0];
+  form.elements[7].value = 1;
+  return
+}
+
+</SCRIPT>
+</HEAD>
+
+<HR>
+<BODY>
+<FORM METHOD="POST" ACTION="http://www-pw.physics.uiowa.edu/cgi-tfa/wfrplot.cgi">
+
+<b>WFR Channel: </b>
+<input type="RADIO" name="entry0" value="0" Checked>1
+<input type="RADIO" name="entry0" value="1" >2
+<input type="RADIO" name="entry0" value="2" >3
+<input type="RADIO" name="entry0" value="3" >4
+<input type="RADIO" name="entry0" value="4" >5
+<br>
+
+<b>Time Range: </b>
+<input size=19 name="entry1" value="2000//201 16:18:00">
+<b> to </b>
+<input size=19 name="entry2" value="2000//201 16:27:00">
+<br>
+
+<b>Data Set # in Sequence: </b>
+<input size=8 name="entry3" value="       1">
+<br>
+
+<b>Amplitude Range: </b>
+<input size=8 name="entry4" value="       0"> DN to
+<input size=8 name="entry5" value="    4095"> DN
+<input type="RADIO" name="entry6" value="0" Checked>Manual scale  <b> OR </b>
+<input type="RADIO" name="entry6" value="1" >Autoscale<br>
+<br>
+
+<b>output: </b>
+<br>
+<input type="radio" name="device_name" value="Z" checked> GIF plot as
+<select name="gif_mime_header">
+<option>application/x-das-gif
+<option selected>image/gif
+<option>application/octet-stream
+</select>
+<br>
+<input type="radio" name="device_name" value="PS"> PS plot as
+<select name="ps_mime_header">
+<option>application/x-das-eps
+<option selected>application/postscript
+<option>application/octet-stream
+</select>
+<br>
+<input type="radio" name="device_name" value="TEXT"> Text file as
+<select name="text_mime_header">
+<option>text/plain
+<option>application/octet-stream
+</select><br>
+
+<P>
+<INPUT TYPE="button" VALUE="<-Prev" NAME="prev" onClick="PrevPlot();">
+<INPUT TYPE="submit">
+<INPUT TYPE="button" VALUE="Next->" NAME="next" onClick="NextPlot();">
+<br>
+<INPUT TYPE="button" VALUE="Reset" NAME="reset" onClick="Reset();">
+Click this to reset to the beginning of the specified time interval.<br>
+</FORM>
+
+<hr>
+</BODY>
+</HTML>

@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+#
+#	Patch real-time data into database
+#
+echo "wpatch PUSH ***********************"
+date
+echo "Cassini.db update"
+
+umask 0002
+
+source %(SETUP_FILE)s
+
+export PATH=%(INST_NAT_BIN)s:/local/gnu/bin:/usr/bin:/opt/csw/bin
+
+PUSH_DIR=%(RPWS_DATA)s/bg_push
+
+if [ ! -d $PUSH_DIR/log ]; then
+	if ! mkdir -p $PUSH_DIR/log ; then
+		echo "Couldn't make $PUSH_DIR/log"
+		exit 3
+	fi
+fi
+	
+if ! cd $PUSH_DIR ; then
+	echo "Couldn't change to $PUSH_DIR" 
+	exit 3
+fi
+
+echo "INFO: Patch processing info will be routed to $PUSH_DIR/log/Cassini_Patch.status" 1>&2
+exec 2> $PUSH_DIR/log/Cassin_Patch.status 
+
+touch log/Ktemp
+touch log/ttemp
+chmod 664 K200*
+chmod 664 t200*
+
+ls -1 t*.u00 > log/patch.files
+if [ -e fred ] ; then
+	rm -f fred
+fi
+
+echo "INFO: %(INST_NAT_BIN)s/rpws_file -size 360 -files log/patch.files -test -path $PUSH_DIR -dbase fred" 1>&2
+%(INST_NAT_BIN)s/rpws_file -size 360 -files log/patch.files -test -path $PUSH_DIR/ -dbase fred
+nRet=$?
+if [ "$nRet" -ne "0" ]; then
+	echo "ERROR: non-zero return form rpws_file: $nRet" 1>&2
+fi
+
+echo "INFO: %(INST_NAT_BIN)s/rpws_db_patch -time_patch -fred fred -verbose 3" 1>&2
+%(INST_NAT_BIN)s/rpws_db_patch -time_patch -fred $PUSH_DIR/fred -verbose 3
+nRet=$?
+if [ "$nRet" -ne "0" ]; then
+	echo "ERROR: non-zero return form rpws_db_patch: $nRet" 1>&2
+fi
+
+nLines=$(wc -l < %(RPWS_MPDB)s)
+echo "INFO: Lines in %(RPWS_MPDB)s -> $nLines" 1>&2
+
+exit $nRet

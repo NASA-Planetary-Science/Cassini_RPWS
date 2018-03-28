@@ -1,0 +1,145 @@
+.\"
+.\" Process this file with
+.\" groff -man -Tascii pwdumpedr.1
+.\"
+.\" To print to postscript:
+.\" groff -t -man -Tps pwdumpedr.1 > pwdumpedr.1.ps
+.\"
+.TH rpws_sort_merge "October 2012" "Cassini RPWS" "Cassini RPWS Standard Processing"
+.\" 
+.\" 
+.\" 
+.\" 
+.SH NAME
+rpws_sort_merge - Sorts Raw Minipacket files by Spacecraft Clock
+.\" 
+.\" 
+.\" 
+.\" 
+.SH SYNOPSIS
+.B rpws_sort_merge [-starting_point 
+.IB N ]
+.B [-ending_point
+.IB N ]
+.B [-start_all] [-end_all] [-path 
+.IB DB_PATH ]
+.B [-name
+.IB DB_NAME ]
+.B [-dataset_size 
+.IB N]
+.B [-debug]
+.I LIST_FILE
+.\" 
+.\" 
+.\" 
+.\" 
+.SH DESCRIPTION
+
+The one required argument is a file containing one input file per line.  These
+files will be sorted in memory and written to the database area.
+
+    <list-file> is a file containing a list of recently
+      acquired data to merge into the database.
+    <list-file> may be specified as "-" to indicate data
+      is to be taken from <stdin>.  This is to allow use of
+      mdb (useful when reprocessing data without doing a requery).
+
+    <-flags> control flags
+                Normally we would drop the first and last
+                files as they would be partials.  These flags
+                will, when set to zero, will casue the starting
+                and ending files (respectively) to be retained.
+        -starting_point n  Default: 1
+        -ending_point n    Default: 1
+        -start_all         All files at the start of the period
+        -end_all           All files at the end of the period
+        -path xx           Database path
+        -name xx           Database name
+
+      Size of data file (hours)
+
+        -dataset_size n    Default: 6
+
+        -debug             controls debug output (stdout)
+                  01         record selection
+                  02         sorting internals
+                  04         sclk that is being sorted on
+                  08         record read counters
+
+    --------------------------------------------------------
+      This routine will merge the files given
+    as an argument to this routine with the
+    database files.  The file given to this routine
+    is simply a list of files to process.
+
+      We begin by scanning the given list of files into
+    memory, sorting and eliminating duplicates.  Start and
+    stop times are detemined by this phase of the operation.
+    We then move an hour before and after the indicated
+    time and scan the database, adding these records to the
+    list, again eliminating duplicates and keeping things
+    in order.
+
+      Once all is in memory, we can then proceed to write the
+    merged (raw) files back out to a new set of files.  These
+    files are named on 1 hour boundaries.  We keep track of the
+    filenames and spit them out to a file, thinking this might
+    be convenient later on.  We also reformat the list, dropping
+    the first and last files from the list, and changing the
+    filetype to that of the u-files (again, thinking this might
+    be useful a bit later).  Now, to get really sophisticated,
+    we can build something to move all of the derivative files
+    to the target directory (Kronos format files end up in a slightly
+    different directory, and we try to take that into account
+    as well).
+
+      You should be able to process the r-files, using the list
+    of r-files, and then move the u-files using the other lists
+    eliminating the fragments at the begining and end.
+
+  REPROCESSING
+      You may need to make use of sort_merge to reporcess data that
+    is already resident at Iowa.  This can be accomplished using the
+    MDB routine (-s R_FILE) to select records between the appropriate
+    times.  This will simply sort/merge the selected period twice, a
+    little extraq work, but operationally no different that processing the
+    results of a query.  As a side effect, the r data is time-ordered and
+    duplicate records are deleted.
+
+  Selection Criteria:
+    1. Records from the raw file are only accepted if the CDS packet
+       length field in non-zero and the packet ID matches one of the
+       7 valid patterns for the RPWS instrument.
+    2. CHDO fill length is used to select the "better" record.  If the
+       non-fill length is the same, the newly acquired record is used.
+
+
+    Result:
+        We should end up with all records that have shown up at JPL.
+        If the database has records that don't show up in a later query,
+        they are retained.
+
+
+  Version Information
+
+    read_raw V2.1
+      Hope we got <stdin> hacked correctly...
+    V2.2
+      Added <stdin> for reprocessing.
+    V1.9
+      Having trouble with packets getting lost (i.e. discarded).
+      Looks like LRS and HSK with identical SCLK tags get identified as
+      duplicates, with one of the getting tossed.  We'll solve this
+      by assigning HSK packkets a time tag that is 102mS after the start
+      of the RTI.  This will NOT match any HRS data (maximum of 12 packets
+      in any given RTI period).
+    V1.5
+      Hmmm...
+    V1.4
+      Database path/name selection.  This makes some debugging tasks
+      a little easier to manage
+    V1.1
+      Added delete to script files (but commented out)
+
+    V1.0
+      Initial Release

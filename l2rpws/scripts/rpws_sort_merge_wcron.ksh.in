@@ -1,0 +1,63 @@
+#!/bin/ksh
+#
+#
+# sample /var/tmp/Cassini_Sort_Merge_* file
+#	Shell Process ID 21972
+#	Background Process ID 21974
+#	chdo_listner: V2.1
+#	CDHO3: eup = 128 -1
+#
+# sample ps output:
+#	wtr 21974     1  0 11:24:05 pts/13   0:00 /opt/project/cassini/bin/rpws_file50 -sciop -split -stpk1 -strip
+#	wtr 21978 21974  0 11:24:05 pts/13   0:00 /opt/project/cassini/bin/rpws_file50 -sciop -strip -addstdout
+#	wtr 22313 21960  0 11:43:05 pts/13   0:00 grep 21974
+#
+# Look in the last "/var/tmp/Cassin_Sort_Merge_*" file for the "Background Process ID" number
+#  and produce a process list.
+#	3 notes.
+#		ID xx	valid
+#		xx ID	valid
+#		xx xx	invalid (grep)
+#
+
+if [ ! -d %(RPWS_DATA)s/sort_merge ]; then
+	if ! mkdir -p %(RPWS_DATA)s/sort_merge ; then
+		echo "Couldn't make %(RPWS_DATA)s/sort_merge"
+		exit 3
+	fi
+fi
+	
+cd %(RPWS_DATA)s/sort_merge
+
+
+echo "wcron Sort/Merge POST PASS ************************"
+date
+umask 113
+touch wcron.001
+touch wcron.002
+rm wcron.001
+rm wcron.002
+sText="Process"
+sPID=`grep "$sText" /var/tmp/Cassini_Sort_Merge.err`
+#
+nPID=${sPID:#$sText}
+ps -ef > wcron.001
+grep "$nPID" < wcron.001 > wcron.002
+rm wcron.001
+grep "defunct" < wcron.002 > wcron.001
+#
+nDefunct=`wc -l < wcron.001`
+nActive=`wc -l < wcron.002`
+if  [ $nActive != 4 ] || [ $nDefunct != 0 ]; then
+	 echo "Sort/Merge Post Pass restarting"
+	 
+    %(INST_NAT_BIN)s/rpws_sort_merge_wkill.ksh
+    %(INST_NAT_BIN)s/rpws_sort_merge_sopc.ksh
+	 
+    echo "We might want to stick sort/merge invocation here..."
+else
+    echo "Post Pass seems OK"
+fi
+#
+rm wcron.001
+rm wcron.002

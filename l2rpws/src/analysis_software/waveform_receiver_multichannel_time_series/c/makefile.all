@@ -1,0 +1,18 @@
+TOP=/opt/project/cassini
+LIB=$(TOP)/lib/original
+INC=$(TOP)/include/original
+CFLAGS=-Ae -g -I$(INC) -I/opt/local/include
+
+OBJS =        wfrall.o
+
+.c:           cc $(CFLAGS) -c $*.c
+
+lib:          $(OBJS)
+		f77 -g -o wfrall wfrall.o  \
+                                        /home/jbg/cassini/web/util.o \
+                                        $(LIB)/libutil.a  \
+                                        -L/opt/local/lib -ldas -lm -lsunmath
+		
+clean:
+		rm *.o
+

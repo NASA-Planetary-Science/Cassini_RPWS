@@ -1,0 +1,198 @@
+<HTML>
+<HEAD>
+<TITLE>das Cassini Two-Panel MFR Plots</TITLE>
+</HEAD>
+
+<BODY>
+<H1><em>das</em> Cassini Two-Panel E & B<br>
+Medium Frequency Receiver Plot<br>
+Web Form Interface</H1>
+
+<HR>
+<P>
+
+<FORM METHOD="POST"
+ACTION="http://cassini.physics.uiowa.edu/cgi-test/das-idl8">
+
+<input type="hidden" name="rows" value="4">
+<input type="hidden" name="columns" value="2">
+<input type="hidden" name="colormaps" value="2">
+<input type="hidden" name="images" value="4">
+<input type="hidden" name="axes" value="4">
+<input type="hidden" name="labels" value="0">
+<input type="hidden" name="plots" value="2">
+<input type="hidden" name="sets" value="3">
+
+<b>display size:</b> <select name="display.isize">
+<option>1024
+<option selected>800
+<option>640
+<option>320
+</select>
+<b>x </b> <select name="display.jsize">
+<option>768
+<option selected>600
+<option>480
+<option>240
+</select><br>
+
+<input type="hidden" name="colormap_i.klow" value="0">
+<input type="hidden" name="colormap_i.khigh" value="display.color.nz">
+<input type="hidden" name="set_i.ticklen" value="-0.02">
+<input type="hidden" name="axis_i.set" value="0">
+<input type="hidden" name="axis_i.method" value="'plot'">
+
+<input type="hidden" name="action" value="init">
+
+<input type="hidden" name="column(0).ileft" value="display.isize * 4 / 32">
+<input type="hidden" name="column(0).iright" value="display.isize * 25 / 32">
+<input type="hidden" name="column(0).time" value="1">
+
+<input type="hidden" name="column(1).ileft" value="display.isize * 30 / 32">
+<input type="hidden" name="column(1).iright" value="display.isize * 31 / 32">
+<input type="hidden" name="column(1).time" value="0">
+
+<b>time range: </b>
+<input size=18 name="column(0).tleft" value="'1999/08/18 01:30'">
+<b> to </b>
+<input size=18 name="column(0).tright" value="'1999/08/18 04:30'"><br>
+
+<input type="hidden" name="row(0).jbottom" value="display.jsize * 21 / 40">
+<input type="hidden" name="row(0).jtop" value="fix(long(display.jsize) * long(37) / long(40))">
+
+<input type="hidden" name="row(1).jbottom" value="display.jsize * 3 / 40">
+<input type="hidden" name="row(1).jtop" value="display.jsize * 19 / 40">
+
+<input type="hidden" name="row(2).jbottom" value="row(0).jbottom">
+<input type="hidden" name="row(2).jtop" value="row(0).jtop">
+
+<input type="hidden" name="row(3).jbottom" value="row(1).jbottom">
+<input type="hidden" name="row(3).jtop" value="row(1).jtop">
+
+<b>frequency range: </b>
+<input size=8 name="row(0).ybottom" value="23.89"><b>Hz to </b>
+<input size=8 name="row(0).ytop" value="11799."><b>Hz </b>
+ <input type="checkbox" name="row(0).log" value="1" checked>log<br>
+<br>
+
+<input type="hidden" name="row(1).ybottom" value="row(0).ybottom">
+<input type="hidden" name="row(1).ytop" value="row(0).ytop">
+<input type="hidden" name="row(1).log" value="row(0).log">
+
+<b>electric amplitude range : </b>
+<input size=8 name="colormap(0).zlow" value="1.e-16">(V/M)<sup>2</sup>/Hz <b>to </b>
+<input size=8 name="colormap(0).zhigh" value="1.e-12">(V/M)<sup>2</sup>/Hz
+<input type="checkbox" name="colormap(0).log" value="1" checked>log<br>
+<br>
+
+<b>magnetic amplitude range: </b>
+<input size=8 name="colormap(1).zlow" value="1.e-10">nT<sup>2</sup>/Hz <b>to </b>
+<input size=8 name="colormap(1).zhigh" value="1.e-6">nT<sup>2</sup>/Hz
+<input type="checkbox" name="colormap(1).log" value="1" checked>log<br>
+<br>
+
+<input type="checkbox" name="gray scale" value="1" ><b>gray scale (default is color)</b><br>
+<br>
+
+<input type="checkbox" name="plot(0).switch" value="1" checked>
+<i>f<sub>ce</sub></i> overlay (electron cyclotron frequency - white ) <br>
+<br>
+
+<input type="hidden" name="plot(0).row" value="0">
+<input type="hidden" name="plot(0).column" value="0">
+<input type="hidden" name="plot(0).set" value="0">
+<input type="hidden" name="plot(0).multi" value="0">
+<input type="hidden" name="plot(0).color" value="display.color.offwhite">
+<input type="hidden" name="plot(0).thick" value="2">
+<input type="hidden" name="plot(0).dataset" value="'cassini/mag/fce'">
+
+<input type="hidden" name="plot(1)" value="plot(0)">
+<input type="hidden" name="plot(1).row" value="1">
+
+<input type="checkbox" name="axis(1).tca" value="'galileo/pws/cephem'" >
+Earth orbit parameters<br>
+<br>
+
+<input type="hidden" name="row(2).ybottom" value="colormap(0).zlow">
+<input type="hidden" name="row(2).ytop" value="colormap(0).zhigh">
+<input type="hidden" name="row(2).log" value="colormap(0).log">
+
+<input type="hidden" name="row(2).ybottom" value="colormap(1).zlow">
+<input type="hidden" name="row(2).ytop" value="colormap(1).zhigh">
+<input type="hidden" name="row(2).log" value="colormap(1).log">
+
+<input type="hidden" name="axis(0).row" value="0">
+<input type="hidden" name="axis(0).column" value="0">
+<input type="hidden" name="axis(0).timeaxis" value="'x'">
+<input type="hidden" name="axis(0).x.tickname" value="no_label">
+<input type="hidden" name="axis(0).y.title" value="'Frequency (Hz)'">
+<input type="hidden" name="axis(0).set" value="1">
+
+<input type="hidden" name="axis(1).row" value="1">
+<input type="hidden" name="axis(1).column" value="0">
+<input type="hidden" name="axis(1).timeaxis" value="'x'">
+<input type="hidden" name="axis(1).x.title" value="column(0).tleft + ' to ' + column(0).tright">
+<input type="hidden" name="axis(1).y.title" value="'Frequency (Hz)'">
+
+<input type="hidden" name="axis(2).row" value="2">
+<input type="hidden" name="axis(2).column" value="1">
+<input type="hidden" name="axis(2).x.style" value="supress">
+<input type="hidden" name="axis(2).y.ticklen" value="-0.2">
+<input type="hidden" name="axis(2).y.title" value="'E-Field Spectral Density (V!U 2!N/M!U 2!N Hz)'">
+<input type="hidden" name="axis(2).set" value="2">
+
+<input type="hidden" name="axis(3).row" value="3">
+<input type="hidden" name="axis(3).column" value="1">
+<input type="hidden" name="axis(3).x.style" value="supress">
+<input type="hidden" name="axis(3).y.ticklen" value="-0.2">
+<input type="hidden" name="axis(3).y.title" value="'B-Field Spectral Density (nT!U 2!N/ Hz)'">
+
+<input type="hidden" name="image(0).row" value="0">
+<input type="hidden" name="image(0).column" value="0">
+<input type="hidden" name="image(0).colormap" value="0">
+
+<input type="hidden" name="image(1).row" value="1">
+<input type="hidden" name="image(1).column" value="0">
+<input type="hidden" name="image(1).colormap" value="1">
+
+<input type="hidden" name="image(0).dataset" value="'cassini/rpws/RPWSmfre'">
+<input type="hidden" name="image(1).dataset" value="'cassini/rpws/RPWSmfrb'">
+
+<input type="hidden" name="image(2).row" value="2">
+<input type="hidden" name="image(2).column" value="1">
+<input type="hidden" name="image(2).colormap" value="0">
+<input type="hidden" name="image(2).dataset" value="'color_wedge'">
+
+<input type="hidden" name="image(3).row" value="3">
+<input type="hidden" name="image(3).column" value="1">
+<input type="hidden" name="image(3).colormap" value="1">
+<input type="hidden" name="image(3).dataset" value="'color_wedge'">
+
+<b>plot title: </b>
+<input size=41 name="set(1).title" value="'Cassini RPWS Medium Frequency Receiver'">
+
+<input type="hidden" name="set(2).title" value="' '">
+
+<br>
+<br>
+<b>output: </b>
+<input type="radio" name="device_name" value="'Z'" checked> GIF as
+<select name="gif_mime_header">
+<option>'application/x-das-gif'
+<option selected>'image/gif'
+<option>'application/octet-stream'
+</select> &nbsp;
+<input type="radio" name="device_name" value="'PS'"> PS as
+<select name="ps_mime_header">
+<option>'application/x-das-eps'
+<option selected>'application/postscript'
+<option>'application/octet-stream'
+</select><br>
+
+<P>
+<INPUT TYPE="submit"> <INPUT TYPE="reset">
+</FORM>
+
+<hr>
+</BODY>
+</HTML>

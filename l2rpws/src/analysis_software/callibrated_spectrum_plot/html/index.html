@@ -1,0 +1,447 @@
+<HTML>
+
+<HEAD>
+
+<TITLE> Cassini Calibrated Spectrum Plot Web Form </TITLE>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="dasTime.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+<!-- hide from old web browsers
+
+var bElectric=true;// Global Scope ???, agrees with the defaults
+var bMagnetic=false;// Global Scope ???
+
+function hSetParms()
+{
+bElectric=false;
+bMagnetic=false;
+
+var sLFDRband="",sLFDRant="";
+var sMFRband="",sMFRant="";
+var sHFRband="",sHFRant="";
+var sText="";
+
+var sMinFrq="23.0";
+var sMaxFrq="16100000.0";
+var sMinAmp="1.0E-18";
+var sMaxAmp="1.0E-9";
+
+  bElectric=false;
+  bMagnetic=false;
+  // Look to see which band buttons are set, find min, find max
+  if(self.document.LFDR_Parms.band[0].checked==true) sMaxFrq=      25;
+  if(self.document.MFR_Parms.band[0].checked==true)  sMaxFrq=     169;
+  if(self.document.MFR_Parms.band[1].checked==true)  sMaxFrq=    1470;
+  if(self.document.MFR_Parms.band[2].checked==true)  sMaxFrq=   11800;
+  if(self.document.HFR_Parms.band[0].checked==true)  sMaxFrq=   15900;
+  if(self.document.HFR_Parms.band[1].checked==true)  sMaxFrq=   71300;
+  if(self.document.HFR_Parms.band[2].checked==true)  sMaxFrq=  320500;
+  if(self.document.HFR_Parms.band[3].checked==true)  sMaxFrq= 4200000;
+  if(self.document.HFR_Parms.band[4].checked==true)  sMaxFrq=16100000;
+
+  if(self.document.HFR_Parms.band[4].checked==true)  sMinFrq=1000000;
+  if(self.document.HFR_Parms.band[3].checked==true)  sMinFrq= 300000;
+  if(self.document.HFR_Parms.band[2].checked==true)  sMinFrq=  74600;
+  if(self.document.HFR_Parms.band[1].checked==true)  sMinFrq=  16500;
+  if(self.document.HFR_Parms.band[0].checked==true)  sMinFrq=   3600;
+  if(self.document.MFR_Parms.band[2].checked==true)  sMinFrq=   1536;
+  if(self.document.MFR_Parms.band[1].checked==true)  sMinFrq=    192;
+  if(self.document.MFR_Parms.band[0].checked==true)  sMinFrq=     23;
+  if(self.document.LFDR_Parms.band[0].checked==true) sMinFrq=      2;
+
+  // Parse LFDR Band and Antenna Settings
+  sLFDRband="";
+  for(var i=0;i<2;i++){
+    if(self.document.LFDR_Parms.band[i].checked==true)  
+      sLFDRband+=self.document.LFDR_Parms.band[i].value;
+  }
+  if(sLFDRband != ""){  
+    if(self.document.LFDR_Parms.antenna[0].checked==true){sLFDRant+="Ex,";bElectric=true;}
+    if(self.document.LFDR_Parms.antenna[1].checked==true){sLFDRant+="Ew,";bElectric=true;}
+    if(self.document.LFDR_Parms.antenna[2].checked==true){sLFDRant+="Bx,";bMagnetic=true;}
+    if(self.document.LFDR_Parms.antenna[3].checked==true){sLFDRant+="By,";bMagnetic=true;}
+    if(self.document.LFDR_Parms.antenna[4].checked==true){sLFDRant+="Bz,";bMagnetic=true;}
+    if(self.document.LFDR_Parms.antenna[5].checked==true){sLFDRant+="Eu,";bElectric=true;}
+    if(self.document.LFDR_Parms.antenna[6].checked==true){sLFDRant+="Ev,";bElectric=true;}
+    if(self.document.LFDR_Parms.antenna[7].checked==true){sLFDR+="LPs,";bElectric=true;}
+  }
+
+
+  // Parse MFR Band and Antenna Settings
+  sMFRband="";
+  for(var i=0;i<3;i++){
+    if(self.document.MFR_Parms.band[i].checked==true)
+      sMFRband+=self.document.MFR_Parms.band[i].value;
+  } 
+  if(sMFRband != ""){  
+    if(self.document.MFR_Parms.antenna[0].checked==true){sMFRant+="Ex,";bElectric=true;}
+    if(self.document.MFR_Parms.antenna[1].checked==true){sMFRant+="Ew,";bElectric=true;}
+    if(self.document.MFR_Parms.antenna[2].checked==true){sMFRant+="Bx,";bMagnetic=true;}
+    if(self.document.MFR_Parms.antenna[3].checked==true){sMFRant+="Bz,";bMagnetic=true;}
+  }
+
+  // Parse HFR Band and Antenna Settings
+  sHFRband="";
+  for(var i=0;i<5;i++){
+    if(self.document.HFR_Parms.band[i].checked==true)
+      sHFRband+=self.document.HFR_Parms.band[i].value;
+  } 
+  if(sHFRband != ""){  
+    if(self.document.HFR_Parms.antenna[0].checked==true){sHFRant+="Eu,";bElectric=true;}
+    if(self.document.HFR_Parms.antenna[1].checked==true){sHFRant+="Ev,";bElectric=true;}
+    if(self.document.HFR_Parms.antenna[2].checked==true){sHFRant+="Ex,";bElectric=true;}
+    if(self.document.HFR_Parms.antenna[3].checked==true){sHFRant+="Ew,";bElectric=true;}
+  }
+
+    if(bMagnetic==true)  sMaxAmp="1.0E+1";
+    else                 sMaxAmp="1.0E-9";
+
+    if(bElectric==true)  sMinAmp="1.0E-18";
+    else                 sMinAmp="1.0E-9";
+
+  // Min/Max Frequency Range
+  self.document.CasDasStd[3].value=sMinFrq;
+  self.document.CasDasStd[4].value=sMaxFrq;
+
+  // Min/Max Amplitude Range
+  self.document.CasDasStd[5].value=sMinAmp;
+  self.document.CasDasStd[6].value=sMaxAmp;
+
+// Y-Title
+  sText="Cassini RPWS ";
+  if(sLFDRband!="")
+    sText+= "LFDR " + sLFDRant + "  ";
+  if(sMFRband!="")
+    sText+="MFR " + sMFRband + " " + sMFRant + "  ";
+  if(sHFRband!="")
+    sText+="HFR " + sHFRband + " " + sHFRant + "  ";
+  self.document.CasDasStd[8].value=sText;
+
+<!--
+  if(self.document.CasDasStd.Hf1Psr.checked==true)
+  self.document.CasDasStd[8].value=sText;
+//-->
+
+
+}
+
+// Collect the variable to be sent to das 
+function hGetParms()
+{
+var sLFDR,sMFR,sHFR;
+  
+  // Check lfdr settings
+  sLFDR="";
+  for(var i=0;i<2;i++){
+    if(self.document.LFDR_Parms.band[i].checked==true)
+      sLFDR+=self.document.LFDR_Parms.band[i].value;
+  }
+  if(sLFDR != ""){ 
+    for(var i=0;i<7;i++){
+     if(self.document.LFDR_Parms.antenna[i].checked==true)
+       sLFDR+=self.document.LFDR_Parms.antenna[i].value;
+    }
+  }
+  
+
+  // Check mfr band settings
+  sMFR="";
+  for(var i=0;i<3;i++){
+    if(self.document.MFR_Parms.band[i].checked==true)
+      sMFR+=self.document.MFR_Parms.band[i].value;
+  }
+  if(sMFR != ""){
+    for(var i=0;i<4;i++){
+      if(self.document.MFR_Parms.antenna[i].checked==true)
+        sMFR+=self.document.MFR_Parms.antenna[i].value;
+    }
+  }
+
+  // Check hfr band settings
+  sHFR="";
+  for(var i=0;i<5;i++){
+    if(self.document.HFR_Parms.band[i].checked==true)
+      sHFR+=self.document.HFR_Parms.band[i].value;
+  }
+  if(sHFR != ""){
+    for(var i=0;i<4;i++){
+      if(self.document.HFR_Parms.antenna[i].checked==true)
+        sHFR+=self.document.HFR_Parms.antenna[i].value;
+    }
+  }
+
+  self.document.CasDasStd[0].value ="";
+  if(sLFDR!="") self.document.CasDasStd[0].value+=" -lfdr " + sLFDR;
+  if(sMFR!="") self.document.CasDasStd[0].value+=" -mfr " + sMFR;
+  if(sHFR!="") self.document.CasDasStd[0].value+=" -hfr " + sHFR;
+
+  self.document.CasDasStd[0].value+="         ";
+  if(sLFDR!="") self.document.CasDasStd[0].value+="     ";
+  if(sMFR!="") self.document.CasDasStd[0].value+="    ";
+  if(sHFR!="") self.document.CasDasStd[0].value+="    ";
+
+  // Check the overlapping status of MFR 3 and HFR A
+  if(self.document.CasDasStd.mfr3_hfrA_overlap[0].checked==true)
+    self.document.CasDasStd[0].value+=" ";
+  else if(self.document.CasDasStd.mfr3_hfrA_overlap[1].checked==true)
+    self.document.CasDasStd[0].value+=" -n hfra_mfr3 ";
+  else
+    self.document.CasDasStd[0].value+=" -n mfr3_hfra ";
+
+  // Check the overlapping status of HFR C and HFR HF1
+  if(self.document.CasDasStd.hfrC_hfr1_overlap[0].checked==true)
+    self.document.CasDasStd[0].value+=" ";
+  else if(self.document.CasDasStd.hfrC_hfr1_overlap[1].checked==true)
+    self.document.CasDasStd[0].value+=" -n hf1_hfrc ";
+  else
+    self.document.CasDasStd[0].value+=" -n hfrc_hf1 ";
+
+  // Reject HF1 Power Supply Noise
+  if(self.document.CasDasStd.hfr1_psr.checked==true)
+    self.document.CasDasStd[0].value+=" -n hf1pwr ";
+
+  self.document.CasDasStd[0].value+=" -n bad_data ";
+
+  // Generate a unique plot name for das
+var jsCurrentTime = new Date();
+var nYear,nMonth,nHour,nMinute,nSecond,sPlotName;
+
+  nYear = jsCurrentTime.getYear();  
+  nMonth = jsCurrentTime.getMonth()+1;
+  nDay = jsCurrentTime.getDate();   
+  nHour = jsCurrentTime.getHours();
+  nMinute = jsCurrentTime.getMinutes();  
+  nSecond = jsCurrentTime.getSeconds(); 
+  sPlotName = "";
+  sPlotName = "" + nYear + nMonth + nDay + nHour + nMinute + nSecond;
+  self.document.CasDasStd.action="http://cassini.physics.uiowa.edu/cgi-tfa/bplot.cgi/" + sPlotName;
+  
+}
+
+
+
+function hNextTmSlice(bDirection)
+{
+var dDiff,sTmp;
+var dasTm0 = new dasTime();
+var dasTm1 = new dasTime();
+
+  // Nix any quotes and replace with spaces
+  sTmp = new String(self.document.CasDasStd[1].value);
+  sTmp = sTmp.replace(/[']+/g,"");
+  if(dasTm0.parsetime(sTmp) == false)
+    dasTm0.PopupParseTmErr();
+
+  sTmp = new String(self.document.CasDasStd[2].value);
+  sTmp = sTmp.replace(/[']+/g,"");
+  if(dasTm1.parsetime(sTmp) == false)
+    dasTm1.PopupParseTmErr();
+
+  if(bDirection == true){  // forward in time
+    dDiff = dasTm1.ttime() - dasTm0.ttime();  // normalizes and returns seconds
+    dasTm0.nSecond += 2.0*dDiff;  // it be nice to overload the + operator
+    dasTm0.tnorm();
+  }
+  else{  // backwards in time
+    dDiff = dasTm1.ttime() - dasTm0.ttime();  // normalizes and returns seconds
+    dasTm1.nSecond -= 2.0*dDiff;  // it be nice to overload the + operator
+    dasTm1.tnorm();
+  }
+  
+  // Update time range text fields
+  self.document.CasDasStd[1].value = dasTm1.FormatRPWS();
+  self.document.CasDasStd[2].value = dasTm0.FormatRPWS();
+
+  hGetParms();  // collect all the current form settings, for submit()
+  self.document.CasDasStd.submit();  // submit current form
+
+return;
+}
+
+
+
+// end hiding -->
+</SCRIPT>
+</HEAD>
+
+
+<BODY>
+<CENTER><FONT SIZE="5"><B>
+ Cassini RPWS <BR>
+ Calibrated Spectrum Web Form<BR>
+</B></FONT>
+<br>
+<img src="thumbnail.gif">
+</CENTER>
+
+<HR>
+
+<!-- Select the LFDR Band and Antenna //-->
+<FORM NAME="LFDR_Parms">
+<DIV ALIGN=CENTER>
+<TABLE><CAPTION><FONT SIZE="4"><B> LFDR </B></FONT></CAPTION>
+<TR>
+  <TD><INPUT TYPE="checkbox" NAME="band" VALUE=" " onClick="hSetParms( );" CHECKED> <B> 27Hz </B></TD>
+  <TD><INPUT TYPE="checkbox" NAME="band" VALUE=" " onClick="hSetParms( );"        > <B> 2.5KHz </B></TD>
+</TR>
+</TABLE>
+<TABLE>
+<TR>
+  <TD><INPUT TYPE="checkbox" NAME="antenna" VALUE="Ex" onClick="hSetParms( );" CHECKED> <B> Ex </B></TD>
+  <TD><INPUT TYPE="checkbox" NAME="antenna" VALUE="Ew" onClick="hSetParms( );">         <B> Ez </B></TD>
+  <TD><INPUT TYPE="checkbox" NAME="antenna" VALUE="Bx" onClick="hSetParms( );">         <B> Bx </B></TD>
+  <TD><INPUT TYPE="checkbox" NAME="antenna" VALUE="By" onClick="hSetParms( );">         <B> By </B></TD>
+  <TD><INPUT TYPE="checkbox" NAME="antenna" VALUE="Bz" onClick="hSetParms( );">         <B> Bz </B></TD>
+</TR>
+<TR>
+  <TD><INPUT TYPE="checkbox" NAME="antenna" VALUE="LMRp" onClick="hSetParms( );"> <B> LMR+ </B></TD>
+  <TD><INPUT TYPE="checkbox" NAME="antenna" VALUE="LMRm" onClick="hSetParms( );"> <B> LMR- </B></TD>
+  <TD><INPUT TYPE="checkbox" NAME="antenna" VALUE="LPs"  onClick="hSetParms( );"> <B> LPs  </B></TD>
+</TR>
+</TABLE>
+</DIV>
+</FORM>
+
+<!-- Select the MFR Band and Antenna //-->
+<FORM NAME="MFR_Parms">
+<DIV ALIGN=CENTER>
+<TABLE><CAPTION><FONT SIZE="4"><B> MFR </B></FONT></CAPTION>
+<TR>
+  <TD><INPUT TYPE="checkbox" NAME="band" VALUE="1" onClick="hSetParms( );" CHECKED> <B> One   </B></TD>
+  <TD><INPUT TYPE="checkbox" NAME="band" VALUE="2" onClick="hSetParms( );" CHECKED> <B> Two   </B></TD>
+  <TD><INPUT TYPE="checkbox" NAME="band" VALUE="3" onClick="hSetParms( );" CHECKED> <B> Three </B></TD>
+</TR>
+ </TABLE>
+<TABLE>
+<TR>
+  <TD><INPUT TYPE="checkbox" NAME="antenna" VALUE="Ex"  onClick="hSetParms( );" CHECKED> <B> Ex </B></TD>
+  <TD><INPUT TYPE="checkbox" NAME="antenna" VALUE="Ew"  onClick="hSetParms( );"
+CHECKED> <B> Ez </B></TD>
+  <TD><INPUT TYPE="checkbox" NAME="antenna" VALUE="Bx"  onClick="hSetParms( );"        > <B> Bx </B></TD>
+  <TD><INPUT TYPE="checkbox" NAME="antenna" VALUE="Bz"  onClick="hSetParms( );"        > <B> Bz </B></TD>
+</TR>
+</TABLE>
+</DIV>
+</FORM>
+
+<!-- Select the HFR Band and Antenna //-->
+<FORM NAME="HFR_Parms">
+<DIV ALIGN=CENTER>
+<TABLE><CAPTION><FONT SIZE="4"><B> HFR </B></FONT></CAPTION>
+<TR>
+  <TD><INPUT TYPE="checkbox" NAME="band" VALUE="A" onClick="hSetParms( );" CHECKED> <B> A   </B></TD>
+  <TD><INPUT TYPE="checkbox" NAME="band" VALUE="B" onClick="hSetParms( );" CHECKED> <B> B   </B></TD>
+  <TD><INPUT TYPE="checkbox" NAME="band" VALUE="C" onClick="hSetParms( );" CHECKED> <B> C   </B></TD>
+  <TD><INPUT TYPE="checkbox" NAME="band" VALUE="1" onClick="hSetParms( );" CHECKED> <B> HF1 </B></TD>
+  <TD><INPUT TYPE="checkbox" NAME="band" VALUE="2" onClick="hSetParms( );" CHECKED> <B> HF2 </B></TD>
+</TR>
+</TABLE>
+<TABLE>
+<TR>
+  <TD><INPUT TYPE="checkbox" NAME="antenna" VALUE="Eu" onClick="hSetParms( );" CHECKED> <B> Ex+    </B></TD>
+  <TD><INPUT TYPE="checkbox" NAME="antenna" VALUE="Ev" onClick="hSetParms( );" CHECKED> <B> Ex-    </B></TD>
+  <TD><INPUT TYPE="checkbox" NAME="antenna" VALUE="Ex"  onClick="hSetParms( );" CHECKED> <B> Ex+/-  </B></TD>
+  <TD><INPUT TYPE="checkbox" NAME="antenna" VALUE="Ew"  onClick="hSetParms( );">         <B> Ez     </B></TD>
+</TR>
+</TABLE>
+</DIV>
+</FORM>
+
+
+<!-- Standard Das Layout //-->
+<DIV ALIGN=CENTER>
+<FORM METHOD="POST" onSubmit="hGetParms();" NAME="CasDasStd"
+      ACTION="http://cassini.physics.uiowa.edu/cgi-tfa/bplot.cgi">
+
+<!-- Initialization Statements for the IDL Script -->
+
+<!-- Select the HFR Band and Antenna //-->
+<INPUT TYPE="hidden" NAME="query_options" VALUE="-band A -antenna ExAny">	<!-- 0 -->
+<!-- Select the HFR Band and Antenna //-->
+
+<br>
+<b>time range: </b>
+<input size=25 name="tstart" value="2017-001T03:00"> <!-- 1 --> 
+<b> to </b>
+<input size=25 name="tstop" value="2017-001T03:01"><br> <!-- 2 --> 
+
+<br>
+<b>frequency range: </b>
+<input size=8 name="flow" value="2">Hz <b>to </b>	<!-- 3 -->
+<input size=8 name="fhigh" value="16100000">Hz		<!-- 4 -->
+
+<br>
+<b>amplitude range: </b>
+<input size=8 name="ybottom" value="1.e-18">V<sup>2</sup> m<sup>-2</sup> Hz<sup>-1</sup><b>to </b>	<!-- 5 -->
+<input size=8 name="ytop"    value="1.e-9">V<sup>2</sup> m<sup>-2</sup> Hz<sup>-1</sup>		<!-- 6 -->
+
+<br>
+<b>data set: </b>                             <!-- 7 -->
+
+  <SELECT name="dataset">
+    <OPTION>cassini/rpws/raj/RPWSspec
+  </SELECT><BR>
+
+<br>
+<b>plot title: </b>                          <!-- 8 -->
+<input size=62 name="title" value="Cassini RPWS LFDR Ex,  MFR 123 Ex,Ew,  HFR ABC12 Eu,Ev,Ex"><br>
+
+<br>
+Select the primary receiver for the given bandwidth <BR>
+<INPUT TYPE="RADIO" NAME="mfr3_hfrA_overlap" onClick="hSetParms();"><B>Average</B>
+<INPUT TYPE="RADIO" NAME="mfr3_hfrA_overlap" onClick="hSetParms();"><B>MFR 3</B>
+<INPUT TYPE="RADIO" NAME="mfr3_hfrA_overlap" onClick="hSetParms();" CHECKED><B>HFR A</B><BR> 
+
+<INPUT TYPE="RADIO" NAME="hfrC_hfr1_overlap" onClick="hSetParms();"><B>Average</B>
+<INPUT TYPE="RADIO" NAME="hfrC_hfr1_overlap" onClick="hSetParms();" CHECKED><B>HFR C</B>
+<INPUT TYPE="RADIO" NAME="hfrC_hfr1_overlap" onClick="hSetParms();"><B>HFR HF1</B><BR> 
+
+<INPUT TYPE="CHECKBOX" NAME="hfr1_psr" VALUE="Hf1Psr" CHECKED>
+Filter HF1 Power Supply Noise<BR> 
+
+<INPUT TYPE="CHECKBOX" NAME="ant_res" VALUE="adjust" >
+Antenna Resonance Adjust<BR>
+
+<!-- 11 October 2000  ljg  //-->
+<b>output: </b>
+<input type="radio" name="device_name" value="Z" checked> GIF as
+<select name="gif_mime_header">
+<option>application/x-das-gif
+<option selected>image/gif
+<option>application/octet-stream
+</select> &nbsp;
+<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<input type="radio" name="device_name" value="PS"> PS as
+<select name="ps_mime_header">
+<option>application/x-das-eps
+<option selected>application/postscript
+<option>application/octet-stream
+</select> &nbsp;
+<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<input type="radio" name="device_name" value="TEXT"> Text file as
+<select name="text_mime_header">
+<option>text/plain
+<option>application/octet-stream
+</select><br>
+<!-- 11 October 2000  ljg  //-->
+
+
+<!-- 9 February 2000 raj //-->
+<P>
+<INPUT TYPE="button" VALUE="<- Next" NAME="prev" onClick="hNextTmSlice(false);">
+<INPUT TYPE="submit" NAME="primary"> 
+<INPUT TYPE="button" VALUE="Next ->" NAME="next" onClick="hNextTmSlice(true);">
+</P>
+<!-- 9 February 2000 raj //-->
+
+<!--
+  <INPUT TYPE="reset">
+//-->
+
+</FORM>
+</DIV>
+<!-- Standard Das Layout //-->
+
+</BODY>
+</HTML>

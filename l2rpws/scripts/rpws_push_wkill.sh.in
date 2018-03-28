@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+#
+#
+# sample $PUSH_DIR/log/Cassini_Push_* file
+#	Shell Process ID 21972
+#	Background Process ID 21974
+#	chdo_listner: V2.1
+#	CDHO3: eup = 128 -1
+#
+# sample ps output:
+#	wtr 21974     1  0 11:24:05 pts/13   0:00 /opt/project/cassini/bin/rpws_file50 -sciop -split -stpk1 -strip
+#	wtr 21978 21974  0 11:24:05 pts/13   0:00 /opt/project/cassini/bin/rpws_file50 -sciop -strip -addstdout
+#	wtr 22313 21960  0 11:43:05 pts/13   0:00 grep 21974
+#
+# Look in the last "$PUSH_DIR/log/Cassin_Push_*" file for the "Background Process ID" number
+#  and produce a process list.
+#	3 notes.
+#		ID xx	valid i.e. kill this process
+#		xx ID	valid i.e. kill these processes
+#		xx xx	invalid (grep)
+#
+#
+umask 0002
+
+source %(SETUP_FILE)s
+
+export PATH=%(INST_NAT_BIN)s:/local/gnu/bin:/usr/bin:/opt/csw/bin
+
+PUSH_DIR=%(RPWS_DATA)s/bg_push
+
+if [ ! -d $PUSH_DIR/log ]; then
+	if ! mkdir -p $PUSH_DIR/log ; then
+		echo "Couldn't make $PUSH_DIR/log"
+		exit 3
+	fi
+fi
+	
+if ! cd $PUSH_DIR ; then
+	echo "Couldn't change to $PUSH_DIR" 
+	exit 3
+fi
+
+# Get the ID of the process to nuke
+
+if [ ! -e $PUSH_DIR/log/Cassini_Push.status ] ; then
+	echo "ERROR: Can't get Proc IDs, $PUSH_DIR/log/Cassini_Push.status is missing."
+	echo "INFO: If you'd like to do this mannually, look for process rpws_chdo_listener,"
+	echo "INFO: find it's parent and kill -TERM that to get all 10 at once."
+	exit 3
+fi
+
+sPID=$(grep -a Process $PUSH_DIR/log/Cassini_Push.status)
+
+nPID=$(echo $sPID | cut -d \  -f 2)
+ps -ef | grep -v bash > log/wkill.ps
+grep $nPID log/wkill.ps | sort > log/wkill.tmp
+rm log/wkill.ps
+
+# 1st Get rid of the child processes, try a nice shutdown first
+for sPid in $(awk '{print $2}' < log/wkill.tmp); do
+	echo "Removing Pipe-line process: kill -15 $sPid"
+	kill -15 $sPid &> /dev/null
+	sleep 1
+	echo "Making sure it's gone:      kill -9 $sPid"
+	kill -9 $sPid &> /dev/null
+done
+rm log/wkill.tmp
+
+# Now get rid of the containing shell, if it still exists
+sleep 1
+echo "Removing Controlling Shell: kill -9 $nPID"
+kill -9 $nPID &> /dev/null
+
+# the staus file could now point to some random program, get rid of it!
+rm $PUSH_DIR/log/Cassini_Push.status
+
+exit 0
+

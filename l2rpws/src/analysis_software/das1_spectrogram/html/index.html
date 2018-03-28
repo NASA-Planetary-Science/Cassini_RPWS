@@ -1,0 +1,692 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+<TITLE>A RPWS Cassini Low Rate Science Web Interface 2.1</TITLE>
+
+
+<SCRIPT LANGUAGE="JavaScript" SRC="dasTime.js"></SCRIPT> 
+<SCRIPT LANGUAGE="JavaScript" SRC="dasStd.js"></SCRIPT> 
+<SCRIPT LANGUAGE="JavaScript" SRC="dasHnd.js"></SCRIPT> 
+<SCRIPT LANGUAGE="JavaScript" SRC="casOrbit.js"></SCRIPT> 
+
+<STYLE TYPE="text/css">
+  BODY { background-image: url(CasGoldMarble.gif); 
+         background-attachment: fixed }
+</STYLE>
+
+</HEAD>
+
+<!--
+         background-color: gray;  sun netscatpe 4.5 renders 
+form inputs with the background color, sometimes.
+===============================================================================
+===============================================================================
+//-->
+
+
+<BODY>
+
+<DIV ALIGN=CENTER>
+ <FONT SIZE="+3"><B>RPWS Cassini Low Rate Science</B></FONT><BR>
+ <FONT SIZE="+2"><EM>das</EM> Web Interface 2.1 </FONT><BR>
+ <EM>Compatable with Netscape 4.5, and IE 5.0</EM>
+</DIV>
+
+<HR>
+
+
+<!-- Cassini Antennas //-->
+<DIV ALIGN=CENTER> <FORM METHOD="POST" NAME="CasAnt">
+<TABLE BORDER=5 CELLSPACING=5>
+  <TR ALIGN=CENTER>
+    <TH COLSPAN=8 NOWRAP><FONT SIZE="+3">RPWS Instruments</FONT></TH></TR>
+  <TR ALIGN=CENTER>
+    <TH COLSPAN=2 NOWRAP><FONT SIZE="+2"> LFR  </FONT></TH>
+    <TH COLSPAN=2 NOWRAP><FONT SIZE="+2"> MFDR </FONT></TH>
+    <TH COLSPAN=2 NOWRAP><FONT SIZE="+2"> MFR  </FONT></TH>
+    <TH COLSPAN=2 NOWRAP><FONT SIZE="+2"> HFR  </FONT></TH></TR>
+  <TR>
+    <TH NOWRAP><FONT SIZE="+1"> Band </FONT></TH>
+    <TH NOWRAP><FONT SIZE="+1"> Antenna </FONT></TH>
+    <TH NOWRAP><FONT SIZE="+1"> Band </FONT></TH>
+    <TH NOWRAP><FONT SIZE="+1"> Antenna </FONT></TH>
+    <TH NOWRAP><FONT SIZE="+1"> Band </FONT></TH>
+    <TH NOWRAP><FONT SIZE="+1"> Antenna </FONT></TH>
+    <TH NOWRAP><FONT SIZE="+1"> Band </FONT></TH>
+    <TH NOWRAP><FONT SIZE="+1"> Antenna </FONT></TH></TR>
+  <TR>
+    <TD NOWRAP><FONT SIZE="+1"> <!-- LFR Bands and Antennas -->
+      <INPUT TYPE="checkbox" NAME="lfdr_bnd" VALUE="L" CHECKED>
+        25Hz</FONT></TD>
+    <TD NOWRAP><FONT SIZE="+1">
+      <INPUT TYPE="checkbox" NAME="lfdr_ant" VALUE="Ex" CHECKED>Ex <BR>
+      <INPUT TYPE="checkbox" NAME="lfdr_ant" VALUE="Ew" CHECKED>Ew <BR>
+      <INPUT TYPE="checkbox" NAME="lfdr_ant" VALUE="Bx" >Bx <BR>
+      <INPUT TYPE="checkbox" NAME="lfdr_ant" VALUE="By" >By<BR>
+      <INPUT TYPE="checkbox" NAME="lfdr_ant" VALUE="Bz" >Bz </FONT></TD>
+    <TD NOWRAP><FONT SIZE="+1"> <!-- MFDR Bands and Antennas -->
+      <INPUT TYPE="checkbox" NAME="mfdr_bnd" VALUE="H" CHECKED>
+        2.5KHz</FONT></TD>
+    <TD NOWRAP><FONT SIZE="+1">
+      <INPUT TYPE="checkbox" NAME="mfdr_ant" VALUE="Ex" CHECKED>Ex <BR>
+      <INPUT TYPE="checkbox" NAME="mfdr_ant" VALUE="Ew" CHECKED>Ew <BR>
+      <INPUT TYPE="checkbox" NAME="mfdr_ant" VALUE="Bx" >Bx <BR>
+      <INPUT TYPE="checkbox" NAME="mfdr_ant" VALUE="By" >By<BR>
+      <INPUT TYPE="checkbox" NAME="mfdr_ant" VALUE="Bz" >Bz </FONT></TD>
+    <TD NOWRAP><FONT SIZE="+1"><!-- MFR Bands and Antennas -->
+      <INPUT TYPE="checkbox" NAME="mfr_bnd" VALUE="1" CHECKED>1<BR>
+      <INPUT TYPE="checkbox" NAME="mfr_bnd" VALUE="2" >2<BR>
+      <INPUT TYPE="checkbox" NAME="mfr_bnd" VALUE="3" CHECKED>3 </FONT> </TD>
+    <TD NOWRAP><FONT SIZE="+1">
+      <INPUT TYPE="checkbox" NAME="mfr_ant" VALUE="Ex" CHECKED>Ex<BR>
+      <INPUT TYPE="checkbox" NAME="mfr_ant" VALUE="Ew" CHECKED>Ew<BR>
+      <INPUT TYPE="checkbox" NAME="mfr_ant" VALUE="Bx" >Bx<BR>
+      <INPUT TYPE="checkbox" NAME="mfr_ant" VALUE="Bz" >Bz </FONT></TD>
+    <TD NOWRAP><FONT SIZE="+1"> <!-- HFR Bands and Antennas -->
+      <INPUT TYPE="checkbox" NAME="hfr_bnd" VALUE="A" CHECKED>A<BR>
+      <INPUT TYPE="checkbox" NAME="hfr_bnd" VALUE="B" CHECKED>B<BR>
+      <INPUT TYPE="checkbox" NAME="hfr_bnd" VALUE="C" CHECKED>C<BR>
+      <INPUT TYPE="checkbox" NAME="hfr_bnd" VALUE="1" CHECKED>HF1<BR>
+      <INPUT TYPE="checkbox" NAME="hfr_bnd" VALUE="2" CHECKED>HF2 </FONT></TD>
+    <TD NOWRAP><FONT SIZE="+1">
+      <INPUT TYPE="checkbox" NAME="hfr_ant" VALUE="Eu" CHECKED>Eu<BR>
+      <INPUT TYPE="checkbox" NAME="hfr_ant" VALUE="Ev" CHECKED>Ev<BR>
+      <INPUT TYPE="checkbox" NAME="hfr_ant" VALUE="Ex"  CHECKED>Ex<BR>
+      <INPUT TYPE="checkbox" NAME="hfr_ant" VALUE="Ew">Ew </FONT></TD>
+  <TR>
+    <TD COLSPAN=4 NOWRAP>
+      <TABLE>
+        <TR>
+          <TH ALIGN=CENTER><FONT SIZE="+1">
+             Data Filtering Options</FONT></TH></TR>
+        <TR>
+          <TD NOWRAP><FONT SIZE="+1">
+            <INPUT TYPE="checkbox" NAME="dfo" VALUE="-n hf1pwr" CHECKED>
+               Hf1 & Hf2 Power Supply Noise<BR>
+<!--
+            <INPUT TYPE="checkbox" NAME="hfr_dfo" VALUE="-a " CHECKED>
+               Correct for Antenna Resonance<BR> 
+            <INPUT TYPE="checkbox" NAME="hfr_dfo" VALUE="-n mfdr_mfr2" >
+               Replace MFR Band 2 with MFDR<BR> 
+//-->
+            <INPUT TYPE="checkbox" NAME="dfo" VALUE="-n bad_data" CHECKED>
+               Bad Data<BR> 
+            <INPUT TYPE="checkbox" NAME="dfo" VALUE="-n hfr_snd" CHECKED>
+               Hfr Sounder<BR> 
+            <INPUT TYPE="checkbox" NAME="dfo" VALUE="-n lp_rswp" CHECKED>
+               Lp Raw Sweep<BR> 
+            <INPUT TYPE="checkbox" NAME="dfo" VALUE="-n dpf_zero" >
+               Lfr/Mfdr Digital Prescale Factor = 0<BR> 
+          </FONT></TD></TR>
+      </TABLE></TD>     
+    <TD COLSPAN=4>
+      <TABLE>
+        <TR ALIGN=CENTER>
+          <TH COLSPAN=2 NOWRAP>
+            <FONT SIZE="+1">MFR/HFR Band Overlap</FONT><BR>
+            <FONT SIZE="+0">Select the primary receiver</FONT></TH></TR>
+        <TR ALIGN=CENTER> 
+          <TH NOWRAP><FONT SIZE="+0">3.6-11.8KHz</FONT></TH>
+          <TH NOWRAP><FONT SIZE="+0">74.6-320KHz</FONT></TH></TR>
+        <TR ALIGN=CENTER>
+          <TD NOWRAP><FONT SIZE="+1">
+            <SELECT MULTIPlE SIZE="2" NAME="mfr3_hfrA">
+              <OPTION VALUE="-n hfra_mfr3">MFR 3
+              <OPTION VALUE="-n mfr3_hfra" SELECTED>HFR A
+            </SELECT></FONT></TD>
+          <TD NOWRAP><FONT SIZE="+1">
+            <SELECT MULTIPlE SIZE="2" NAME="hfrC_hfrHF1">
+              <OPTION VALUE="-n hf1_hfrc" SELECTED>HFR C
+              <OPTION VALUE="-n hfrc_hf1">HFR HF1
+             <!-- <OPTION>HFR HF2 //-->
+            </SELECT></FONT> </TD></TR>
+        <TR ALIGN=CENTER>
+          <TD COLSPAN=2 NOWRAP><FONT SIZE="+1">
+            <INPUT TYPE="checkbox" NAME="mfr_mfdr" VALUE="-n mfdr_mfr2" CHECKED>
+               Replace MFR Band 2 with MFDR </FONT> </TD></TR>
+<!--
+            <INPUT TYPE="checkbox" NAME="mfrhfr_ndp" VALUE="-ndp">
+               Fill Data Gaps</FONT> </TD></TR>
+//-->
+      </TABLE>
+    </TD>
+ </TR>   
+</TABLE>
+</FORM> </DIV>
+<!-- Cassini Antennas //-->
+
+
+
+
+<!-- Cassini Das Options //-->
+<DIV ALIGN=CENTER> <FORM METHOD="POST" NAME="CasOpt">
+
+<TABLE BORDER=5 CELLSPACING=5>
+
+  <TR ALIGN=CENTER> <!-- display size data set //-->
+    <TD NOWRAP> 
+      <FONT SIZE="+2">Display Size</FONT> <BR>
+      <SELECT NAME="disp_xsize">
+         <OPTION VALUE="1024" SELECTED>1024
+         <OPTION VALUE="800">800
+         <OPTION VALUE="640">640
+         <OPTION VALUE="320">320
+      </SELECT> 
+      <FONT SIZE="+1">by&nbsp</FONT>
+      <SELECT NAME="disp_ysize">
+         <OPTION VALUE="768" SELECTED>768
+         <OPTION VALUE="600">600
+         <OPTION VALUE="480">480
+         <OPTION VALUE="240">240
+      </SELECT> </TD>
+    <TD NOWRAP>
+      <FONT SIZE="+2">Data Set</FONT> <BR>
+      <SELECT NAME="data_set">
+         <OPTION VALUE="cassini/rpws/raj/RPWSlrfc" SELECTED>
+                        cassini/rpws/raj/RPWSlrfc</OPTION>
+         <OPTION VALUE="cassini/rpws/tfa/RPWSkey" >
+                        cassini/rpws/tfa/RPWSkey</OPTION>
+         <OPTION VALUE="cassini/rpws/tfa/RPWSbrowse" >
+                        cassini/rpws/tfa/RPWSbrowse</OPTION>
+         <OPTION VALUE="cassini/rpws/raj/RPWSmp">
+                        cassini/rpws/raj/RPWSmp</OPTION>
+         <OPTION VALUE="cassini/rpws/raj/RPWSpdsmp">
+                        cassini/rpws/raj/RPWSpdsmp</OPTION>
+      </SELECT> </TD></TR> <!-- display size data set //-->
+
+  <TR ALIGN=CENTER> <!-- mime type output format //-->
+    <TD COLSPAN=2 NOWRAP>
+      <FONT SIZE="+2">Mime Type Output Format</FONT> <BR>
+      <INPUT TYPE=radio NAME="mime_type" VALUE="GIF" CHECKED> GIF
+      <SELECT NAME="mime_gif">
+         <OPTION VALUE="image/gif" SELECTED>
+                        image/gif</OPTION>
+         <OPTION VALUE="image/x-das-gif">
+                        image/x-das-gif</OPTION>
+         <OPTION VALUE="application/x-das-gif">
+                        application/x-das-gif</OPTION>
+         <OPTION VALUE="application/octet-stream">
+                        application/octet-stream</OPTION>
+      </SELECT> 
+      <INPUT TYPE=radio NAME="mime_type" VALUE="PS"> PS
+      <SELECT NAME="mime_ps">
+         <OPTION VALUE="application/x-das-eps">
+                        application/x-das-eps</OPTION>
+         <OPTION VALUE="application/postscript">
+                        application/postscript</OPTION>
+         <OPTION VALUE="application/octet-stream">
+                        application/octet-stream</OPTION>
+      </SELECT> </TD></TR> <!-- mime type output format //-->
+
+  <TR ALIGN=CENTER> <!-- data overlay and orbit parameters //-->
+    <TD NOWRAP><FONT SIZE="+2">Orbit Parameters</FONT><BR>
+      <SELECT NAME="orbit_parm">
+         <OPTION VALUE="">None
+         <OPTION VALUE="galileo/pws/cephemSun">Heliocentric
+         <OPTION VALUE="galileo/pws/cephemV">Venus
+         <OPTION VALUE="galileo/pws/cephemE">Earth
+         <OPTION VALUE="galileo/pws/cephemJ">Jupiter
+         <OPTION VALUE="galileo/pws/cephemS"SELECTED>Saturn
+         <OPTION VALUE="galileo/pws/cephemMimas">Mimas
+         <OPTION VALUE="galileo/pws/cephemEnceladus">Enceladus
+         <OPTION VALUE="galileo/pws/cephemTethys">Tethys
+         <OPTION VALUE="galileo/pws/cephemDione">Dione
+         <OPTION VALUE="galileo/pws/cephemRhea">Rhea
+         <OPTION VALUE="galileo/pws/cephemTitan">Titan
+         <OPTION VALUE="galileo/pws/cephemHyperion">Hyperion
+         <OPTION VALUE="galileo/pws/cephemIapetus">Iapetus
+         <OPTION VALUE="galileo/pws/cephemPhoebe">Phoebe
+      </SELECT> </TD>
+    <TD NOWRAP>
+      <TABLE BORDER=0>
+        <TR>
+          <TD ALIGN=CENTER NOWRAP>
+            <FONT SIZE="+2">Data Overlay</FONT></TD></TR>
+        <TR>
+          <TD><FONT SIZE="+1">
+            <INPUT TYPE=checkbox NAME="data_overlay" VALUE="1" CHECKED>
+                 f<SUB>ce</sub>(from MAG data when available)<BR>
+            <INPUT TYPE=checkbox NAME="data_overlay" VALUE="1" CHECKED>
+                 f<SUB>L=0</sub>(from LP Proxy data)<BR>
+            <INPUT TYPE=checkbox NAME="data_overlay" VALUE="1" CHECKED>
+                 f<SUB>L=0</sub>(from RPWS tracing)<BR>
+            <INPUT TYPE=checkbox NAME="data_overlay" VALUE="1" CHECKED>
+                 f<SUB>uh</sub>(from RPWS tracing)<BR> 
+            <INPUT TYPE=checkbox NAME="data_overlay" VALUE="1" >
+                 f<SUB>pe</sub>(from RPWS tracing)<BR> 
+            <INPUT TYPE=checkbox NAME="data_overlay" VALUE="1" >
+                 f<SUB>pe</sub>(from LP Proxy Density)<BR> 
+            </FONT></TD></TR>
+      </TABLE> </TD></TR> <!-- orbit parameters and data overlay //-->
+
+  <TR ALIGN=CENTER> <!-- plot title //-->
+    <TD COLSPAN=2>  
+      <TABLE>
+        <TR ALIGN=CENTER>
+          <TH><FONT SIZE="+2">Plot Title</FONT></TH>
+          <TD><INPUT TYPE="checkbox" NAME="title_auto" VALUE="1" CHECKED>
+              <FONT SIZE="+1">Auto Gen</FONT></TD></TR>
+        <TR>
+          <TD><INPUT TYPE="text" NAME="plot_title" SIZE=45 
+               VALUE="Pds LFR, MFR, and HFR"></TD>
+          <TD> &nbsp </TD></TR>
+      </TABLE> </TD></TR> <!-- plot title //-->
+
+  <TR ALIGN=CENTER> <!-- time range //-->
+    <TD COLSPAN=2> 
+      <TABLE>
+        <TR ALIGN=CENTER>
+          <TH COLSPAN=2><FONT SIZE="+2">Time Range</FONT></TH></TR>
+        <TR ALIGN=CENTER>
+          <TD>
+            <INPUT TYPE=text NAME="time_start" SIZE=25 
+               VALUE="2004-317T00:00">
+            <FONT SIZE="+2">To</FONT>
+            <INPUT TYPE=text NAME="time_stop" SIZE=25 
+               VALUE="2004-317T01:00"></TD></TR>
+      </TABLE> </TD></TR> <!-- time range //-->
+
+  <TR ALIGN=CENTER> <!-- frequency range //-->
+    <TD COLSPAN=2>
+      <TABLE>
+        <TR>
+          <TH><FONT SIZE="+2">Frequency Range</FONT></TH>
+          <TD><FONT SIZE="+1">
+            <INPUT TYPE="checkbox" NAME="freq_auto" CHECKED>
+                Auto Gen</FONT></TD></TR>
+        <TR>
+          <TD><INPUT TYPE="text" NAME="freq_min" SIZE=10 VALUE="2.0">
+            <SELECT NAME="freq_min_units">
+              <OPTION VALUE="Hz" SELECTED> Hz 
+              <OPTION VALUE="KHz" > KHz 
+              <OPTION VALUE="MHz"> MHz
+            </SELECT> 
+            <FONT SIZE="+2">To&nbsp</FONT>
+            <INPUT TYPE="text" NAME="freq_max" SIZE=10 VALUE="16.1">
+            <SELECT NAME="freq_max_units">
+              <OPTION VALUE="Hz"> Hz 
+              <OPTION VALUE="KHz" > KHz 
+              <OPTION VALUE="MHz" SELECTED> MHz
+             </SELECT></TD>
+          <TD NOWRAP><FONT SIZE="+1"> 
+            <INPUT TYPE=checkbox NAME="freq_log" VALUE="1" CHECKED> Log
+            </FONT></TD></TR>
+      </TABLE> </TD></TR> <!-- frequency range //-->
+
+  <TR ALIGN=CENTER> <!-- amplitude range //-->
+    <TD COLSPAN=2>
+      <TABLE>
+        <TR ALIGN=CENTER>
+          <TH COLSPAN=2><FONT SIZE="+2">Amplitude Range</FONT></TH>
+          <TD ALIGN=RIGHT><FONT SIZE="+1">
+            <INPUT TYPE="checkbox" NAME="amp_auto" VALUE="1" CHECKED>
+                 Auto Gen</FONT></TD></TR>
+        <TR>
+          <TD COLSPAN=2>
+            <INPUT TYPE=text NAME="amp_min" SIZE=10 VALUE="0">
+            <FONT SIZE="+1">V<SUP>2</SUP>/m<SUP>2</SUP>/Hz</FONT>
+            <FONT SIZE="+2">To</FONT>
+            <INPUT TYPE=text NAME="amp_max" SIZE=10 VALUE="25">
+            <FONT SIZE="+1">V<SUP>2</SUP>/m<SUP>2</SUP>/Hz</FONT></TD>
+          <TD>
+            <FONT SIZE="+1">
+            <INPUT TYPE=checkbox NAME="amp_log" VALUE="1" CHECKED> Log
+            </FONT></TD></TR>
+        <TR>  
+          <TD>
+            <FONT SIZE="+1">
+            <INPUT TYPE=radio NAME="amp_gray" VALUE="COLOR" CHECKED> Color Map
+            <INPUT TYPE=radio NAME="amp_gray"  VALUE="GRAY" > Gray Scale
+            </FONT></TD></TR>
+      </TABLE> </TD></TR> <!-- amplitude range //-->
+
+  <TR ALIGN=CENTER>
+    <TD COLSPAN=2 NOWRAP>
+      <TABLE>
+        <TR ALIGN=CENTER>
+          <TH COLSPAN=2><FONT SIZE="+2">Processing Options</FONT></TH></TR>
+        <TR ALIGN=LEFT>
+          <TD ALIGN=LEFT COLSPAN=2 NOWRAP><FONT SIZE="+1">
+            <INPUT TYPE="checkbox" NAME="ant_res" VALUE="-a " CHECKED>
+               Correct for Antenna Resonance
+            </FONT></TD></TR>
+        <TR ALIGN=LEFT> 
+          <TD ALIGN=LEFT COLSPAN=2 NOWRAP><FONT SIZE="+1">
+            <INPUT TYPE=checkbox NAME="bgd" VALUE="1" CHECKED>
+                   Background Division 
+            <INPUT TYPE=text NAME="bgd_per" SIZE=2 VALUE="7"> % by
+            <SELECT NAME="bgd_mode">
+               <OPTION VALUE="mode" SELECTED>das & inst. mode
+               <OPTION VALUE="das">das only
+               <OPTION VALUE="rdr">inst. mode only
+            </SELECT> 
+            </FONT></TD></TR>
+        <TR ALIGN=LEFT>
+          <TD ALIGN=LEFT COLSPAN=2 NOWRAP><FONT SIZE="+1">
+            <INPUT TYPE="checkbox" NAME="bgd_day" VALUE="-bgday" CHECKED>
+               Use day interval for background calculation
+            </FONT></TD></TR>
+      </TABLE> 
+    </TD></TR>
+</TABLE>
+
+</FORM> </DIV>
+<!-- Cassini Das Options //-->
+
+
+
+<!-- Standard Das Parameters to Pass //-->
+<!-- ACTION="http://cassini.physics.uiowa.edu/das/das-idl8/plot.gif">//-->
+
+<DIV ALIGN=CENTER>
+<FORM METHOD="POST" NAME="dasStd"
+   ACTION="http://cassini.physics.uiowa.edu/das/das-idl8/plot.gif">
+
+<!-- Initialization Statements for the IDL Script -->
+<input type="hidden" name="rows" value="3">
+<input type="hidden" name="columns" value="2">
+<input type="hidden" name="colormaps" value="1">
+<input type="hidden" name="images" value="2">
+<input type="hidden" name="axes" value="2">
+<input type="hidden" name="plots" value="6">
+<input type="hidden" name="labels" value="1">
+<input type="hidden" name="sets" value="2">
+
+<input type="hidden" name="colormap_i.klow" value="0">
+<input type="hidden" name="colormap_i.khigh" value="display.color.nz">
+<input type="hidden" name="set_i.ticklen" value="-0.02">
+<input type="hidden" name="axis_i.set" value="0">
+<input type="hidden" name="axis_i.method" value="'plot'">
+
+<input type="hidden" name="action" value="init">
+<!-- Initialization Statements for the IDL Script //-->
+
+
+<!-- Form Variable for user defined variables //-->
+<INPUT TYPE="hidden" NAME="image(0).query" 
+      VALUE="-lfr LEx -mfr 123ExEz -hfr ABC12EuEvEx">
+<!-- Form Variable for user defined variables //-->
+
+<!-- Display X and Y Parameters //-->
+<input type="hidden" name="display.isize" value="640">
+<input type="hidden" name="display.jsize" value="480">
+
+<input type="hidden" name="column(0).ileft" value="display.isize / 8">
+<input type="hidden" name="column(0).iright" value="display.isize * 6 / 8">
+<input type="hidden" name="column(0).time" value="1">
+
+
+<!-- time range //-->
+<input type="hidden" name="column(0).tleft"  value="'2002-355T00:00'">
+<input type="hidden" name="column(0).tright" value="'2002-356T00:00'">
+
+<input type="hidden" name="column(1).ileft" 
+      value="column(0).iright + display.isize / 8">
+<input type="hidden" name="column(1).iright" 
+      value="column(1).ileft + display.isize / 32">
+<input type="hidden" name="row(0).jbottom" value="display.jsize * 2 / 10">
+<input type="hidden" name="row(0).jtop" value="display.jsize * 8 / 10">
+
+
+<!-- frequency range (in Hz) //-->
+<input type="hidden" name="row(0).ybottom" value="2">
+<input type="hidden" name="row(0).ytop" value="16100000">
+<input type="hidden" name="row(0).log" value="1">
+<input type="hidden" name="row(1)" value="row(0)">
+
+
+<!-- amplitude range (in Hz) //-->
+<input type=hidden name="colormap(0).zlow"  value="1.e-18">
+<input type=hidden name="colormap(0).zhigh" value="1.e-9">
+<input type=hidden name="colormap(0).log"   value="1">
+<input type=hidden name="gray scale" value="0"> 
+
+<!-- 32 -->
+<input type="hidden" name="axis(0).row" value="0">
+<input type="hidden" name="axis(0).column" value="0">
+<input type="hidden" name="axis(0).timeaxis" value="'x'">
+<input type="hidden" name="axis(0).x.title" value="'SCET'">
+<input type="hidden" name="axis(0).y.title" value="'Frequency (Hz)'">
+<input type="hidden" name="axis(0).set" value="1">
+
+<!-- 38 -->
+<input type="hidden" name="axis(1).row" value="1">
+<input type="hidden" name="axis(1).column" value="1">
+<input type="hidden" name="axis(1).x.style" value="supress">
+<input type="hidden" name="axis(1).y.ticklen" value="-0.2">
+<input type="hidden" name="axis(1).y.title" value="'V!E2 !Nm!E-2 !NHz!E-1 !N'">
+
+<!-- 43 -->
+<input type="hidden" name="image(0).row"      value="0">
+<input type="hidden" name="image(0).column"   value="0">
+<input type="hidden" name="image(0).colormap" value="0">
+
+
+<!-- Data Set //-->
+<input type="hidden" name="image(0).dataset" value="'undefined data set'">
+
+<!-- 
+     'cassini/rpws/raj/RPWSspec' 
+     'cassini/rpws/tfa/RPWSbrowse'
+     'cassini/rpws/raj/RPWSspecIowa'
+//-->
+
+
+<input type="hidden" name="image(1).row" value="1">
+<input type="hidden" name="image(1).column" value="1">
+<input type="hidden" name="image(1).colormap" value="0">
+<input type="hidden" name="image(1).dataset" value="'color_wedge'">
+
+
+<!-- orbit numbers below color bar //--> 
+  <!-- Placement in Page //-->
+  <input type="hidden" name="row(2).jtop" value="row(0).jbottom">
+  <input type="hidden" name="row(2).jbottom" value="display.jsize*1/10">
+  <!-- Normalize Coordinate System //-->
+  <input type="hidden" name="row(2).ytop" value="1">
+  <input type="hidden" name="row(2).ybottom" value="0">
+
+  <!--  //-->
+  <input type="hidden" name="label(0).charsize" value="1">
+  <input type="hidden" name="label(0).alignment" value="0.5">
+  <input type="hidden" name="label(0).orientation" value="0">
+  <input type="hidden" name="label(0).row" value="2">
+  <input type="hidden" name="label(0).column" value="1">
+  <!-- Placement within frame, pixels or is it normalized coordinates? !C//-->
+  <input type="hidden" name="label(0).xp" value="0.5">
+  <input type="hidden" name="label(0).yp" value="0.0">
+  <input type="hidden" name="label(0).value" value="'     '">
+
+<!-- color map //-->
+<input type="hidden" name="image(1).column" value="1">
+<input type="hidden" name="image(1).colormap" value="0">
+<input type="hidden" name="image(1).dataset" value="'color_wedge'">
+
+
+
+
+<!-- plot title //--> 
+<input type="hidden" name="set(1).title" 
+      value="'RPWS Cassini Instruments: LFR, MFR, and HFR'">
+
+
+<!-- background division //-->
+<input type="hidden" name="image(0).bgd"   value="0">  
+<input type="hidden" name="colormap(0).db" value="0">  
+<!-- 
+     for background division:
+         image(0).bgd is the % to take as the background
+         colormap(0).db should be set to 1
+     for noiselevel division:
+         image(0).bgd should be set to 0 
+         colormap(0).db should be set to 1
+     all else:
+         image(0).bgd should be set to 0 
+         colormap(0).db should be set to 0
+//-->
+
+
+<!-- orbit parameters //-->
+<input type="hidden" name="axis(0).tca" value="'galileo/pws/cephemE'"> 
+<!--
+  No Orbit Parameters      value="''"
+  Heliocentric Parameters  value="'galileo/pws/cephemSun'"
+  Earth Orbit Parameters   value="'galileo/pws/cephemE'"
+  Jupiter Orbit Parameters value="'galileo/pws/cephemJ'"
+  Saturn Orbit Parameters  value="'galileo/pws/cephemS'" 
+//-->
+
+
+<!-- mime type //-->
+<input type="hidden" name="device_name" value="'Z'">
+<input type="hidden" name="gif_mime_header" value="'image/gif'">
+<!-- 
+  gif
+    name="device_name" value="'Z'"
+    name="gif_mime_header" value="'application/x-das-gif'">
+                                 "'image/gif'"
+                                 "'application/octet-stream'"
+  postscript
+    name="device_name" value="'PS'"
+    name="ps_mime_header" value="'application/x-das-eps'"
+                                "'application/postscript'"
+                                "'application/octet-stream'"
+    
+//-->
+
+<!-- 54 
+Noise Level Subtraction
+<INPUT TYPE="checkbox" NAME="NoiseLevelSub" VALUE="Off">
+//--> 
+
+<!-- 55
+Noise Level Division
+<INPUT TYPE="checkbox" NAME="NoiseLevelDiv" VALUE="nld" onClick="hSetParms();">
+//--> 
+
+
+
+<!-- fce overlay from MAG //-->
+<input type=hidden name="plot(0).row"     value="0">
+<input type=hidden name="plot(0).column"  value="0">
+<input type=hidden name="plot(0).set"     value="0">
+<input type=hidden name="plot(0).multi"   value="0">
+<input type=hidden name="plot(0).color"   value="display.color.offwhite">
+<input type=hidden name="plot(0).thick"   value="2">
+<input type=hidden name="plot(0).dataset" value="'cassini/mag/fce'">
+<input type=hidden name="plot(0).enable"  value="1">
+<!-- fce overlay from MAG //-->
+
+<!-- L=0 derived from cas_lp_proxy and css_mag //-->
+<input type=hidden name="plot(1).row"     value="0">
+<input type=hidden name="plot(1).column"  value="0">
+<input type=hidden name="plot(1).set"     value="0">
+<input type=hidden name="plot(1).multi"   value="0">
+<input type=hidden name="plot(1).color"   value="display.color.offwhite">
+<input type=hidden name="plot(1).thick"   value="2">
+<input type=hidden name="plot(1).dataset" value="'galileo/pws/cLEqualsZeroLP03'">
+<input type=hidden name="plot(1).enable"  value="1">
+<!-- L=0 derived from cas_lp_proxy and css_mag //-->
+
+<!-- L=0 derived from cas_fpe and css_mag //-->
+<input type=hidden name="plot(2).row"     value="0">
+<input type=hidden name="plot(2).column"  value="0">
+<input type=hidden name="plot(2).set"     value="0">
+<input type=hidden name="plot(2).multi"   value="0">
+<input type=hidden name="plot(2).color"   value="display.color.offwhite">
+<input type=hidden name="plot(2).thick"   value="2">
+<input type=hidden name="plot(2).dataset" value="'galileo/pws/cLEqualsZero03'">
+<input type=hidden name="plot(2).enable"  value="1">
+<!-- L=0 derived from cas_fpe and css_mag //-->
+
+<!-- fuh overlay from RPWS tracing //-->
+<input type=hidden name="plot(3).row"     value="0">
+<input type=hidden name="plot(3).column"  value="0">
+<input type=hidden name="plot(3).set"     value="0">
+<input type=hidden name="plot(3).multi"   value="0">
+<input type=hidden name="plot(3).color"   value="display.color.offwhite">
+<input type=hidden name="plot(3).thick"   value="2">
+<input type=hidden name="plot(3).dataset" value="'galileo/pws/cfuh'">
+<input type=hidden name="plot(3).enable" value="1">
+<!-- fuh overlay from RPWS tracing //-->
+
+<!-- fpe overlay from RPWS tracing //-->
+<input type=hidden name="plot(4).row"     value="0">
+<input type=hidden name="plot(4).column"  value="0">
+<input type=hidden name="plot(4).set"     value="0">
+<input type=hidden name="plot(4).multi"   value="0">
+<input type=hidden name="plot(4).color"   value="display.color.offwhite">
+<input type=hidden name="plot(4).thick"   value="2">
+<input type=hidden name="plot(4).dataset" value="'galileo/pws/cfpe'">
+<input type=hidden name="plot(4).enable" value="1">
+<!-- fpe overlay from RPWS tracing //-->
+
+<!-- fpe overlay from Langmuir Probe Proxy Density Data //-->
+<input type=hidden name="plot(5).row"     value="0">
+<input type=hidden name="plot(5).column"  value="0">
+<input type=hidden name="plot(5).set"     value="0">
+<input type=hidden name="plot(5).multi"   value="0">
+<input type=hidden name="plot(5).color"   value="display.color.offwhite">
+<input type=hidden name="plot(5).thick"   value="2">
+<input type=hidden name="plot(5).dataset" value="'galileo/pws/cas_lp_proxy03'">
+<input type=hidden name="plot(5).enable" value="1">
+<!-- fpe overlay from Langmuir Probe Proxy Density Data //-->
+
+
+
+<FONT SIZE="+1">
+<INPUT TYPE="submit" VALUE="<-Next" NAME="sub_prev" onClick="onNext(false)">
+<INPUT TYPE="submit" VALUE="Submit" NAME="sub_curr" onClick="onSubmitDas()">
+<INPUT TYPE="submit" VALUE="Next->" NAME="sub_next" onClick="onNext(true)">
+</FONT>
+
+</FORM> </DIV>
+<!-- Standard Das Parameters to Pass //-->
+<A HREF="http://www-pw.physics.uiowa.edu/das/view-log?das">das log file</A>
+&nbsp &nbsp &nbsp &nbsp 
+<!--
+<A HREF="http://www-pw.physics.uiowa.edu/cassini/raj/dashelp/dashelp.html">
+  das help </A>
+//-->
+<SCRIPT LANGUAGE="JavaScript">
+var fOpt=document.CasOpt,fAnt=document.CasAnt;
+var ampauto_handler = new Function("onAmpAuto(this)");
+var ant_hnd = new Function("ant_handler()");
+var bnd_hnd = new Function("bnd_handler()");
+var mfdr_hnd = new Function("mfdr_handler()");
+
+
+  // Register event handlers 
+
+  fOpt.bgd.onclick=ampauto_handler;
+
+  for(var i=0;i<fAnt.lfdr_ant.length;i++)
+    fAnt.lfdr_ant[i].onclick=ant_hnd;
+  for(var i=0;i<fAnt.mfdr_ant.length;i++)
+    fAnt.mfdr_ant[i].onclick=ant_hnd;
+  for(var i=0;i<fAnt.mfr_ant.length;i++)
+    fAnt.mfr_ant[i].onclick=ant_hnd;
+  for(var i=0;i<fAnt.hfr_ant.length;i++)
+    fAnt.hfr_ant[i].onclick=ant_hnd;
+
+  fAnt.lfdr_bnd.onclick=bnd_hnd;
+  fAnt.mfdr_bnd.onclick=bnd_hnd;
+  for(var i=0;i<fAnt.mfr_bnd.length;i++)
+    fAnt.mfr_bnd[i].onclick=bnd_hnd;
+  for(var i=0;i<fAnt.hfr_bnd.length;i++)
+    fAnt.hfr_bnd[i].onclick=bnd_hnd;
+
+  fAnt.mfr_mfdr.onclick=mfdr_hnd;
+  fOpt.data_set.onchange=ant_hnd;
+
+  // Involke Handlers to match initial settings
+//  onAmpAuto(fOpt.bgd);
+//  ant_handler();
+//  bnd_handler();
+  onTitleAuto(fAnt,fOpt);
+
+</SCRIPT> 
+
+</BODY>
+</HTML>

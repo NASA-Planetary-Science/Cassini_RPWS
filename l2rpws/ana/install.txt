@@ -1,0 +1,53 @@
+This software has been tested on Solaris 10.  Much of the code depends on 
+Big-Endian (Most Significant Byte First) byte order and 32-bit pointer lengths
+to operate correctly.  To install the software:
+
+
+Build dependencies
+------------------
+This source depends on libraries under stable/GSE. Install those first using
+the install.txt instructions in that location.
+
+
+Setup your environment
+----------------------
+The following enviroment variables need to be set before building the software
+
+PREFIX     The top level install directory
+RPWS_DATA  The directory for minipacket 'R' and 'U' files.
+PGPLOT_DIR The directory containing the PGPLOT font file grfont.dat
+
+Here's an example setup for installation into ones home directory:
+
+$ bash
+$ export PGPLOT_DIR=/local/pgplot
+$ export PREFIX=$HOME/cassini
+$ export RPWS_DATA=$PREFIX/data
+$ export RPWS_MPDB=$RPWS_DATA/database/Cassini.db
+
+
+If you often build install to the same location, generate a file you can
+'source' to get these settings.
+
+Build the software
+------------------
+$ gmake
+
+
+Install the software
+--------------------
+$ gmake install
+
+
+Running the software
+----------------
+You will need to have PGPLOT_DIR in your environment when running rpws_ana.
+
+$ export PGPLOT_DIR=/local/pgplot
+$ rpws_ana
+
+
+
+
+
+ 

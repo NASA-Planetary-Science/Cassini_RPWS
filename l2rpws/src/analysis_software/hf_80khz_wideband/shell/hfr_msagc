@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# usage: hfr_msagc begin-scet end-scet [dataset]
+
+#if [ $# -ne 2 ]; then
+#  exit -1
+#fi
+
+exec /home/tfa/cassini/hfr/web/hfr_msagc.exe "$1" "$2"
+exit 0

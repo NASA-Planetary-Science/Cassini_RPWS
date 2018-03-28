@@ -1,0 +1,270 @@
+<HTML>
+<HEAD>
+<TITLE>das Cassini Five-Channel HFWR Plots</TITLE>
+</HEAD>
+
+<BODY>
+<H1><em>das</em> Cassini Five-Channel HFWR Plot<br>
+Web Form Interface</H1>
+
+<HR>
+<P>
+
+<FORM METHOD="POST"
+ACTION="http://www-pw.physics.uiowa.edu/cgi-test/das-idl.cgi">
+
+<input type="hidden" name="rows" value="10">
+<input type="hidden" name="columns" value="2">
+<input type="hidden" name="colormaps" value="2">
+<input type="hidden" name="images" value="10">
+<input type="hidden" name="axes" value="10">
+<input type="hidden" name="labels" value="0">
+<input type="hidden" name="plots" value="0">
+<input type="hidden" name="sets" value="3">
+
+<b>display size:</b> <select name="display.isize">
+<option>768
+<option selected>600
+<option>480
+<option>240
+</select>
+<b>x </b> <select name="display.jsize">
+<option>1024
+<option selected>800
+<option>640
+<option>320
+</select><br>
+
+<input type="hidden" name="colormap_i.klow" value="0">
+<input type="hidden" name="colormap_i.khigh" value="display.color.nz">
+<input type="hidden" name="set_i.ticklen" value="-0.02">
+<input type="hidden" name="axis_i.set" value="0">
+<input type="hidden" name="axis_i.method" value="'plot'">
+
+<input type="hidden" name="action" value="init">
+
+<input type="hidden" name="column(0).ileft" value="display.isize * 4 / 32">
+<input type="hidden" name="column(0).iright" value="display.isize * 25 / 32">
+<input type="hidden" name="column(0).time" value="1">
+
+<input type="hidden" name="column(1).ileft" value="display.isize * 30 / 32">
+<input type="hidden" name="column(1).iright" value="display.isize * 31 / 32">
+<input type="hidden" name="column(1).time" value="0">
+
+<b>time range: </b>
+<input size=18 name="column(0).tleft" value="'1998/12/30 09:15'">
+<b> to </b>
+<input size=18 name="column(0).tright" value="'1998/12/30 11:15'"><br>
+
+<input type="hidden" name="row(0).jbottom" value="display.jsize * 31 / 40">
+<input type="hidden" name="row(0).jtop" value="fix(long(display.jsize) * long(37) / long(40))">
+
+<input type="hidden" name="row(1).jbottom" value="display.jsize * 24 / 40">
+<input type="hidden" name="row(1).jtop" value="display.jsize * 30 / 40">
+
+<input type="hidden" name="row(2).jbottom" value="display.jsize * 17 / 40">
+<input type="hidden" name="row(2).jtop" value="display.jsize * 23 / 40">
+
+<input type="hidden" name="row(3).jbottom" value="display.jsize * 10 / 40">
+<input type="hidden" name="row(3).jtop" value="display.jsize * 16 / 40">
+
+<input type="hidden" name="row(4).jbottom" value="display.jsize * 3 / 40">
+<input type="hidden" name="row(4).jtop" value="display.jsize * 9 / 40">
+
+<input type="hidden" name="row(5).jbottom" value="row(0).jbottom">
+<input type="hidden" name="row(5).jtop" value="row(0).jtop">
+
+<input type="hidden" name="row(6).jbottom" value="row(1).jbottom">
+<input type="hidden" name="row(6).jtop" value="row(1).jtop">
+
+<input type="hidden" name="row(7).jbottom" value="row(2).jbottom">
+<input type="hidden" name="row(7).jtop" value="row(2).jtop">
+
+<input type="hidden" name="row(8).jbottom" value="row(3).jbottom">
+<input type="hidden" name="row(8).jtop" value="row(3).jtop">
+
+<input type="hidden" name="row(9).jbottom" value="row(4).jbottom">
+<input type="hidden" name="row(9).jtop" value="row(4).jtop">
+
+<b>frequency range: </b>
+<input size=8 name="row(0).ybottom" value="0.0"><b>KHz to </b>
+<input size=8 name="row(0).ytop" value="3.5"><b>KHz </b>
+ <input type="checkbox" name="row(0).log"  >log<br>
+<br>
+
+<input type="hidden" name="row(1).ybottom" value="row(0).ybottom">
+<input type="hidden" name="row(1).ytop" value="row(0).ytop">
+<input type="hidden" name="row(1).log" value="row(0).log">
+
+<input type="hidden" name="row(2).ybottom" value="row(0).ybottom">
+<input type="hidden" name="row(2).ytop" value="row(0).ytop">
+<input type="hidden" name="row(2).log" value="row(0).log">
+
+<input type="hidden" name="row(3).ybottom" value="row(0).ybottom">
+<input type="hidden" name="row(3).ytop" value="row(0).ytop">
+<input type="hidden" name="row(3).log" value="row(0).log">
+
+<input type="hidden" name="row(4).ybottom" value="row(0).ybottom">
+<input type="hidden" name="row(4).ytop" value="row(0).ytop">
+<input type="hidden" name="row(4).log" value="row(0).log">
+
+<b>electric amplitude range : </b>
+<input size=8 name="colormap(0).zlow" value="1.e-18">(V/M)<sup>2</sup>/Hz <b>to </b>
+<input size=8 name="colormap(0).zhigh" value="1.e-8">(V/M)<sup>2</sup>/Hz
+<input type="checkbox" name="colormap(0).log" value="1" checked>log<br>
+<br>
+
+<b>magnetic amplitude range: </b>
+<input size=8 name="colormap(1).zlow" value="1.e-12">nT<sup>2</sup>/Hz <b>to </b>
+<input size=8 name="colormap(1).zhigh" value="1.e-2">nT<sup>2</sup>/Hz
+<input type="checkbox" name="colormap(1).log" value="1" checked>log<br>
+<br>
+
+<input type="checkbox" name="gray scale" value="1" ><b>gray scale (default is color)</b><br>
+<br>
+
+<input type="hidden" name="row(5).ybottom" value="colormap(0).zlow">
+<input type="hidden" name="row(5).ytop" value="colormap(0).zhigh">
+<input type="hidden" name="row(5).log" value="colormap(0).log">
+
+<input type="hidden" name="row(6).ybottom" value="colormap(0).zlow">
+<input type="hidden" name="row(6).ytop" value="colormap(0).zhigh">
+<input type="hidden" name="row(6).log" value="colormap(0).log">
+
+<input type="hidden" name="row(7).ybottom" value="colormap(1).zlow">
+<input type="hidden" name="row(7).ytop" value="colormap(1).zhigh">
+<input type="hidden" name="row(7).log" value="colormap(1).log">
+
+<input type="hidden" name="row(8).ybottom" value="colormap(1).zlow">
+<input type="hidden" name="row(8).ytop" value="colormap(1).zhigh">
+<input type="hidden" name="row(8).log" value="colormap(1).log">
+
+<input type="hidden" name="row(9).ybottom" value="colormap(1).zlow">
+<input type="hidden" name="row(9).ytop" value="colormap(1).zhigh">
+<input type="hidden" name="row(9).log" value="colormap(1).log">
+
+<input type="hidden" name="axis(0).row" value="0">
+<input type="hidden" name="axis(0).column" value="0">
+<input type="hidden" name="axis(0).timeaxis" value="'x'">
+<input type="hidden" name="axis(0).x.tickname" value="no_label">
+<input type="hidden" name="axis(0).y.title" value="'Eu freq (KHz)'">
+<input type="hidden" name="axis(0).set" value="1">
+
+<input type="hidden" name="axis(1).row" value="1">
+<input type="hidden" name="axis(1).column" value="0">
+<input type="hidden" name="axis(1).timeaxis" value="'x'">
+<input type="hidden" name="axis(1).y.title" value="'Ez freq (KHz)'">
+<input type="hidden" name="axis(1).x.tickname" value="no_label">
+
+<input type="hidden" name="axis(2).row" value="2">
+<input type="hidden" name="axis(2).column" value="0">
+<input type="hidden" name="axis(2).timeaxis" value="'x'">
+<input type="hidden" name="axis(2).y.title" value="'Bx freq (KHz)'">
+<input type="hidden" name="axis(2).x.tickname" value="no_label">
+
+<input type="hidden" name="axis(3).row" value="3">
+<input type="hidden" name="axis(3).column" value="0">
+<input type="hidden" name="axis(3).timeaxis" value="'x'">
+<input type="hidden" name="axis(3).x.tickname" value="no_label">
+<input type="hidden" name="axis(3).y.title" value="'By freq (KHz)'">
+
+<input type="hidden" name="axis(4).row" value="4">
+<input type="hidden" name="axis(4).column" value="0">
+<input type="hidden" name="axis(4).timeaxis" value="'x'">
+<input type="hidden" name="axis(4).x.title" value="column(0).tleft + ' to ' + column(0).tright">
+<input type="hidden" name="axis(4).y.title" value="'Bz freq (KHz)'">
+
+<input type="hidden" name="axis(5).row" value="5">
+<input type="hidden" name="axis(5).column" value="1">
+<input type="hidden" name="axis(5).x.style" value="supress">
+<input type="hidden" name="axis(5).y.ticklen" value="-0.2">
+<input type="hidden" name="axis(5).y.title" value="'V!U 2!N/M!U 2!N Hz'">
+<input type="hidden" name="axis(5).set" value="2">
+
+<input type="hidden" name="axis(6).row" value="6">
+<input type="hidden" name="axis(6).column" value="1">
+<input type="hidden" name="axis(6).x.style" value="supress">
+<input type="hidden" name="axis(6).y.ticklen" value="-0.2">
+<input type="hidden" name="axis(6).y.title" value="'V!U 2!N/M!U 2!N Hz'">
+
+<input type="hidden" name="axis(7).row" value="7">
+<input type="hidden" name="axis(7).column" value="1">
+<input type="hidden" name="axis(7).x.style" value="supress">
+<input type="hidden" name="axis(7).y.ticklen" value="-0.2">
+<input type="hidden" name="axis(7).y.title" value="'nT!U 2!N/ Hz'">
+
+<input type="hidden" name="axis(8).row" value="8">
+<input type="hidden" name="axis(8).column" value="1">
+<input type="hidden" name="axis(8).x.style" value="supress">
+<input type="hidden" name="axis(8).y.ticklen" value="-0.2">
+<input type="hidden" name="axis(8).y.title" value="'nT!U 2!N/ Hz'">
+
+<input type="hidden" name="axis(9).row" value="9">
+<input type="hidden" name="axis(9).column" value="1">
+<input type="hidden" name="axis(9).x.style" value="supress">
+<input type="hidden" name="axis(9).y.ticklen" value="-0.2">
+<input type="hidden" name="axis(9).y.title" value="'nT!U 2!N/ Hz'">
+
+<input type="hidden" name="image(0).row" value="0">
+<input type="hidden" name="image(0).column" value="0">
+<input type="hidden" name="image(0).colormap" value="0">
+
+<input type="hidden" name="image(1).row" value="1">
+<input type="hidden" name="image(1).column" value="0">
+<input type="hidden" name="image(1).colormap" value="0">
+
+<input type="hidden" name="image(2).row" value="2">
+<input type="hidden" name="image(2).column" value="0">
+<input type="hidden" name="image(2).colormap" value="1">
+
+<input type="hidden" name="image(3).row" value="3">
+<input type="hidden" name="image(3).column" value="0">
+<input type="hidden" name="image(3).colormap" value="1">
+
+<input type="hidden" name="image(4).row" value="4">
+<input type="hidden" name="image(4).column" value="0">
+<input type="hidden" name="image(4).colormap" value="1">
+
+<input type="hidden" name="image(0).dataset" value="'cassini/rpws/tfa/RPWShfwr0'">
+<input type="hidden" name="image(3).dataset" value="'cassini/rpws/tfa/RPWShfwr3'">
+<input type="hidden" name="image(1).dataset" value="'cassini/rpws/tfa/RPWShfwr1'">
+<input type="hidden" name="image(4).dataset" value="'cassini/rpws/tfa/RPWShfwr4'">
+<input type="hidden" name="image(2).dataset" value="'cassini/rpws/tfa/RPWShfwr2'">
+
+<input type="hidden" name="image(5).row" value="5">
+<input type="hidden" name="image(5).column" value="1">
+<input type="hidden" name="image(5).colormap" value="0">
+<input type="hidden" name="image(5).dataset" value="'color_wedge'">
+
+<input type="hidden" name="image(6).row" value="6">
+<input type="hidden" name="image(6).column" value="1">
+<input type="hidden" name="image(6).colormap" value="0">
+<input type="hidden" name="image(6).dataset" value="'color_wedge'">
+
+<input type="hidden" name="image(7).row" value="7">
+<input type="hidden" name="image(7).column" value="1">
+<input type="hidden" name="image(7).colormap" value="1">
+<input type="hidden" name="image(7).dataset" value="'color_wedge'">
+
+<input type="hidden" name="image(8).row" value="8">
+<input type="hidden" name="image(8).column" value="1">
+<input type="hidden" name="image(8).colormap" value="1">
+<input type="hidden" name="image(8).dataset" value="'color_wedge'">
+
+<input type="hidden" name="image(9).row" value="9">
+<input type="hidden" name="image(9).column" value="1">
+<input type="hidden" name="image(9).colormap" value="1">
+<input type="hidden" name="image(9).dataset" value="'color_wedge'">
+
+<b>plot title: </b>
+<input size=36 name="set(1).title" value="'Cassini RPWS HFWR'">
+
+<input type="hidden" name="set(2).title" value="' '">
+
+<P>
+<INPUT TYPE="submit"> <INPUT TYPE="reset">
+</FORM>
+
+<hr>
+</BODY>
+</HTML>

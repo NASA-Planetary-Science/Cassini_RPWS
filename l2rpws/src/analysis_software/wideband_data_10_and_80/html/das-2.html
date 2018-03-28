@@ -1,0 +1,157 @@
+<HTML>
+<HEAD>
+<TITLE>das Cassini Two Panel WBR Plot</TITLE>
+</HEAD>
+
+<BODY>
+<H1><em>das</em> Cassini Two Panel WBR Plot<br>
+Web Form Interface</H1>
+
+<HR>
+<P>
+
+<FORM METHOD="POST"
+ACTION="http://cassini.physics.uiowa.edu/cgi-test/das-idl8">
+
+<input type="hidden" name="rows" value="4">
+<input type="hidden" name="columns" value="2">
+<input type="hidden" name="colormaps" value="2">
+<input type="hidden" name="images" value="4">
+<input type="hidden" name="axes" value="4">
+<input type="hidden" name="labels" value="0">
+<input type="hidden" name="plots" value="0">
+<input type="hidden" name="sets" value="2">
+
+<b>display size:</b> <select name="display.isize">
+<option>1024
+<option selected>800
+<option>640
+<option>320
+</select>
+<b>x </b> <select name="display.jsize">
+<option>768
+<option selected>600
+<option>480
+<option>240
+</select><br>
+
+<input type="hidden" name="colormap_i.klow" value="0">
+<input type="hidden" name="colormap_i.khigh" value="display.color.nz">
+<input type="hidden" name="set_i.ticklen" value="-0.02">
+<input type="hidden" name="axis_i.set" value="0">
+<input type="hidden" name="axis_i.method" value="'plot'">
+
+<input type="hidden" name="action" value="init">
+
+<input type="hidden" name="column(0).ileft" value="display.isize / 8">
+<input type="hidden" name="column(0).iright" value="display.isize * 6 / 8">
+<input type="hidden" name="column(0).time" value="1">
+
+<br>
+<b>time range: </b>
+<input size=18 name="column(0).tleft" value="'1998/12/30 10:20'">
+<b> to </b>
+<input size=18 name="column(0).tright" value="'1998/12/30 11:20'">
+
+<input type="hidden" name="column(1).ileft" value="column(0).iright + display.isize / 8">
+<input type="hidden" name="column(1).iright" value="column(1).ileft + display.isize / 32">
+
+<input type="hidden" name="row(0).jbottom" value="display.jsize / 8 + display.jsize / 16">
+<input type="hidden" name="row(0).jtop" value="display.jsize / 2 - 10 + display.jsize / 16">
+
+<br>
+<b>lower panel frequency range: </b>
+<input size=8 name="row(0).ybottom" value="0.0">kHz <b>to </b>
+<input size=8 name="row(0).ytop" value="12.5">kHz
+<input type="checkbox" name="row(0).log" value="1" >log<br>
+
+<input type="hidden" name="row(2)" value="row(0)">
+
+<br>
+<b>upper panel frequency range: </b>
+<input size=8 name="row(1).ybottom" value="0.0">kHz <b>to </b>
+<input size=8 name="row(1).ytop" value="100.">kHz
+<input type="checkbox" name="row(1).log" value="1" >log<br>
+
+<br>
+<b>amplitude range: </b>
+<input size=8 name="colormap(0).zlow" value="1.e-18">(V/M)<sup>2</sup>/Hz <b>to </b>
+<input size=8 name="colormap(0).zhigh" value="1.e-8">(V/M)<sup>2</sup>/Hz
+<input type="checkbox" name="colormap(0).log" value="1" checked>log<br>
+
+<br>
+<input type="checkbox" name="gray scale" value="1" ><b>gray scale (default is color)</b><br>
+
+<input type="hidden" name="axis(0).row" value="0">
+<input type="hidden" name="axis(0).column" value="0">
+<input type="hidden" name="axis(0).timeaxis" value="'x'">
+<input type="hidden" name="axis(0).x.title" value="'SCET'">
+<input type="hidden" name="axis(0).y.title" value="'frequency (kHz)'">
+
+<input type="hidden" name="axis(2).row" value="2">
+<input type="hidden" name="axis(2).column" value="1">
+<input type="hidden" name="axis(2).x.style" value="supress">
+<input type="hidden" name="axis(2).y.ticklen" value="-0.2">
+<input type="hidden" name="axis(2).y.title" value="'Spectral Density ( V!U 2 !N/M!U 2 !N Hz )'">
+
+<input type="hidden" name="image(0).row" value="0">
+<input type="hidden" name="image(0).column" value="0">
+<input type="hidden" name="image(0).colormap" value="0">
+
+<br>
+<b>lower data set: </b>
+<input size=32 name="image(0).dataset" value="'cassini/rpws/RPWSwb10'"><br>
+
+<br>
+<b>upper data set: </b>
+<input size=32 name="image(1).dataset" value="'cassini/rpws/RPWSwb80'"><br>
+
+<input type="hidden" name="image(2).row" value="2">
+<input type="hidden" name="image(2).column" value="1">
+<input type="hidden" name="image(2).colormap" value="0">
+<input type="hidden" name="image(2).dataset" value="'color_wedge'">
+
+<input type="hidden" name="row(1).jbottom" value="display.jsize / 2 + 10 + display.jsize / 16">
+<input type="hidden" name="row(1).jtop" value="display.jsize * 7 / 8 + display.jsize / 16">
+<input type="hidden" name="row(1).log" value="row(0).log">
+
+<input type="hidden" name="row(3)" value="row(1)">
+
+<input type="hidden" name="colormap(1).zlow" value="colormap(0).zlow">
+<input type="hidden" name="colormap(1).zhigh" value="colormap(0).zhigh">
+<input type="hidden" name="colormap(1).log" value="colormap(0).log">
+
+<input type="hidden" name="axis(1).row" value="1">
+<input type="hidden" name="axis(1).column" value="0">
+<input type="hidden" name="axis(1).timeaxis" value="'x'">
+<input type="hidden" name="axis(1).x.tickname" value="no_label">
+<input type="hidden" name="axis(1).y.title" value="'frequency (kHz)'">
+<input type="hidden" name="axis(1).set" value="1">
+
+<input type="hidden" name="axis(3).row" value="3">
+<input type="hidden" name="axis(3).column" value="1">
+<input type="hidden" name="axis(3).x.style" value="supress">
+<input type="hidden" name="axis(3).y.ticklen" value="-0.2">
+<input type="hidden" name="axis(3).y.title" value="'Spectral Density ( V!U 2 !N/M!U 2 !N Hz )'">
+
+<input type="hidden" name="image(1).row" value="1">
+<input type="hidden" name="image(1).column" value="0">
+<input type="hidden" name="image(1).colormap" value="1">
+
+
+<input type="hidden" name="image(3).row" value="3">
+<input type="hidden" name="image(3).column" value="1">
+<input type="hidden" name="image(3).colormap" value="1">
+<input type="hidden" name="image(3).dataset" value="'color_wedge'">
+ 
+<br>
+<b>plot title: </b>
+<input size=13 name="set(1).title" value="'Cassini WBR'"><br>
+
+<P>
+<INPUT TYPE="submit"> <INPUT TYPE="reset">
+</FORM>
+
+<hr>
+</BODY>
+</HTML>

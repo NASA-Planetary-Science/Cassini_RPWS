@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# usage: hwfr channel# begin-scet end-scet [dataset]
+
+#if [ $# -ne 2 ]; then
+#  exit -1
+#fi
+
+exec /home/tfa/cassini/wfr/spec/hfwr "$1" "$2" "$3" $4
+exit 0

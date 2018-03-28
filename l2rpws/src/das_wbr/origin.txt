@@ -1,0 +1,24 @@
+The source code for these two readers was copied in from:
+
+  /home/tfa/cassini/wbr/spec
+  
+The original names of the readers in that area was: 
+
+   new10k_V4.exe, new80k_V4.exe, wbrgain.exe
+
+For the wbrgain.exe the source file wbrgain_new.c was selected
+since it seemed to account for more issues that may come up in
+the data.
+
+(Old version of this note)
+
+These programs were copied in from: /home/tfa/cassini/hfr/web
+
+They are referenced by the DSDF files at:
+
+  /opt/project/das/datasetroot/cassini/rpws/tfa/RPWSwb80_HF  (old www-pw server)
+  /opt/project/das/datasetroot/cassini/rpws/tfa/RPWShfrmsagc
+  
+  /opt/project/cassini/etc/datasetroot/rpws/wideband80_HF
+  /opt/project/cassini/etc/datasetroot/rpws/hfrmsagc
+  

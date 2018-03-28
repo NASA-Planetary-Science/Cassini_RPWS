@@ -1,0 +1,13 @@
+* To see what's in a file:
+cat FILE | rpws_dsp_4 -format +eof -time -hex 
+
+* To bust an R file out into components:
+
+   
+To tail a 6-hour R file and send it to rpws_file...:
+
+$ cd /opt/project/cassini/data/realtime_1hr_R
+$ tail -c +1 -f /opt/project/cassini/data/bg_push/t20172550000.r00 | rpws_file -fred local_db.tab -size 60 -sciop -strip -nodupe
+
+
+  

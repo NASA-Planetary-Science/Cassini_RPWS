@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# usage: new80k begin-scet end-scet [dataset]
+
+#if [ $# -ne 2 ]; then
+#  exit -1
+#fi
+
+exec /home/tfa/cassini/wbr/spec/new80k_V5.exe "$1" "$2" $3
+exit 0

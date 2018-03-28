@@ -1,0 +1,14 @@
+Stuff in this directory was copied from:
+
+/home/tfa/cassini/aacs/makedbase.c -> makedbase.c
+
+/home/tfa/cassini/aacs/web/getatt.c -> getatt.c  
+  This file matched the binary produced for the cgi program: nph-getatt
+  which handles requests from 
+  http://www-pw.physics.uiowa.edu/~tfa/cassatt.html
+  
+/home/tfa/cassini/aacs/web/gei2gse.c -> gei2gse.c
+
+/home/jbg/httpd_1.4.1/util.c -> webutil.c
+  
+on 2012-01-17 and 2016-08-15 by C. Piker.

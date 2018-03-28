@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+
+# Start, or restart the push data reciever for RPWS
+
+umask 0002
+
+source %(SETUP_FILE)s
+
+export PATH=%(INST_NAT_BIN)s:/local/gnu/bin:/usr/bin:/opt/csw/bin
+
+PUSH_DIR=%(RPWS_DATA)s/bg_push
+
+if [ ! -d $PUSH_DIR/log ]; then
+	if ! mkdir -p $PUSH_DIR/log ; then
+		echo "Couldn't make $PUSH_DIR/log"
+		exit 3
+	fi
+fi
+	
+if ! cd $PUSH_DIR ; then
+	echo "Couldn't change to $PUSH_DIR" 
+	exit 3
+fi
+
+echo "wcron PUSH **********************"
+date
+
+# Find out if I need to restart processing, first find the PID of the 
+# shell that contains the huge command pipeline.  If it ain't running, I need
+# to restart.
+
+sRestartReason="none"
+
+if [ ! -e $PUSH_DIR/log/Cassini_Push.status ] ; then
+	sRestartReason="the status file missing"
+fi
+
+if [ "$sRestartReason" = "none" ]; then
+
+	if [ -e $PUSH_DIR/restart ] ; then
+		sRestartReason="a user requested it"
+		if ! rm $PUSH_DIR/restart ; then
+			echo "$PUSH_DIR/restart is not removable, not restarting the push handler"
+			exit 3
+		fi
+	fi
+fi
+
+nActive=13
+nDefunct=2
+if [ "$sRestartReason" = "none" ]; then
+
+	sText="Process"
+	sPID=$(grep -a "$sText" $PUSH_DIR/log/Cassini_Push.status)
+	nPID=$(echo $sPID | cut -d \  -f 2)
+	
+	echo "Data Push " > log/wcron.procs
+	date >> log/wcron.procs
+	
+	ps -ef > log/wcron.ps
+	grep " $nPID " log/wcron.ps | sort >> log/wcron.procs
+	rm log/wcron.ps
+
+	echo "Data Push " > log/wcron.defunct
+	date >> log/wcron.defunct
+	
+	grep "defunct" log/wcron.procs >> log/wcron.defunct
+
+	nDefunct=$(wc -l < log/wcron.defunct)
+	#echo $nDefunct
+	nActive=$(wc -l < log/wcron.procs)
+	#echo $nActive
+
+	if [ "$nActive" -ne "13" ] ; then
+		sRestartReason="pipe line procs are missing"
+	else
+		if [ "$nDefunct" -ne "2" ] ; then
+	      sRestartReason="of defunct processes in the pipe line"
+		fi
+	fi
+fi
+
+
+nRet=0
+if [ "$sRestartReason" = "none" ] ; then
+    echo "PUSH seems OK, all 10 sub processes are running, no defunct processes"
+else
+	nRet=4
+	
+	echo "PUSH restarting because: $sRestartReason"
+	
+	if [ "$nDefunct" -ne "2" ] ; then
+		echo "------ log/wcron.defunct -------- defunct list"
+		cat log/wcron.defunct
+	fi
+	
+	if [ "$nActive" -ne "13" ] ; then
+		echo "------ log/wcron.procs ---------- process list"
+		cat log/wcron.procs
+	fi
+		
+	if [ -e $PUSH_DIR/log/Cassini_Push.status ] ; then
+		if ! %(INST_NAT_BIN)s/rpws_push_wkill.sh; then
+			nRet=5
+		fi
+	fi
+	 
+	if ! %(INST_NAT_BIN)s/rpws_push_sopc.sh; then
+		nRet=6
+	fi
+fi
+
+if [ -e log/wcron.procs ] ; then 
+	rm log/wcron.procs
+fi
+
+if [ -e log/wcron.defunct ] ; then 
+	rm log/wcron.defunct
+fi
+
+exit $nRet

@@ -1,0 +1,63 @@
+#!/usr/bin/ksh
+#
+#	POST-PASS Query
+#		new features in rpws_file allow everything
+#		to be combined into a single 'pipe'
+#
+#	Note about the mpii "-pool" argument:
+#		The Micro-sort will eliminate duplicate records
+#		ONLY if it is enabled with a value at or above 32
+#		(23-APR-2002 set to 32)
+#
+#
+
+if [ ! -d %(RPWS_DATA)s/sort_merge ]; then
+	if ! mkdir -p %(RPWS_DATA)s/sort_merge ; then
+		echo "Couldn't make %(RPWS_DATA)s/sort_merge"
+		exit 3
+	fi
+fi
+	
+cd %(RPWS_DATA)s/sort_merge
+#
+#
+#
+umask 113
+s2File=`date '+Cassini_Sort_Merge_%%Y-%%jT%%H:%%M'`
+sFile='Cassini_Sort_Merge'
+mv /var/tmp/$sFile.err /var/tmp/$s2File.err
+echo 1>&2 Errors Routed to /var/tmp/$sFile.err 
+exec 2> /var/tmp/$sFile.err 
+echo 1>&2 "sopc_1270.bat POST PASS *****************"
+date 1>&2
+# touch nert_spool
+rm -f nert_spool
+#
+#	 /opt/project/cassini/bin/rpws_file56a  (this was replaced 7/24/2009 WTR)
+#						to get the new K file to include
+#						millisecond mode...
+#		+eof \
+#		-nert \
+#
+exec \
+	%(INST_NAT_BIN)s/rpws_chdo_listner \
+		-debug \
+		-port 1270 \
+    | \
+	 %(INST_NAT_BIN)s/rpws_chdo \
+		+eof \
+		-epup 128 \
+    | \
+	 %(INST_NAT_BIN)s/rpws_dsp_hkrom \
+		+eof \
+		-recent %(RPWS_DATA)s/sort_merge/recent_hsk.dat \
+		-stdout \
+    | \
+	 %(INST_NAT_BIN)s/rpws_file \
+		+eof \
+		-sciop \
+		-strip \
+    &
+echo 1>&2 Shell $$
+echo 1>&2 Process $!
+exit 0

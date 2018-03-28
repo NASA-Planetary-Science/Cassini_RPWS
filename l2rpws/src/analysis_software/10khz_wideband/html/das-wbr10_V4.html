@@ -1,0 +1,427 @@
+<HTML>
+<HEAD>
+<TITLE>das NEW Cassini 10-KHz WBR Spectrogram</TITLE>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="dasTime.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="dasStd.js"></SCRIPT> 
+<SCRIPT LANGUAGE="JavaScript" SRC="dasHnd.js"></SCRIPT> 
+<SCRIPT LANGUAGE="JavaScript" SRC="casOrbit.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+
+function DoPlot()
+{
+  var sTmp="";
+  var nTmp;
+  var das=document.forms[0];
+  var f=document.forms[0];
+  var orbit = new casOrbit();
+  var dasTm0 = new dasTime();
+  var dasTm1 = new dasTime();
+  
+//  orbit.tBeg = new String(document.forms[0].elements[19].value);
+  orbit.tBeg = new String(f["column(0).tleft"].value);
+  orbit.tBeg = orbit.tBeg.replace(/[']+/g,"");
+  if(dasTm0.parsetime(orbit.tBeg) == false)
+      dasTm0.PopupParseTmErr();
+  orbit.tBeg = dasTm0.FormatRPWS();
+
+//  orbit.tEnd = new String(document.forms[0].elements[20].value);
+  orbit.tEnd = new String(f["column(0).tright"].value);
+  orbit.tEnd = orbit.tEnd.replace(/[']+/g,"");
+  if(dasTm1.parsetime(orbit.tEnd) == false)
+      dasTm1.PopupParseTmErr();
+  orbit.tEnd = dasTm1.FormatRPWS();
+
+  orbit.Lookup();
+//  document.forms[0].elements[113].value ="'" +  orbit.Name + "'";
+  f["label(1).value"].value ="'" +  orbit.Name + "'";
+
+  fft_length();
+  toss_it();
+  check_overlap();
+  time_stretch();
+  document.forms[0].elements[63].value +=  " -fft_overlap ";
+  document.forms[0].elements[63].value +=  document.forms[0].elements[100].value;
+  document.forms[0].elements[63].value +=  " -looper_period ";
+  document.forms[0].elements[63].value +=  document.forms[0].elements[91].value;
+  document.forms[0].elements[63].value +=  " -wbr_duration ";
+  document.forms[0].elements[63].value +=  document.forms[0].elements[92].value;
+  document.forms[0].elements[63].value +=  " -desired_gap ";
+  document.forms[0].elements[63].value +=  document.forms[0].elements[93].value;
+  document.forms[0].elements[63].value +=  " -baseband 1";
+  document.forms[0].elements[101].value =  document.forms[0].elements[63].value;
+  var form = document.forms[0];
+  form.submit();
+  return
+}
+
+function dB_or_SD()
+{
+  if (document.forms[0].elements[33].checked==true)
+  { document.forms[0].elements[30].value =  0;		<!-- low  amplitude  0 dB -->
+    document.forms[0].elements[31].value = 10;		<!-- high amplitude 10 dB -->
+    document.forms[0].elements[33].value = 1;		<!-- db choice -->
+    document.forms[0].elements[34].value = 10;		<!-- background noise level 10 % -->
+    document.forms[0].elements[35].value = "'dB above background'";
+    document.forms[0].elements[32].value = "'dB'";
+  }
+  else
+  { document.forms[0].elements[30].value = 1.E-18;	<!-- low  amplitude 1.e-18 -->
+    document.forms[0].elements[31].value = 1.E-14;	<!-- high amplitude 1.e-14 -->
+    document.forms[0].elements[33].value = 0;		<!-- spectral density choice -->
+    document.forms[0].elements[34].value = 0;		<!-- background noise level 0 % -->
+    document.forms[0].elements[35].value = "'Spectral Density ( V!U 2 !N/m!U 2 !N Hz )'";
+    document.forms[0].elements[32].value = "'V**2/m**2/Hz'";
+  }
+  return
+}
+
+function fft_length()
+{
+  document.forms[0].elements[63].value =  "-dataset JPL";
+  if (document.forms[0].fft_len[0].checked==true)
+      document.forms[0].elements[63].value +=  " -fft_length 4096";
+  else if (document.forms[0].fft_len[1].checked==true)
+      document.forms[0].elements[63].value +=  " -fft_length 2048";
+  else if (document.forms[0].fft_len[2].checked==true)
+      document.forms[0].elements[63].value +=  " -fft_length 1024";
+  else if (document.forms[0].fft_len[3].checked==true)
+      document.forms[0].elements[63].value +=  " -fft_length 512";
+  else if (document.forms[0].fft_len[4].checked==true)
+      document.forms[0].elements[63].value +=  " -fft_length 256";
+  return
+}
+
+function toss_it()
+{
+  if (document.forms[0].toss_mfr[0].checked==true)
+      document.forms[0].elements[63].value +=  " -toss_mfr 1";
+  else if (document.forms[0].toss_mfr[1].checked==true)
+      document.forms[0].elements[63].value +=  " -toss_mfr 0";
+  return
+}
+
+function check_overlap()
+{
+  if (document.forms[0].elements[100].value < 0 )
+  { alert ("% overlap less than zero, setting to zero");
+    document.forms[0].elements[100].value = 0;
+  }
+  else if (document.forms[0].elements[100].value >= 100 )
+  { alert ("% overlap cannot be 100 or larger, setting to 99");
+    document.forms[0].elements[100].value = 99;
+  }
+  return
+}
+
+function time_stretch()
+{
+  var period, duration, gap;
+  document.forms[0].elements[94].value = "''";
+  if (document.forms[0].elements[91].value == 0)
+    return;
+  period = parseInt (document.forms[0].elements[91].value);
+  duration = parseInt (document.forms[0].elements[92].value);
+  gap = parseInt (document.forms[0].elements[93].value);
+  if (period < 0)
+  { alert ("Looper period less than zero, ignoring...");
+    document.forms[0].elements[91].value = 0;
+    return;
+  }
+  if (duration < 0)
+  { alert ("WBR duration less than zero, ignoring...");
+    document.forms[0].elements[91].value = 0;
+    return;
+  }
+  if (duration > period)
+  { alert ("WBR duration," + document.forms[0].elements[92].value +
+           ", greater than Looper period," + document.forms[0].elements[91].value + ", ignoring...");
+    document.forms[0].elements[91].value = 0;
+    return;
+  }
+  if (gap < 0)
+  { alert ("Desired gap less than zero, ignoring...");
+    document.forms[0].elements[91].value = 0;
+    return;
+  }
+  if (gap > (period-duration) )
+  { alert ("WBR duration greater than Looper period less WBR duration, ignoring...");
+    document.forms[0].elements[91].value = 0;
+    return;
+  }
+  document.forms[0].elements[94].value =  "'Time Stretch Options:" + 
+  "Period=" + document.forms[0].elements[91].value +
+  ",Duration=" + document.forms[0].elements[92].value + ",Gap=" +
+  document.forms[0].elements[93].value + "'";
+  return
+}
+
+</SCRIPT>
+</HEAD>
+
+<BODY>
+<H1><em>das</em> NEW Cassini 10-KHz WBR Spectrogram<br>
+Web Form Interface</H1>
+
+<HR>
+<P>
+
+<FORM METHOD="POST"
+ACTION="http://cassini.physics.uiowa.edu/cgi-test/das-idl8">
+
+<!-- Positional array index 0  -->
+<input type="hidden" name="rows" value="5">
+<input type="hidden" name="columns" value="2">
+<input type="hidden" name="colormaps" value="2">
+<input type="hidden" name="images" value="2">
+<input type="hidden" name="axes" value="3">
+<input type="hidden" name="labels" value="2">
+<input type="hidden" name="plots" value="3">
+<input type="hidden" name="sets" value="3">
+
+<!-- Positional array index 8  -->
+<b>display size:</b> <select name="display.isize">
+<option>1024
+<option selected>800
+<option>640
+</select>
+<b>x </b> <select name="display.jsize">
+<option>768
+<option selected>600
+<option>480
+</select>
+<br>
+
+<!-- Positional array index 10 -->
+<input type="hidden" name="colormap_i.klow" value="0">
+<input type="hidden" name="colormap_i.khigh" value="display.color.nz">
+<input type="hidden" name="set_i.ticklen" value="-0.02">
+<input type="hidden" name="axis_i.set" value="0">
+<input type="hidden" name="axis_i.method" value="'plot'">
+
+<!-- Positional array index 15 -->
+<input type="hidden" name="action" value="init">
+
+<!-- Positional array index 16 -->
+<input type="hidden" name="column(0).ileft" value="display.isize / 8">
+<input type="hidden" name="column(0).iright" value="display.isize * 6 / 8">
+<input type="hidden" name="column(0).time" value="1">
+
+<!-- <br> -->
+<!-- Positional array index 19 -->
+<b>time range: </b>
+<input size=18 name="column(0).tleft" value="'2002//157 06:00:20'">
+<b> to </b>
+<input size=18 name="column(0).tright" value="'2002//157 06:01:00'">
+<br>
+
+<!-- Positional array index 21 -->
+<input type="hidden" name="column(1).ileft" value="column(0).iright + display.isize / 8">
+<input type="hidden" name="column(1).iright" value="column(1).ileft + display.isize / 32">
+
+<!-- Positional array index 23 -->
+<input type="hidden" name="row(0).jbottom" value="13 * display.jsize / 64">
+<input type="hidden" name="row(0).jtop" value="row(0).jbottom + 3*(column(0).iright-column(0).ileft)/4">
+
+<!-- <br> -->
+<!-- Positional array index 25 -->
+<b>frequency range: </b>
+<input size=8 name="row(0).ybottom" value="0.0">kHz <b>to </b>
+<input size=8 name="row(0).ytop" value="12.5">kHz
+<input type="checkbox" name="row(0).log" value="1" >log
+<br>
+
+<!-- Positional array index 28 -->
+<input type="hidden" name="row(2)" value="row(0)">
+
+<!-- <br> -->
+<!-- Positional array index 29 -->
+<b>amplitude range: </b>
+<input type="hidden" name="colormap(0).log" value="1">			<!--29 -->
+<input size=8 name="colormap(0).zlow"  value="1.e-18"> <b>to </b>	<!--30 -->
+<input size=8 name="colormap(0).zhigh" value="1.e-14"> &nbsp		<!--31 -->
+<input size=14 name="amp_label" value="'V**2/m**2/Hz'">			<!--32 -->
+<!-- (or V<sup>2</sup>m<sup>-2</sup>Hz<sup>-1</sup>) -->
+<br>
+<b>background division </b>
+<input type="checkbox" name="colormap(0).db" value="0" onClick="dB_or_SD();" >			<!--33 -->
+<b> &nbsp &nbsp  background noise level percentage: </b>
+<input size=2 name="image(0).bgd" value=" 0">							<!--34 -->
+
+<input type="hidden" name="axis(2).y.title" value="'Spectral Density ( V!U 2 !N/m!U 2 !N Hz )'">	<!--35 -->
+<input type="hidden" name="axis(2).row" value="2">
+<input type="hidden" name="axis(2).column" value="1">
+<input type="hidden" name="axis(2).x.style" value="supress">
+<input type="hidden" name="axis(2).y.ticklen" value="-0.2">
+
+<br>
+<!-- Positional array index 40 -->
+<input type="checkbox" name="gray scale" value="1" ><b>gray scale (default is color)</b>
+<br>
+
+<!-- <br> -->
+<!-- Positional array index 41 -->
+<input type="checkbox" name="plot(0).enable" value="1" >
+<i>f<sub>ce</sub></i> overlay (electron cyclotron frequency - white )
+<br>
+
+<!-- Positional array index 42 -->
+<input type="hidden" name="row(3)" value="row(0)">
+<input type="hidden" name="row(3).ybottom" value="row(0).ybottom*1000">
+<input type="hidden" name="row(3).ytop" value="row(0).ytop*1000">
+<input type="hidden" name="plot(0).row" value="3">
+<input type="hidden" name="plot(0).column" value="0">
+<input type="hidden" name="plot(0).set" value="0">
+<input type="hidden" name="plot(0).multi" value="0">
+<input type="hidden" name="plot(0).color" value="display.color.offwhite">
+<input type="hidden" name="plot(0).thick" value="2">
+<input type="hidden" name="plot(0).dataset" value="'cassini/mag/fce'">
+
+<!-- Positional array index 52 -->
+<input type="hidden" name="axis(0).row" value="0">
+<input type="hidden" name="axis(0).column" value="0">
+<input type="hidden" name="axis(0).timeaxis" value="'x'">
+<input type="hidden" name="axis(0).x.ticklen" value="-0.01">
+<input type="hidden" name="axis(0).x.title" value="'SCET'">
+<input type="hidden" name="axis(0).y.title" value="'Frequency (kHz)'">
+<input type="hidden" name="axis(0).set" value="0">
+
+<!-- Positional array index 59 -->
+<input type="hidden" name="image(0).row" value="0">
+<input type="hidden" name="image(0).column" value="0">
+<input type="hidden" name="image(0).colormap" value="0">
+<input type="hidden" name="image(0).dataset" value="'cassini/rpws/tfa/RPWSwb10_V4'">
+<input type="hidden" name="image(0).query" value="-dataset JPL -fft_length 4096">
+
+<!-- Positional array index 64 -->
+<input type="hidden" name="image(1).row" value="2">
+<input type="hidden" name="image(1).column" value="1">
+<input type="hidden" name="image(1).colormap" value="0">
+<input type="hidden" name="image(1).dataset" value="'color_wedge'">
+
+<!-- Positional array index 68 -->
+<input type="hidden" name="row(1).ybottom" value="0">
+<input type="hidden" name="row(1).ytop" value="70">
+<input type="hidden" name="row(1).jbottom" value="row(0).jtop + display.jsize / 64">
+<input type="hidden" name="row(1).jtop" value="29 * display.jsize / 32">
+<input type="hidden" name="row(1).log" value="0">
+
+<!-- Positional array index 73 -->
+<input type="hidden" name="colormap(1).zlow" value="colormap(0).zlow">
+<input type="hidden" name="colormap(1).zhigh" value="colormap(0).zhigh">
+
+<!-- Positional array index 75 -->
+<input type="hidden" name="axis(1).row" value="1">
+<input type="hidden" name="axis(1).column" value="0">
+<input type="hidden" name="axis(1).timeaxis" value="'x'">
+<input type="hidden" name="axis(1).x.tickname" value="no_label">
+<input type="hidden" name="axis(1).y.title" value="'Gain (dB)'">
+<input type="hidden" name="axis(1).y.ticks" value="1">
+<input type="hidden" name="axis(1).y.minor" value="(row(1).ytop-row(1).ybottom)/10">
+<input type="hidden" name="axis(1).set" value="1">
+
+<!-- Positional array index 83 -->
+<input type="hidden" name="plot(1).enable" value="1">
+<input type="hidden" name="plot(1).row" value="1">
+<input type="hidden" name="plot(1).column" value="0">
+<input type="hidden" name="plot(1).set" value="1">
+<input type="hidden" name="plot(1).color" value="display.color.black">
+<input type="hidden" name="plot(1).thick" value="2">
+<input type="hidden" name="plot(1).dataset" value="'cassini/rpws/tfa/RPWSwbgain'">
+
+<!-- <br> -->
+<!-- Positional array index 90 -->
+<b>plot title: </b>
+<input size=36 name="set(1).title" value="'Cassini 10 KHz WBR'">
+<br>
+
+<!-- Positional array index 91 -->
+<b>Looper Repeat Period (seconds): </b>
+<INPUT SIZE=8 NAME="looper_period"  value="0"><br>
+<!-- Positional array index 92 -->
+<b>Expected WBR duration per Looper Period (seconds): </b>
+<INPUT SIZE=8 NAME="wbr_duration"  value="40"><br>
+<!-- Positional array index 93 -->
+<b>Desired Gap width (seconds): </b>
+<INPUT SIZE=8 NAME="desired_gap"  value="60"><br>
+
+<!-- Positional array index 94 -->
+<input type="hidden" name="set(2).title"
+       value="'Time Stretch Options: Period=1800,Duration=40,Gap=60'">
+<input type="hidden" name="label(0).row" value="1">
+<input type="hidden" name="label(0).column" value="0">
+<input type="hidden" name="label(0).set" value="2">
+<input type="hidden" name="label(0).xp" value="0">
+<input type="hidden" name="label(0).yp" value="70">
+
+<!-- Positional array index 100 -->
+<b>FFT % overlap: </b>
+<INPUT SIZE=8 NAME="fft_overlap"  value="0">
+
+<input type="hidden" name="plot(1).query" value="-dataset JPL -fft_length 4096">
+
+<!-- orbit numbers below color bar //--> 
+  <!-- Placement in Page //-->
+  <input type="hidden" name="row(4).jtop" value="row(0).jbottom">
+  <input type="hidden" name="row(4).jbottom" value="display.jsize*1/10">
+  <!-- Normalize Coordinate System //-->
+  <input type="hidden" name="row(4).ytop" value="1">
+  <input type="hidden" name="row(4).ybottom" value="0">
+
+  <!--  //-->
+  <input type="hidden" name="label(1).charsize" value="1">
+  <input type="hidden" name="label(1).alignment" value="0.5">
+  <input type="hidden" name="label(1).orientation" value="0">
+  <input type="hidden" name="label(1).row" value="4">
+  <input type="hidden" name="label(1).column" value="1">
+  <!-- Placement within frame, pixels or is it normalized coordinates? !C//-->
+  <input type="hidden" name="label(1).xp" value="0.5">
+  <input type="hidden" name="label(1).yp" value="0.0">
+
+<!-- Positional array index 113 -->
+  <input type="hidden" name="label(1).value" value="'Orbit A'">
+
+<b>FFT Length: </b>
+<INPUT TYPE="RADIO" NAME="fft_len" onClick="fft_length();">4096
+<INPUT TYPE="RADIO" NAME="fft_len" onClick="fft_length();" CHECKED>2048
+<INPUT TYPE="RADIO" NAME="fft_len" onClick="fft_length();">1024
+<INPUT TYPE="RADIO" NAME="fft_len" onClick="fft_length();">512
+<INPUT TYPE="RADIO" NAME="fft_len" onClick="fft_length();">256
+
+<br>
+<b>Remove WBR Data when MFR Interference: </b>
+<INPUT TYPE="RADIO" NAME="toss_mfr" onClick="toss_it();">YES
+<INPUT TYPE="RADIO" NAME="toss_mfr" onClick="toss_it();" CHECKED>NO
+
+<br>
+No Orbit Parameters <INPUT TYPE="RADIO" NAME="axis(0).tca" VALUE="''" ><BR>
+Heliocentric Parameters <!-- January 3, 2002 //-->
+  <INPUT TYPE="RADIO" NAME="axis(0).tca" VALUE="'galileo/pws/cephemSun'"><BR>
+Earth Orbit Parameters <INPUT TYPE="RADIO" NAME="axis(0).tca" VALUE="'galileo/pws/cephemE'" ><BR>
+Jupiter Orbit Parameters <INPUT TYPE="RADIO" NAME="axis(0).tca" VALUE="'galileo/pws/cephemJ'" ><BR>
+Saturn Orbit Parameters <!-- July 5, 2000 //-->
+<INPUT TYPE="RADIO" NAME="axis(0).tca" VALUE="'galileo/pws/cephemS'" checked><BR>
+
+<b>output: </b>
+<input type="radio" name="device_name" value="'Z'" checked> GIF as
+<select name="gif_mime_header">
+<option>'application/x-das-gif'
+<option selected>'image/gif'
+<option>'application/octet-stream'
+</select> &nbsp;
+<input type="radio" name="device_name" value="'PS'"> PS as
+<select name="ps_mime_header">
+<option>'application/x-das-eps'
+<option selected>'application/postscript'
+<option>'application/octet-stream'
+</select><br>
+
+
+<P>
+<INPUT TYPE="button" VALUE="Submit"  NAME="do_me" onClick="DoPlot();">
+</FORM>
+
+<hr>
+</BODY>
+</HTML>

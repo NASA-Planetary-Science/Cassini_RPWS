@@ -1,0 +1,216 @@
+#!/local/bin/perl
+
+#-----------------------------------------------------------------------------
+#
+# ca-rpws-list - simple cgi script to deliver text data listings
+# derived from ljg's po-pwi-list
+#
+#-----------------------------------------------------------------------------
+
+$version = 'ca-rpws-list 2000-06-12';
+
+$DEBUG = 'y';
+
+if ($DEBUG) { open(DEBUG, '>/var/tmp/ca-rpws.log'); }
+
+$datasetroot = '/home/Web/das/datasetroot/cassini/rpws/';
+
+use CGI;
+
+$query = new CGI;
+
+#-----------------------------------------------------------------------------
+#
+# HANDLE REQUEST
+#
+#-----------------------------------------------------------------------------
+
+if ($query->param('submit') eq 'process') {
+
+  $query->param('data_set') || &PrintErrorExit ("no data set specified");
+
+  # Get info from dataset description
+
+  open(INF, $datasetroot.$query->param('data_set')) ||
+    &PrintErrorExit ("cannot open dataset");
+  @datasetinfo = <INF>; close (INF);
+
+  # Parse for reader definition and number of data items
+  # Note that determining the number of "y_coordinate" items is
+  # pretty specific to the existing mfr & lfdr dataset descriptions
+
+  foreach (@datasetinfo) {
+    $reader = $_ if /^\s*reader\s*=\s*\S+/i;
+    $y_coordinate = $_ if /^\s*y_coordinate\s*=\s*\S+/i;
+  }
+
+  if ($reader) {
+    chop $reader;
+    $reader =~ s/^\s*reader\s*=\s*//i;
+    $reader =~ s/'//g;
+  } else { &PrintErrorExit ("no reader specified"); }
+
+  if ($y_coordinate) {
+    chop $y_coordinate;
+    $y_coordinate =~ s/^\s*y_coordinate\s*=\s*//i;
+    if ($DEBUG) { print DEBUG "y_coordinate = $y_coordinate\n"; }
+    $items = $y_coordinate;
+    $_ = $items;
+    if (/findgen\s*\(/) {
+      $items =~ s/^.*findgen\s*\(\s*//i;
+      $items =~ s/\).*//i;
+      if ($DEBUG) { print DEBUG "findgen items = $items\n"; }
+    } else {
+      $items =~ s/^.*\[\s*//i;
+      $items =~ s/\].*//i;
+      if ($DEBUG) { print DEBUG "bracketed items = $items\n"; }
+      $items = split /,/, $items;
+    }
+    if ($items =~ /\D+/) {
+      &PrintErrorExit ("cannot determine number of items");
+    }
+  } else { &PrintErrorExit ("y_coordinate info not found"); }
+  $items++;
+
+  # Invoke reader with begin and end times
+
+  $begin = $query->param('begin_time');
+  $end   = $query->param('end_time');
+  $begin && $end || &PrintErrorExit ("begin or end times missing");
+
+# &PrintErrorExit ("check point");
+
+  if ($DEBUG) { print DEBUG "items = $items\n"; }
+
+  open(INF, "$reader \"$begin\" \"$end\" | /home/ljg/das/util/pdslist $items \"$begin\" |") ||
+    &PrintErrorExit ("could not invoke reader");
+
+  if ($line = <INF>) {
+#    $savename = "${begin}.txt";
+#    $savename =~ tr/ /-/;
+#    $location = "http://www-pw.physics.uiowa.edu/cgi-test/$0/$savename";
+    print $query->header(-type=>$query->param('mime_type'),
+      -status=>'200 ASCII text data follows',-expires=>'+10s');
+    print @datasetinfo;
+    print "note\t\t= \'Some of the information above may be inaccurate for this application.\'\n";
+    print "begin_time\t= \'$begin\'\n";
+    print "end_time\t= \'$end\'\n\n";
+    print $line;
+  } else { PrintErrorExit ("reading data or no data available"); }
+
+  while ($line = <INF>) { print $line; }
+
+  close(INF);
+
+  exit 0;
+
+} # if a request
+
+#-----------------------------------------------------------------------------
+#
+# REQUEST FORM
+#
+#-----------------------------------------------------------------------------
+
+# various initializations
+
+&PrintHeader;
+
+print <<EOH;
+<H1><em>das</em> Cassini RPWS Data Request Form</H1>\n<HR>
+<p><em>WARNING:  This form delivers ASCII text tables from spacecraft
+instruments that may sample at very high data rates and may include many
+frequency channels.  Requesting more than a few minutes is likely
+to result in a very large amount of data returned.  Your browser
+configuration may not be able to cope with more than a few tens of
+megabytes.</em></p><HR>
+<p><b>Select the dataset to be delivered.</b>
+EOH
+
+print $query->startform;
+
+# generate a separate menu for each (limited to tfa's readers, in a stingy way)
+
+if (!$query->param('data_set')) {
+
+  @datasetlist = grep /\/RPWS/, `ls $datasetroot*`;
+
+  chop @datasetlist; # remove the trailing newline
+
+  foreach (@datasetlist) { # trim the leading directory info
+    $i = $_;
+    s/^$datasetroot//;
+    $labels{$i} = $_;
+  }
+
+}
+
+# build a scrolling single-selection list
+
+print <<EOH;
+<p><b>Cassini / RPWS</a></b>
+(For more information, see: <a href="http://www-pw.physics.uiowa.edu/~tfa/cas/datasets.html">Cassini RPWS Data Sets</a>.)<br>\n
+EOH
+
+print $query->scrolling_list(-name=>'data_set',
+  -values=>\@datasetlist,-size=>16,
+  -labels=>\%labels);
+
+print "<p><b>begin time: </b>";
+print $query->textfield(-name=>'begin_time',-default=>'1999-08-18 05:00');
+
+print "&nbsp; <b> end time: </b>";
+print $query->textfield(-name=>'end_time',-default=>'1999-08-18 05:10');
+
+print "<p><b>mime type: </b>";
+print $query->radio_group(-name=>'mime_type',
+  -values=>['text/plain','application/octet-stream'],
+  -default=>'text/plain');
+print <<EOH;
+<br>Selecting \"application/octet-stream\" is likely to give you
+an option for saving the result to a file instead of viewing it
+in your browser.
+EOH
+
+print "<p>",$query->submit(-name=>'submit', -value=>'process'),
+	      $query->reset, "\n";
+
+print $query->endform;
+
+&PrintTrailer;
+exit 0;
+
+#-----------------------------------------------------------------------------
+#
+# UTILITY SUBROUTINES (put your own e-mail and web info here!)
+#
+#-----------------------------------------------------------------------------
+
+sub PrintHeader {
+  print $query->header;
+  print $query->start_html
+    (-title=>$version, -author=>'nobody@uiowa.edu');
+}
+
+sub PrintTrailer {
+  print <<EOH;
+<HR>
+<p>
+Anyone who intends to use the data obtained through this form in a
+presentation or publication should consult the Cassini RPWS Principal
+Investigator.
+</p>
+<p>
+<HR>
+<ADDRESS>
+</ADDRESS>
+EOH
+print $query->end_html;
+}
+
+sub PrintErrorExit {
+  &PrintHeader;
+  print "<H2>ERROR: $_[0]</H2>\n";
+  &PrintTrailer;
+  exit 0;
+}
