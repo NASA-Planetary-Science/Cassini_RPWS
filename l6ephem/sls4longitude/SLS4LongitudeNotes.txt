@@ -1,0 +1,68 @@
+   The time string can either be in a year/month/day format:
+
+      yyyy/mm/dd hh:mm:ss.sss
+
+   or in a year/day-of-year format:
+
+      yyyy//ddd hh:mm:ss.sss
+
+
+      Choosing Saturn barycentric or Saturn geocentric for the origin
+   will not change the longitude value.
+
+   Note that the longitude value is considered west longitude (WL).
+      
+   The SLS4 longitude system (North) is only valid for this time period:
+   
+      5 April 2006 to 16 September 2009.
+      
+   The SLS4 longitude system (South) is only valid for this time period:
+   
+      12 September 2004 to 16 October 2009.
+      
+      If the user chooses a time outside these time periods, a fill
+   value of -1 will be used in the output.
+
+   Revision History
+   ======== =======
+
+   v1.0  Initial version.  30 Aug 2010
+
+   v1.1  Phase constant changed so that the corrected phase
+         will be approximately 100 degrees for both north
+         and south.  10 Sep 2010
+
+   v1.2  Two types of electric field measurements are now being
+         used.  The first is from the x-axis dipole electric field
+         antenna, and the second is from the two- or three-axis
+         electric antennas.  The first type is used to measure
+         the southern SKR source and the second is used to measure
+         the northern SKR source.  Also, the time ranges for north
+         and south have been extended.  13 Jan 2011
+
+   v1.3  Two ASCII files have been added that contain the times when
+         the sub-solar longitude is zero using the SLS4 longitude
+         system (north and south).  A PDF file has been added that
+         describes how to determine the longitude for a given time
+         using interpolation.  The same file also describes how to
+         compute the spacecraft longitude if the local time of the
+         spacecraft is known.  An option has been added to let the user
+         decide if the longitude of the SKR peak will be zero or one
+         hundred degrees.  The time range for SLS4 south has been
+         extended by thirty days.  24 Feb 2011
+
+   v1.3a The time range for SLS4 south has been extended by thirty
+         days.   5 Apr 2011
+
+   v1.3b The time range for SLS4 south has been extended by thirty
+         days.  26 Apr 2011
+
+   v1.3c The time range for SLS4 south has been extended by thirty
+         days.  25 May 2011
+
+   v1.3d The time range for SLS4 south has been extended by sixty
+         days.  03 Aug 2011
+
+   v1.4  Due to uncertainties in the SKR starting in early 2010,
+         the time range for SLS4 south has been changed.  It is
+         now 12 September 2004 to 16 October 2009.  28 Dec 2012
