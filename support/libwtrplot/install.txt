@@ -1,0 +1,34 @@
+1. Setup the install location
+-----------------------------
+
+The library will be installed under the directory specified by the environment
+variable named PREFIX.  By defauld PREFIX=$HOME, set it to a different location
+if you like.  For example to install into the cassini solaris programs area:
+
+  $ export PREFIX=/opt/project/cassini/SunOS.sparc
+  
+The library will go into:  $PREFIX/lib/libwtrplot.a
+The header will go into:   $PREFIX/include/wtrplot.h
+
+
+2. Build the Software
+---------------------
+
+  $ gmake
+  
+  
+3. Test the software
+--------------------
+
+  $ gmake test
+  
+
+4. Install the Software
+-----------------------
+
+  $ gmake install
+  
+  
+ 
+
+   
