@@ -1,0 +1,97 @@
+<HTML>
+<HEAD>
+<TITLE>CASSINI trajectory plotting tool</TITLE>
+<CENTER><H1>CASSINI trajectory plotting tool</H1></CENTER>
+
+<HR>
+
+<FORM METHOD="POST" ACTION="http://cassini.physics.uiowa.edu/das/plotsat">
+<DIV ALIGN=CENTER>
+
+<input size=1 type="hidden" name="entry0" value="1">
+
+<br>
+<b>Time Range: </b>
+<input size=18 name="entry1" value="2005//017 00:00:00">
+<b> to </b>
+<input size=18 name="entry2" value="2005//048 00:00:00">
+<br>
+
+<b>Tick marks every </b>
+<input size=5 name="entry3" value="   24">
+<b> hours and </b>
+<input size=2 name="entry4" value=" 0">
+<b> minutes</b>
+<br>
+
+<b>Coordinate System: </b> <select name="entry5">
+<option selected value="sequ"> Saturn Equatorial
+<option value="secl"> Saturn Ecliptic
+<option value="sksm"> Saturn KSM
+</select>
+<br>
+
+<p>Here are <a href = "http://www-pw.physics.uiowa.edu/~jbg/coords.txt">
+descriptions</a> of the coordinate systems.</p>
+
+<b>Plot Type: </b> <select name="entry6">
+<option selected value="plt1"> X and Y
+<option value="plt2">  X and Z
+<option value="plt3">  Y and Z
+<option value="plt4">  Rho and Z
+</select>
+<br>
+
+<br>
+<b>Plot Scale (X axis): </b>
+<input size=8 name="entry7" value=" -75">
+<b> to </b>
+<input size=8 name="entry8" value=" +75">
+<b> Saturn radii </b>
+<br>
+
+<br>
+<b>Plot Scale (Y axis): </b>
+<input size=8 name="entry9" value=" -75">
+<b> to </b>
+<input size=8 name="entry10" value=" +75">
+<b> Saturn radii </b>
+<br>
+
+<b>L1 value </b>
+<input size=4 name="entry11" value="   4">
+<b> Saturn radii (enter 0 to not plot it)</b>
+<br>
+
+<b>L2 value </b>
+<input size=4 name="entry12" value="   8">
+<b> Saturn radii (enter 0 to not plot it)</b>
+<br>
+
+<br>
+<b>Plot Title: </b>
+<input size=50 name="entry13" value="">
+<br>
+
+<b>Output Type: </b> <select name="entry14">
+<option selected value="gif">   GIF
+<option value="pps">  Postscript
+</select>
+<br>
+
+<p>Here are the <a href = "http://www-pw.physics.uiowa.edu/~jbg/kernels.txt">
+names</a> of the SPICE kernels used by this program.</p>
+
+<p>Go <a href = "http://www-pw.physics.uiowa.edu/~jbg/satplot2.html">
+here</a> to make plots using the orbit numbers instead of time.</p>
+
+<p>Send questions or comments to <a href="&#109;ailto&#58;joseph-groene&#64;uiowa&#46;ed&#117;">
+joseph-groene&#64;uiowa&#46;ed&#117</a>.</p>
+
+<P>
+<INPUT TYPE="submit">
+</FORM>
+
+<HR>
+</BODY>
+</HTML>

@@ -1,0 +1,10 @@
+
+        (Saturn Solar Ecliptic, Saturn centered X=Sun, V2=Orbital normal)
+        X      - Along the Sat->Sun line (S), positive towards the Sun.
+        Y      - V2 x X
+        Z      - Parallel to the Saturn orbital plane upward normal.
+
+        (Saturn Solar Equatorial, Saturn centered Z=Omega, V2=Sat-Sun vector)
+        X      - In the Sat->Sun plane, positive towards the Sun.
+        Y      - Z x X
+        Z      - Northward spin axis of Saturn.
