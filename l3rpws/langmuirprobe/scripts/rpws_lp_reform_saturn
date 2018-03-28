@@ -1,0 +1,281 @@
+#!/usr/bin/env python
+
+"""Reformat Cassini RPWS Langmuir probe Saturn inner magnetosphere data 
+ ** MUST RUN ON CENTOS6 FOR PYTHON 2.6 OR NEWER **
+"""
+
+# 2016-01-13 derived from rpws_lp_reform_enceladus L. Granroth (LJG)
+# 2016-03-24 changed input file name and format  LJG
+
+import glob
+import datetime
+import os
+import sys
+import optparse
+import logging
+import math
+
+from os.path import join as pjoin
+from os.path import basename as bname
+from os.path import basename as dname
+
+import rpw_pds.util as U
+import pspice
+
+import css
+
+##############################################################################
+# Main 
+def main(argv):
+
+  INVALID_CONSTANT = -1.0e32
+
+  timefmt="%04d-%02d-%02dT%02d:%02d:%06.3fZ"
+  
+  sUsage = """rpws_lp_reformat - Reformat Langmuir probe data
+    usage:  rpws_lp_reformat [options] [FILE_1] [FILE_2] ... [FILE_N]
+
+    where: FILE_1 ... FILE_N are the input files to process.  If no files
+           are specified files that match the pattern LP_SWEEPFIT_???_???????_*.dat in the
+           current directory are processed."""
+
+  psr = optparse.OptionParser(usage=sUsage)
+  
+  sDefKern = os.getenv('CAS_EPHEMERIS_KERNELS')
+
+  psr.add_option('-k', '--kernel-list', dest="sMetaKern", default=sDefKern,
+                 help="Specify an alternate SPICE kernel list file, the "+\
+                "default is taken from the environment variable "+\
+                "CAS_EPHEMERIS_KERNELS (%s)"%sDefKern, metavar="FURNSH_FILE")
+ 
+  psr.add_option("-l", "--log-level", dest="sLevel", metavar="LOG_LEVEL",
+                help="Logging level one of [critical, error, warning, "+\
+                "info, debug].  The default is info.", type="string",
+                action="store", default="info")
+  
+  sDef = pjoin(css.g_sConfDir, "pds", "RPWS_LP_S_yyyyddd_nnn_V1.LBL.template")
+  psr.add_option('-t','--lbl-template', dest='sLblTplt', type="string",
+                 help="The label template file, the default is %s"%sDef,
+                 default=sDef, metavar="FILE")
+					  
+  sDef = os.getcwd()
+  psr.add_option('-o','--out-dir', dest='sOutDir', type="string",
+                 help="Set the output directory, the default is the "+\
+                 "current directory.  If the output directory " +\
+                 "not exist it is created.", metavar="DIR", default=sDef)
+   
+  (opts, lFiles) = psr.parse_args(argv[1:])
+  
+  # Set logging level
+  U.setupLogging(opts.sLevel)
+  log = logging.getLogger('rpws_lp_reformat')
+  
+  log.info("Setting process umask to 0002")
+  os.umask(0002)
+  
+  # Furnish the spice kernel
+  if opts.sMetaKern == None:
+    log.error("No Cassini spice metakernel specified")
+    return 4
+	 
+  pspice.furnsh(opts.sMetaKern)
+  
+  # read in label template which will act as a format string, 'b' is used to
+  # preserve DOS style line endings which are required for PDS3
+  f=file(opts.sLblTplt,'rb')
+  template=f.read()
+  f.close()
+  
+  # Get the list of files to process if not specified
+  if len(lFiles) == 0:
+    lFiles = glob.glob("LP_SWEEPFIT_???_???????_*.dat")
+  if len(lFiles) == 0:
+    log.warning("No input files specified or found, successfully did nothing.")
+    return 0
+  
+  lFiles.sort()
+
+  # Spice IDs and Saturn Radius in km
+  saturnN=699
+  cassiniN=-82
+  saturnR=pspice.bodvrd('SATURN','RADII')[0]
+   
+  # process all LP_SWEEPFIT_???_???????_*.dat files in the current directory
+  recs=0; curday=''; lblf=None; tabf=None
+  for datname in lFiles:
+    log.info("Reading %s"%datname)
+    datf=file(datname,'rb')
+
+    # get orbitID from file name
+    orbitID=datname.split(r"LP_SWEEPFIT_")[-1].split(r"_")[0]
+    orbitID="%d" % int(orbitID)
+
+    # get orbit bounding times
+    i=0
+    while (orbitID != css.tables.cssOrbit[i][0] and i < len(css.tables.cssOrbit)):
+      i+=1
+    if orbitID != css.tables.cssOrbit[i][0]:
+      log.error("File name %s does not match %s %s"%(datname, css.tables.cssOrbit[i]))
+      return 1
+    beginterval=css.tables.cssOrbit[i][1]
+    endinterval=css.tables.cssOrbit[i+1][1]
+
+    # get first line and split out columns
+    line=datf.readline()
+    col=line.split()
+    begstring=None
+
+    # reformat the data file into a PDS table
+    # may be blank lines at end, so need to loop on len(col)  
+    while len(col) > 10:
+
+      # format time and check that we're in the correct orbit
+      curtime=datetime.datetime(
+        int(col[0]),int(col[1]),int(col[2]),
+        int(col[3]),int(col[4]),0,0)
+      curstring=curtime.strftime("%Y-%jT%H:%M")[:14]
+      if curstring < beginterval or curstring >= endinterval:
+        log.error("Time %s does not belong in orbit %s."%(curstring,orbitID))
+        return 1
+
+      # check for day change and open new files
+      if curday != curstring[:8]:
+        if lblf:
+          lblf.close(); lblf=None
+        if tabf:
+          tabf.close(); tabf=None
+
+          # now create the label file          
+          log.info("Writing %s"%lblpath)
+          lblf=file(lblpath,'wb')
+          # end time is 24 seconds past last record time
+          S=int(second)
+          ns=int((second-float(S))*1000000)
+          endtime=datetime.datetime(Y,m,d,H,M,S,ns)
+          endtime+=datetime.timedelta(seconds=24)
+          endstring=endtime.strftime("%Y-%jT%H:%M:%S.%f")[:21]
+          # search MissionPhaseName tuple
+          i=0
+          while (curday >= css.tables.MissionPhaseName[i][2]) and \
+            (i < len(css.tables.MissionPhaseName)-1):
+            i+=1
+          missionphase=css.tables.MissionPhaseName[i][0]
+          # Convert the SCETs to SCLKs
+          et = pspice.utc2et(begstring)
+          begsclk = pspice.sce2s(css.g_nSpiceId, et)
+          et = pspice.utc2et(endstring)
+          endsclk = pspice.sce2s(css.g_nSpiceId, et)
+          creationtime = datetime.datetime.now().strftime("%Y-%m-%d")
+          lblf.write(template%{
+            'tabname':tabname,
+            'nnn':orbitID,
+            'begscet':begstring,'endscet':endstring,
+            'recs':recs,
+            'productID':tabname[:-7],
+            'missionphase':missionphase,
+            'begsclk':begsclk,'endsclk':endsclk,
+            'creationtime':creationtime})
+          lblf.close(); lblf=None
+          recs=0
+          begstromg=None
+
+        curday = curstring[:8]
+        tabname="RPWS_LP_S_%s_%s_V1.TAB"%(curtime.strftime("%Y%j"),orbitID)
+        lblname=tabname.split('.')[0]+".LBL"
+        lblpath = pjoin(opts.sOutDir, lblname)
+        log.debug("%s %s %s"%(datname, tabname, lblname))
+        if not os.path.isdir(opts.sOutDir):
+          log.info("Creating directory %s"%opts.sOutDir)
+          os.makedirs(opts.sOutDir, 0775)
+        tabpath=pjoin(opts.sOutDir, tabname)
+        log.info("Writing %s"%tabpath)
+        tabf=file(tabpath,'wb')
+
+      Y=int(col[0])
+      m=int(col[1])
+      d=int(col[2])
+      H=int(col[3])
+      M=int(col[4])
+      second=float(col[5])
+      pdstime=timefmt%(Y,m,d,H,M,second)
+      if not begstring:
+        S=int(second)
+        ns=int((second-float(S))*1000000)
+        begtime=datetime.datetime(Y,m,d,H,M,S,ns)
+        begstring=begtime.strftime("%Y-%jT%H:%M:%S.%f")[:21]
+      # print pdstime
+      # get spacecraft position from spice
+      et = pspice.utc2et(pdstime[:-1])
+      state=pspice.spkez(cassiniN, et, 'J2000', 'NONE', saturnN)[0]
+      distance=math.sqrt(state[0]*state[0]+state[1]*state[1]+state[2]*state[2])
+      Rs=distance/saturnR
+      #Rs=float(col[7])
+      Ne=float(col[8])
+      if col[9] == '2.00000000e+02':
+        col[9]='NaN'
+      Te=float(col[9])
+      Usc=float(col[10])
+      if math.isnan(Ne):
+        Ne = INVALID_CONSTANT
+      if math.isnan(Te):
+        Te = INVALID_CONSTANT
+      if math.isnan(Usc):
+        Usc = INVALID_CONSTANT
+      tabf.write(pdstime+
+        ",%15.8E"%Rs+
+        ",%15.8E"%Ne+
+        ",%15.8E"%Te+
+        ",%15.8E"%Usc+"\r\n")
+      recs+=1
+      line=datf.readline()
+      if line:
+        col=line.split()
+      else:
+        col=()
+  
+    datf.close()
+  
+    if lblf:
+      lblf.close(); lblf=None
+    if tabf:
+      tabf.close(); tabf=None
+
+      # now create the label file          
+      log.info("Writing %s"%lblpath)
+      lblf=file(lblpath,'wb')
+      # end time is 24 seconds past last record time
+      S=int(second)
+      ns=int((second-float(S))*1000000)
+      endtime=datetime.datetime(Y,m,d,H,M,S,ns)
+      endtime+=datetime.timedelta(seconds=24)
+      endstring=endtime.strftime("%Y-%jT%H:%M:%S.%f")[:21]
+      # search MissionPhaseName tuple
+      i=0
+      while (curday >= css.tables.MissionPhaseName[i][2]) and \
+        (i < len(css.tables.MissionPhaseName)-1):
+        i+=1
+      missionphase=css.tables.MissionPhaseName[i][0]
+      # Convert the SCETs to SCLKs
+      et = pspice.utc2et(begstring)
+      begsclk = pspice.sce2s(css.g_nSpiceId, et)
+      et = pspice.utc2et(endstring)
+      endsclk = pspice.sce2s(css.g_nSpiceId, et)
+      creationtime = datetime.datetime.now().strftime("%Y-%m-%d")
+      lblf.write(template%{
+        'tabname':tabname,
+        'nnn':orbitID,
+        'begscet':begstring,'endscet':endstring,
+        'recs':recs,
+        'productID':tabname[:-7],
+        'missionphase':missionphase,
+        'begsclk':begsclk,'endsclk':endsclk,
+        'creationtime':creationtime})
+      lblf.close(); lblf=None
+
+  return 0
+
+##############################################################################
+# Kicker Stub
+if __name__ == "__main__":
+	sys.exit(main(sys.argv))
+

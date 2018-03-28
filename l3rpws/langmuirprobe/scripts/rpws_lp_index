@@ -1,0 +1,187 @@
+#!/usr/bin/env python
+import sys
+import optparse
+import os
+import os.path
+import glob
+import logging
+
+from os.path import join as pjoin
+
+import rpw_pds.util as U
+import rpw_pds.index as I
+
+##############################################################################
+# A generic version reporting block
+
+def stripSVNkey(s):
+	if s.find(':') == -1:
+		return s.strip(" $") + ": unknown"
+	else:
+		return s.strip(' $')
+
+g_sRev = stripSVNkey("$Rev: 677 $")
+g_sURL = stripSVNkey("$URL: https://saturn.physics.uiowa.edu/svn/cassini/production/devel/l3rpws/langmuirprobe/scripts/rpws_lp_index $")
+g_sWho = stripSVNkey("$LastChangedBy: cwp $")
+g_sWhen = stripSVNkey("$LastChangedDate: 2016-10-05 12:33:36 -0500 (Wed, 05 Oct 2016) $")
+
+##############################################################################
+def makeIndexer(log, sVolDir):
+	
+	sCh = "CHARACTER"
+	sIn = "INTEGER"
+	sRe = "REAL"
+	sId = "IDENTIFIER"
+	sTi = "TIME"
+	
+	# Static element to always add into the index
+	lStatic = [
+		('LABEL_REVISION_NOTE', sCh, '2015-08-10, Larry Granroth (UIOWA), initial;\r\n2014-10-04, Larry Granroth (UIOWA), UI and NEPROXY added;'),
+		('INSTRUMENT_HOST_NAME', sCh, 'CASSINI ORBITER'),
+		('INSTRUMENT_HOST_ID', sId, 'CO'),
+		('INSTRUMENT_NAME', sCh, 'RADIO AND PLASMA WAVE SCIENCE'),
+		('INSTRUMENT_ID', sId, 'RPWS'),		
+		('VOLUME_ID', sCh, 'CORPWS_1001')
+	]
+	
+	# Lists to collect from the labels encountered
+	lUnique = [('TARGET_NAME',sCh)]
+	
+	# Ranges to collect from the labels encountered
+	lExtreama = [
+		('START_TIME',sTi, 'min'), ('STOP_TIME',sTi, 'max'), 
+		('SPACECRAFT_CLOCK_START_COUNT',sCh, 'min'),
+		('SPACECRAFT_CLOCK_STOP_COUNT',sCh, 'max') 
+	]
+
+	# Elements I want indexed:
+	lCols = [
+		I.Column('DATA_SET_ID', 'IDENTIFIER', 'The data set ID from the product '+\
+		         'label'),
+
+                I.Column('STANDARD_DATA_PRODUCT_ID', 'IDENTIFIER', 'The data set sub-category'),
+		
+		I.Column('PRODUCT_ID', 'CHARACTER', 'The unchanging product ID.  New '+\
+		         'versions of the product file do not alter this field.'),
+		
+		I.Column('START_TIME', 'TIME', 'The starting Spacecraft Event Time of '+\
+		         'the coverage period for this product.  Note that this value '+\
+		         'is not necessarily equal to the time stamp of the first '+\
+		         'record in the product as data may not be available for the '+\
+					'entire coverage period.'),
+		
+		I.Column('STOP_TIME', 'TIME', 'The ending Spacecraft Event Time of the '+\
+		         'coverage period for this product.  Note that this value is '+\
+		         'not necessarily close to the time stamp of the last record '+\
+		         'in the product as data may not be available for the entire '+\
+		         'coverage period.'),
+					
+#		I.Column('ORBIT_NAME', 'CHARACTER', 'The orbit name for data in the '+\
+#		         'indexed product'),
+		
+#		I.Column('OBSERVATION_ID', 'IDENTIFIER', 'The Titan flyby ID for the '+\
+#		         'data in the indexed product'),
+		
+		I.Column('FILE_SPECIFICATION_NAME', 'CHARACTER', 'The path to the PDS '+\
+		         'label file that describes the file containing instrument '+\
+		         'data.  The path is relative to the root of the archive volume.',
+					None, None, None, I.getLblPath),
+					
+		I.Column('PRODUCT_CREATION_TIME', 'TIME', 'The creation date of the '+\
+		         'product file, which may not be the same as the product label '+\
+					'file.', 'CR_DATE'),
+					
+	]
+	
+	indexer = I.Indexer(log, sVolDir, lStatic, lUnique, lExtreama, lCols)
+	
+	return indexer
+
+
+##############################################################################
+# Main Routine
+
+def main(argv):
+	"""(re)-generates an Cassini RPWS Langmuir Probe volume index"""
+	
+	psr = optparse.OptionParser(
+		usage="rpws_lp_index [options] VOLUME_ROOT",
+		prog="rpws_lp_index",
+		version=" \n".join( [g_sRev, g_sWho, g_sWhen, g_sURL] ),
+		description="""
+(Re)-generates the Cassini RPWS Langmuir Probe data product index.  The index
+is filled using values from the PDS labels.
+"""
+	)	
+	
+	psr.add_option('-l', "--log-level", dest="sLevel", metavar="LOG_LEVEL",
+	               help="Logging level one of [critical, error, warning, "+\
+	               "info, debug].  The default is info.", type="string",
+	               action="store", default="info")
+	
+	(opts, lArgs) = psr.parse_args(argv[1:])
+	
+	# Setup the logging level
+	log = U.setupLogging(opts.sLevel)
+	log = logging.getLogger('')
+		
+	if len(lArgs) == 0:
+		log.error("No data volume specified, use -h for help.")
+		return 3
+	elif len(lArgs) > 1:
+		log.error("Extraneous command line arguments: %s, use -h for help."%lArgs[1:])
+	else:
+		sVolDir = lArgs[0]
+		
+	if not os.path.isdir(sVolDir):
+		log.error("%s: Volume directory missing"%sVolDir)
+		
+	# Got to load the spice kernels...
+#	S.furnsh(opts.sKernels)
+	
+	indexer = makeIndexer(log, sVolDir)
+	
+	# Feed product labels to the indexer
+	log.info("Reading data labels under: %s"%sVolDir)
+	
+	# Check to make sure we don't have un-labeled products
+	lLabels  = glob.glob(sVolDir + '/DATA/*/*.LBL')
+        lLabels += glob.glob(sVolDir + '/DATA/*/T?????XX/*.LBL')
+	lProds   = glob.glob(sVolDir + '/DATA/*/*.TAB')
+        lProds  += glob.glob(sVolDir + '/DATA/*/T?????XX/*.TAB')
+	
+	nMissing = len(lProds) - len(lLabels)
+	if nMissing != 0:
+		log.error("Data product file count, %d is not equal to the"%len(lProds)+\
+		          " label count, %d."%len(lLabels))
+		return 13
+
+#        lLabels += glob.glob(sVolDir + '/BROWSE/*/*.LBL')
+#        lLabels += glob.glob(sVolDir + '/BROWSE/*/T?????XX/*.LBL')
+#        lProds  += glob.glob(sVolDir + '/BROWSE/*/*.PNG')
+#        lProds  += glob.glob(sVolDir + '/BROWSE/*/T?????XX/*.PNG')
+
+	nRet = 0
+	for sPath in lLabels:
+		log.info("%s: Parsing", sPath.replace(sVolDir, ""))
+		
+		sProd = sPath.replace('.LBL','.TAB')
+		
+		if not os.path.isfile(sProd):
+			log.error("Extraneous label: %s"%sPath)
+			nRet = 13
+		else:
+			indexer.readLabel(sPath)
+			
+	indexer.mkIndex()
+	
+	if nRet != 0:
+		log.error("Extra labels found on the volume REMOVE THEM!")
+
+	return nRet
+	
+
+##############################################################################
+# kicker stub
+if __name__ == "__main__":
+	sys.exit(main(sys.argv))
